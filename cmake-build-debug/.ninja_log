@@ -1,0 +1,10 @@
+# ninja log v5
+59	116	7302325188144043	PreAsmblr.exe	564ece06dc1bc667
+6	59	7302325187598894	CMakeFiles/PreAsmblr.dir/PreAsmblr/PreAsmblr.c.obj	5fb407ba9d5901fb
+2	54	7302325187548894	CMakeFiles/PreAsmblr.dir/main/main.c.obj	2de758c328d91d17
+1	99	7302326170349524	build.ninja	480b297fd001fa84
+1	70	7302326228477585	CMakeFiles/main.dir/main/main.c.obj	252652062adadc12
+6	78	7302326228510382	CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj	1d8e0ae4d8604ade
+78	134	7302326229097545	main.exe	6d42234e5e99ef4
+2	60	7302327878596402	CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj	1d8e0ae4d8604ade
+60	116	7302327879141429	main.exe	6d42234e5e99ef4

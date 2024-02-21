@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.27)
+project(. C)
+
+set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+add_compile_options(-ansi -pedantic -Wall -g)
+
+
+include_directories(.)
+
+add_executable(main
+        main/main.c
+        PreAsmblr/PreAsmblr.c
+        PreAsmblr/PreAsmblr.h
+        )
