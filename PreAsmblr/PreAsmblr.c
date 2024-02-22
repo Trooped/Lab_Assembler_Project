@@ -13,9 +13,6 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
     char curMacroName[MAXCHARSPERLINE];
     char currentLine[MAXCHARSPERLINE];
     int macroCount = 0;
-    /*
-    macro * macros[MAXMACROS];
-     */
 
     macro **macros = NULL;
     int macroArrSize = MAXMACROS; /* Maximum number of macros*/
@@ -34,28 +31,10 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
     removeSubstring(oldFileName, oldFileFormat);
 
     resultFile = fopen(newFileName, "w+");
-    /*TODO do i even need to check if the file is null? i just created it and it's new*/
     if (resultFile == NULL) {
         fprintf(stderr, "Error opening file '%s': %s\n", newFileName, strerror(errno));
         return NULL;
     }
-
-    /*Allocating memory to the macros, for now TODO CHANGE THIS
-    for (i = 0; i < MAXMACROS; i++) {
-        macros[i] = malloc(sizeof(macro));
-        if (macros[i] == NULL) {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(1);
-        }
-        macros[i]->curMacroName = malloc(MAXCHARSPERLINE * sizeof(char));
-        if (macros[i]->curMacroName == NULL) {
-            fprintf(stderr, "Memory allocation failed\n");
-            exit(1);
-        }
-    }
-     */
-
-
 
 
     while (fgets(lineBuffer, sizeof(lineBuffer), source) != NULL) {
@@ -77,35 +56,37 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
                             if (newMacros == NULL) {
                                 /* Handle memory allocation failure*/
                                 free(macros);
-                                exit(EXIT_FAILURE);
+                                fclose(resultFile);
+                                return NULL;
                             }
                             macros = newMacros;
                             macroArrSize = tmpSize;
                         }
 
 
-
                         macros[macroCount] = (macro*)malloc(sizeof(macro));
                         if (macros[macroCount] == NULL) {
-                            exit(EXIT_FAILURE);
+                            fclose(resultFile);
+                            return NULL;
                         }
-
                         macros[macroCount]->macroName = (char*)malloc(strlen(curMacroName) + 1);
                         if (macros[macroCount]->macroName == NULL) {
-                            exit(EXIT_FAILURE);
+                            fclose(resultFile);
+                            return NULL;
                         }
+
+
                         strcpy(macros[macroCount]->macroName, curMacroName);
                         macros[macroCount]->linesCounter = 0;
                         macroCount++;
 
 
-
-
                         word = strtok(NULL, " \n\r\t"); /* Get the next word */
                         if (word != NULL) {
                             /*another word after macro name, exit the program!*/
-                            printf(";Error: macro name cannot be followed by another word\n");
-                            /*TODO add this functionality*/
+                            printf("\nError: macro name cannot be followed by another word\n");
+                            fclose(resultFile);
+                            return NULL;
                         }
 
                         while (fgets(lineBuffer, sizeof(lineBuffer), source) != NULL) {
@@ -125,13 +106,6 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
         }
     }
 
-
-    /*
-    for (i = 0; i < MAXMACROS; i++) {
-        free(macros[i]->curMacroName);
-        free(macros[i]);
-    }
-     */
 
     for (i = 0; i < macroCount; i++) {
         free(macros[i]->macroName);
