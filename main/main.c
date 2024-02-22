@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include "../PreAsmblr/PreAsmblr.h"
 
-#define MAX_FILE_NAME 256 /*TODO HAVE ONLY ONE DEFINITION OF MAXFIELNAME*/
-
 /*TODO why is this here?*/
 int lineCount=0; /* for error reporting */
 int error; /* to indicate an error has been encountered */
@@ -41,7 +39,7 @@ void testCopyMacrosIntoNewFile() {
     FILE* testFile = fopen(testFileName, "w");
     FILE* newFile;
     if (testFile != NULL) {
-        fputs("mcr testMacro\nline1\nline2\nendmcr\nHello!\nwhat's up?\n\n\n\ntestMacro\nfinish\n", testFile);
+        fputs("mcr testMacro\nline1\nline2\nendmcr\nHello!\n; this is a comment\nwhat's up?\n\n\n\ntestMacro\nfinish\n", testFile);
         fclose(testFile);
     } else {
         printf("Failed to open file %s for writing\n", testFileName);
@@ -81,7 +79,7 @@ int main(int argc, char** argv) {
 #if 0
     int fileCount;
     FILE* oldFIle, *newFile; /* TODO WHY IS THIS- NECESSARY?? ->>>am: for the file returned from pre-assembly */
-    char* fileName = (char*) calloc(MAX_FILE_NAME, sizeof(char));
+    char* fileName = (char*) calloc(MAXFILENAME, sizeof(char));
 
     if (argc >= 2) {
         for (fileCount=1; fileCount < argc; fileCount++) {

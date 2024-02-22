@@ -8,7 +8,7 @@
  * @return the new file
  */
 FILE* createNewFileAndWriteMacros(FILE* source, const char* oldFileName) {
-    char newFileName[MAX_FILE_NAME];
+    char newFileName[MAXFILENAME];
     FILE * resultFile;
     int macroArrSize = MAXMACROS; /* Maximum number of macros*/
     int tmpSize = 0;
@@ -46,7 +46,15 @@ macro** allocateMemoryToMacros(int macroArrSize) {
     return macros;
 }
 
-/*TODO ADD COMMENT!*/
+/**
+ * This function will process the lines of the old file and write the macros into the new file.
+ * @param source the old file
+ * @param resultFile the new file
+ * @param macros the macros array
+ * @param macroCount the number of macros
+ * @param macroArrSizePtr the size of the macros array
+ * @param tmpSizePtr the temporary size of the macros array
+ */
 void processFileLines(FILE* source, FILE* resultFile, macro **macros, int *macroCount, int * macroArrSize, int * tmpSize) {
     char lineBuffer[MAXCHARSPERLINE];
     char currentLine[MAXCHARSPERLINE];
@@ -54,7 +62,7 @@ void processFileLines(FILE* source, FILE* resultFile, macro **macros, int *macro
     while (fgets(lineBuffer, sizeof(lineBuffer), source) != NULL) {
         strcpy(currentLine, lineBuffer);
         word = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
-        if (strlen(currentLine) > 1) {
+        if (strlen(currentLine) > 1 && currentLine[0] != ';') {
             if (strcmp(word, "mcr") == 0) {
                 addNewMacroToMacrosArray(source, resultFile, lineBuffer, word, &macros, macroCount, currentLine, macroArrSize,tmpSize);
             } else if (checkIfMacroExists(word, *macroCount, macros)) {
@@ -100,7 +108,7 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
 
             /*allocate memory for the current macro element in the macro array.*/
             (*macros)[*macroCount] = (macro *) malloc(sizeof(macro));
-            (*macros)[*macroCount]->macroName = (char*)malloc(strlen(word) + 1);
+            (*macros)[*macroCount]->macroName = (char*)malloc(strlen(word) + 1); /*TODO maybe change it to some defined size? does it work correctly now?*/
             if (*macros[*macroCount] == NULL || (*macros)[*macroCount]->macroName == NULL) {
                 fclose(resultFile);
                 return;
@@ -184,7 +192,11 @@ void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], 
     }
 }
 
-
+/**
+ * This function will remove the given substring from the given string.
+ * @param string the string
+ * @param sub the substring
+ */
 void removeSubstring(char* string, const char* sub) {
     char* match = strstr(string, sub);
     if(match) {
