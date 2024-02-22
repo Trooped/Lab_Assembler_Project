@@ -25,6 +25,7 @@ typedef struct macros{
 
 FILE* copyMacrosIntoNewFile(FILE* source, const char* oldFileName);
 
-int checkIfMacro(char* word, int macroCount, macro *macros);
+int checkIfMacro(char* word, int macroCount, macro *macros[]);
 
-void writeMacroToFile(FILE* newFile, char* macroName, macro *macros, int macroCount);
+void writeMacroToFile(FILE* newFile, char* macroName, macro *macros[], int macroCount);
+void removeSubstring(char* string, const char* sub);

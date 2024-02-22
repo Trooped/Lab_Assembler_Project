@@ -37,10 +37,11 @@ void printFileContent(const char* fileName) {
 void testCopyMacrosIntoNewFile() {
     /* Create a test file with some macros*/
     const char* testFileName = "testFile.as";
+    const char* newFileName = "testFile.am";
     FILE* testFile = fopen(testFileName, "w");
     FILE* newFile;
     if (testFile != NULL) {
-        fputs("mcr testMacro\nline1\nline2\nendmcr\n", testFile);
+        fputs("mcr testMacro\nline1\nline2\nendmcr\nHello!\nwhat's up?\ntestMacro\nfinish\n", testFile);
         fclose(testFile);
     } else {
         printf("Failed to open file %s for writing\n", testFileName);
@@ -51,6 +52,7 @@ void testCopyMacrosIntoNewFile() {
     FILE* oldFile = fopen(testFileName, "r");
     if (oldFile != NULL) {
         newFile = copyMacrosIntoNewFile(oldFile, "testFile");
+        fclose(newFile);
     } else {
         printf("Failed to open file %s for reading\n", testFileName);
         return;
@@ -58,7 +60,7 @@ void testCopyMacrosIntoNewFile() {
 
     /* Print the contents of the old and new files*/
     printFileContent(testFileName);
-    printFileContent("testFilenewFileFormat");
+    printFileContent(newFileName);
 
     /* Clean up*/
     fclose(newFile);
