@@ -10,10 +10,23 @@
 FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
     int i;
     char newFileName[MAX_FILE_NAME];
-    char macroName[MAXCHARSPERLINE];
+    char curMacroName[MAXCHARSPERLINE];
     char currentLine[MAXCHARSPERLINE];
     int macroCount = 0;
-    macro * macros[MAXMACROS]; /*TODO MAKE IT DINAMYC MEMORY*/ /*TODO FIRST!! CHANGE IT TO NON POINTER ARRAY?? IDK*/
+    /*
+    macro * macros[MAXMACROS];
+     */
+
+    macro **macros = NULL;
+    int macroArrSize = MAXMACROS; /* Maximum number of macros*/
+    int tmpSize = 0;
+
+    macros = (macro**)malloc(macroArrSize * sizeof(macro*));
+    if (macros == NULL) {
+        /* Handle memory allocation failure*/
+        exit(EXIT_FAILURE);
+    }
+
     FILE * resultFile;
     char lineBuffer[MAXCHARSPERLINE];
     sprintf(newFileName, "%s%s", oldFileName, newFileFormat);
@@ -27,19 +40,20 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
         return NULL;
     }
 
-    /*Allocating memory to the macros, for now TODO CHANGE THIS*/
+    /*Allocating memory to the macros, for now TODO CHANGE THIS
     for (i = 0; i < MAXMACROS; i++) {
         macros[i] = malloc(sizeof(macro));
         if (macros[i] == NULL) {
             fprintf(stderr, "Memory allocation failed\n");
             exit(1);
         }
-        macros[i]->macroName = malloc(MAXCHARSPERLINE * sizeof(char));
-        if (macros[i]->macroName == NULL) {
+        macros[i]->curMacroName = malloc(MAXCHARSPERLINE * sizeof(char));
+        if (macros[i]->curMacroName == NULL) {
             fprintf(stderr, "Memory allocation failed\n");
             exit(1);
         }
     }
+     */
 
 
 
@@ -50,16 +64,42 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
         if (strlen(currentLine) > 1) {
             if (strcmp(word, "mcr") == 0) {
                 word = strtok(NULL, " \n\r\t"); /* Get the next word, which is the macro's name.*/
-                strcpy(macroName, word);
+                strcpy(curMacroName, word);
                 if (word != NULL) {
-                    if (checkIfMacroExists(macroName, macroCount, macros)) {
+                    if (checkIfMacroExists(curMacroName, macroCount, macros)) {
                         break;
                     }
 
                     else {
-                        strcpy(macros[macroCount]->macroName, macroName);
+                        if (macroCount == macroArrSize) {
+                            tmpSize = macroArrSize * 2; /* Double the size of the array*/
+                            macro **newMacros = (macro**)realloc(macros, tmpSize * sizeof(macro*));
+                            if (newMacros == NULL) {
+                                /* Handle memory allocation failure*/
+                                free(macros);
+                                exit(EXIT_FAILURE);
+                            }
+                            macros = newMacros;
+                            macroArrSize = tmpSize;
+                        }
+
+
+
+                        macros[macroCount] = (macro*)malloc(sizeof(macro));
+                        if (macros[macroCount] == NULL) {
+                            exit(EXIT_FAILURE);
+                        }
+
+                        macros[macroCount]->macroName = (char*)malloc(strlen(curMacroName) + 1);
+                        if (macros[macroCount]->macroName == NULL) {
+                            exit(EXIT_FAILURE);
+                        }
+                        strcpy(macros[macroCount]->macroName, curMacroName);
                         macros[macroCount]->linesCounter = 0;
                         macroCount++;
+
+
+
 
                         word = strtok(NULL, " \n\r\t"); /* Get the next word */
                         if (word != NULL) {
@@ -86,11 +126,18 @@ FILE* findMacrosAndWriteIntoFile(FILE* source, const char* oldFileName) {
     }
 
 
-
+    /*
     for (i = 0; i < MAXMACROS; i++) {
+        free(macros[i]->curMacroName);
+        free(macros[i]);
+    }
+     */
+
+    for (i = 0; i < macroCount; i++) {
         free(macros[i]->macroName);
         free(macros[i]);
     }
+    free(macros);
 
 
     return resultFile;

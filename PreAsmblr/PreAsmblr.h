@@ -8,7 +8,7 @@
 #define MAXCHARSPERLINE (80+1)
 #define oldFileFormat ".as"
 #define newFileFormat ".am"
-#define MAXMACROS 100 /*TODO MAKE IT DINAMYC MEMORY*/
+#define MAXMACROS 32 /*Starter number for number of macros, dynamically allocated further on*/
 #define MAX_FILE_NAME 256 /*TODO HAVE ONLY ONE DEFINITION OF MAXFIELNAME*/
 
 /**
