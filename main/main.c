@@ -21,7 +21,7 @@ int error; /* to indicate an error has been encountered */
 
 void printFileContent(const char* fileName) {
     FILE* file = fopen(fileName, "r");
-    char line[CHARACTERS];
+    char line[MAXCHARSPERLINE];
 
     if (file != NULL) {
         printf("Content of %s:\n", fileName);
@@ -41,7 +41,7 @@ void testCopyMacrosIntoNewFile() {
     FILE* testFile = fopen(testFileName, "w");
     FILE* newFile;
     if (testFile != NULL) {
-        fputs("mcr testMacro\nline1\nline2\nendmcr\nHello!\nwhat's up?\ntestMacro\nfinish\n", testFile);
+        fputs("mcr testMacro\nline1\nline2\nendmcr\nHello!\nwhat's up?\n\n\n\ntestMacro\nfinish\n", testFile);
         fclose(testFile);
     } else {
         printf("Failed to open file %s for writing\n", testFileName);
@@ -51,7 +51,7 @@ void testCopyMacrosIntoNewFile() {
     /* Call your function with the test file*/
     FILE* oldFile = fopen(testFileName, "r");
     if (oldFile != NULL) {
-        newFile = copyMacrosIntoNewFile(oldFile, "testFile");
+        newFile = findMacrosAndWriteIntoFile(oldFile, "testFile");
         fclose(newFile);
     } else {
         printf("Failed to open file %s for reading\n", testFileName);
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
             sprintf(fileName, "%s.as", argv[fileCount]); /*TODO should i use sprintf or just strcpy?*/
             oldFIle = fopen(fileName, "r");
             if (oldFIle) {
-                /*newFile = copyMacrosIntoNewFile(oldFIle, argv[fileCount]);*/
+                /*newFile = findMacrosAndWriteIntoFile(oldFIle, argv[fileCount]);*/
                 fclose(oldFIle);
 
 
