@@ -29,3 +29,10 @@ int checkIfMacroExists(char* word, int macroCount, macro *macros[]);
 
 void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], int macroCount);
 void removeSubstring(char* string, const char* sub);
+
+macro** allocateMacros(int size);
+
+void freeMacros(macro **macros, int macroCount);
+void processFileLines(FILE* source, FILE* resultFile, macro **macros, int *macroCount, int * macroArrSizePtr, int * tmpSizePtr);
+void addNewMacroToArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize);
+
