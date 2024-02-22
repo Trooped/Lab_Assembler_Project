@@ -51,7 +51,7 @@ void testCopyMacrosIntoNewFile() {
     /* Call your function with the test file*/
     FILE* oldFile = fopen(testFileName, "r");
     if (oldFile != NULL) {
-        newFile = findMacrosAndWriteIntoFile(oldFile, "testFile");
+        newFile = createNewFileAndWriteMacros(oldFile, "testFile");
         fclose(newFile);
     } else {
         printf("Failed to open file %s for reading\n", testFileName);
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
             sprintf(fileName, "%s.as", argv[fileCount]); /*TODO should i use sprintf or just strcpy?*/
             oldFIle = fopen(fileName, "r");
             if (oldFIle) {
-                /*newFile = findMacrosAndWriteIntoFile(oldFIle, argv[fileCount]);*/
+                /*newFile = createNewFileAndWriteMacros(oldFIle, argv[fileCount]);*/
                 fclose(oldFIle);
 
 
