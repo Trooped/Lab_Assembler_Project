@@ -87,13 +87,15 @@ void processFileLines(FILE* source, FILE* resultFile, macro **macros, int *macro
  * @param tmpSize the temporary size of the macros array
  */
 void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize) {
+    int i;
+    int tempLineCounter=LINES;
     macro **newMacros = NULL;
     word = strtok(NULL, " \n\r\t"); /* Get the next word, which is the macro's name.*/
     if (word != NULL) {
-        if (checkIfMacroExists(word, *macroCount, *macros)) {/*Checks if the macro already exists, if it does: return.*/
+        if (checkIfMacroExists(word, *macroCount, *macros)) {/*Checks if the macro already exists in the macro array, if it does: return.*/
             return;
         }
-        else {/*Macro doesn't exist in the macros array*/
+        else {/*Macro doesn't exist in the macros array, create a new instance of it.*/
             /*Check if we reached the macroArrSize (current maximum size), if we did, then reallocate 2x the memory of the current.*/
             if (*macroCount == *macroArrSize) {
                 *tmpSize = *macroArrSize * 2; /* Double the size of the array*/
@@ -106,17 +108,22 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
                 *macroArrSize = *tmpSize; /*updating the macroArrSize to the new size.*/
             }
 
-            /*allocate memory for the current macro element in the macro array.*/
+            /*allocate memory for the current macro element in the macro array, and it's sub-elements.*/
             (*macros)[*macroCount] = (macro *) malloc(sizeof(macro));
             (*macros)[*macroCount]->macroName = (char*)malloc(strlen(word) + 1); /*TODO maybe change it to some defined size? does it work correctly now?*/
-            if (*macros[*macroCount] == NULL || (*macros)[*macroCount]->macroName == NULL) {
+            (*macros)[*macroCount]->lines = (char**)malloc(LINES * sizeof(char*)); /* Allocate memory for lines*/
+            for (i = 0; i < LINES; i++) {
+                (*macros)[*macroCount]->lines[i] = (char*)malloc(MAXCHARSPERLINE * sizeof(char)); /* Allocate memory for each line*/
+            }
+            /*Check if any of the allocations failed.*/
+            if (*macros[*macroCount] == NULL || (*macros)[*macroCount]->macroName == NULL || (*macros)[*macroCount]->lines == NULL){
                 fclose(resultFile);
                 return;
             }
+
             /*Copy the new macro's name into the relevant macro element in the macros array, initalize the lines counter and add 1 to the macroCount*/
             strcpy((*macros)[*macroCount]->macroName, word);
             (*macros)[*macroCount]->linesCounter = 0;
-            (*macroCount)++;
 
             /*Checking if there's another word after the macro's name, which leads to an error.*/
             word = strtok(NULL, " \n\r\t"); /* Get the word following the macro's name */
@@ -133,8 +140,22 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
                 if (strstr(currentLine, "endmcr") != NULL) {/*If we find endmcr in our line, then we terminate the process of copying.*/
                     break;
                 }
-                strcpy((*macros)[(*macroCount) - 1]->lines[(*macros)[(*macroCount) - 1]->linesCounter++], lineBuffer);
+                /*Checking if we need to allocate more memory to the lines array, inside the specific macro's instance*/
+                if ((*macros)[*macroCount]->linesCounter >= tempLineCounter) {
+                    tempLineCounter = tempLineCounter * 2; /* Double the size of the lines array's current size*/
+                    (*macros)[*macroCount]->lines = (char**)realloc((*macros)[*macroCount]->lines, tempLineCounter * sizeof(char*)); /* Reallocate memory for the lines array*/
+                    if ((*macros)[*macroCount]->lines == NULL) {
+                        fclose(resultFile);
+                        return;
+                    }
+                    for (i = (*macros)[*macroCount]->linesCounter; i < tempLineCounter; i++) {/* Allocate memory for each new line*/
+                        (*macros)[*macroCount]->lines[i] = (char*)malloc(MAXCHARSPERLINE * sizeof(char));
+                    }
+                }
+                /*The most important line- if there's no problem, copy the current line in the file, to it's respective counterpart in the macro's instance*/
+                strcpy((*macros)[(*macroCount)]->lines[(*macros)[(*macroCount)]->linesCounter++], lineBuffer);
             }
+            (*macroCount)++; /*New macro created, add 1 to the macroCount*/
         }
     }
 }
@@ -145,8 +166,12 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
  * @param macroCount the number of macros
  */
 void freeMacrosMemory(macro **macros, int macroCount) {
-    int i;
+    int i,j;
     for (i = 0; i < macroCount; i++) {
+        for (j = 0; j < macros[i]->linesCounter; j++) {
+            free(macros[i]->lines[j]); /* Free each line*/
+        }
+        free(macros[i]->lines); /* Free the lines array*/
         free(macros[i]->macroName);
         free(macros[i]);
     }

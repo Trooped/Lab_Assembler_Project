@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 /*TODO move the definitions to a different file?*/
-#define LINES 100 /*Maximum number of lines in a macro TODO make it dynamic, like i asked down there?*/
+#define LINES 32 /*Maximum number of lines in a macro, will be adjusted dynamically*/
 #define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
 #define oldFileFormat ".as" /*Constant with the .as file format*/
 #define newFileFormat ".am" /*Constant with the .am file format*/
@@ -20,8 +20,7 @@
 typedef struct macros{
     char * macroName;
     int linesCounter;
-    /*TODO make this number of lines dynamic, somewhen down the line!!.*/
-    char lines[LINES][MAXCHARSPERLINE];
+    char **lines;
 }macro;
 
 
