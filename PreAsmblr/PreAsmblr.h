@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 /*TODO move the definitions to a different file?*/
+/*TODO add a list of saved words you can't use? or registers? idk*/
 #define LINES 32 /*Maximum number of lines in a macro, will be adjusted dynamically*/
 #define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
 #define oldFileFormat ".as" /*Constant with the .as file format*/
@@ -15,17 +16,14 @@
 #define MAXFILENAME 256 /*Maximum file name length*/
 
 /**
- * This struct will contain each indexed word, it's line appearances and the number of appearances, it'll be used extensively in the program.
+ * This struct will define each macro, it's lines (the actual lines of a text, a 2d pointer array) and a lines counter.
  */
 typedef struct macros{
     char * macroName;
-    int linesCounter;
     char **lines;
+    int linesCounter;
 }macro;
 
-
-
-/*TODO ADD COMMENTS*/
 
 /**
  * This function will copy the macros from the old file into the new file.
