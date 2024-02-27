@@ -1,4 +1,4 @@
-mcr testMacro
+mcr mov
 line1
 line2
 line3

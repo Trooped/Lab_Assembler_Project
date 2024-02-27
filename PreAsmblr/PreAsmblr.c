@@ -3,6 +3,7 @@
 
 /**
  * This function will copy the macros from the old file into the new file.
+ * TODO maybe I should read the source file from here, and not from the main method.
  * @param source the old file
  * @param oldFileName the old file name
  * @return the new file
@@ -92,10 +93,16 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
     macro **newMacros = NULL;
     word = strtok(NULL, " \n\r\t"); /* Get the next word, which is the macro's name.*/
     if (word != NULL) {
-        if (checkIfMacroExists(word, *macroCount, *macros)) {/*Checks if the macro already exists in the macro array, if it does: return.*/
+        /*Checking if the macro already exists in the macro array, or if it's valid. if any apply: return.*/
+        if (checkIfMacroExists(word, *macroCount, *macros)) {
+            printf("\nError: macro already exists\n");
             return;
         }
-        else {/*Macro doesn't exist in the macros array, create a new instance of it.*/
+        else if (checkIfMacroNameIsValid(word)==0){
+            printf("\nError: invalid macro name\n");
+            return;
+        }
+        else {/*Macro doesn't exist in the macros array, and has a valid name. create a new instance of it.*/
             /*Check if we reached the macroArrSize (current maximum size), if we did, then reallocate 2x the memory of the current.*/
             if (*macroCount == *macroArrSize) {
                 *tmpSize = *macroArrSize * 2; /* Double the size of the array*/
@@ -228,5 +235,33 @@ void removeSubstring(char* string, const char* sub) {
         size_t len = strlen(sub);
         memmove(match, match + len, 1 + strlen(match + len));
     }
+}
+
+/**
+ * This function will check if the given word is a valid macro name.
+ * TODO do i need to pause the program if the macro name is invalid?
+ * @param word the word to check
+ * @return 1 if the word is a valid macro name, else 0
+ */
+int checkIfMacroNameIsValid(char* word){
+    int i;
+    char* endptr;
+    if (word == NULL) {
+        return 0;
+    }
+
+    strtol(word, &endptr, 10); /* Try to convert the word to a long integer*/
+    if (*endptr == '\0') { /* If the conversion is successful, endptr should point to the null terminator*/
+        return 0; /* Return 0 (false) if the word is a number*/
+    }
+
+    char* savedWords[] = {".data", ".string", ".entry", ".extern", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt"};
+    int numSavedWords = sizeof(savedWords) / sizeof(savedWords[0]);
+    for (i = 0; i < numSavedWords; i++) {
+        if (strcmp(word, savedWords[i]) == 0) {
+            return 0; /* Return 0 (false) if the word is a saved word*/
+        }
+    }
+    return 1;
 }
 

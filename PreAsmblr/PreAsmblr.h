@@ -7,7 +7,6 @@
 #include <stdio.h>
 
 /*TODO move the definitions to a different file?*/
-/*TODO add a list of saved words you can't use? or registers? idk*/
 #define LINES 32 /*Maximum number of lines in a macro, will be adjusted dynamically*/
 #define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
 #define oldFileFormat ".as" /*Constant with the .as file format*/
@@ -97,6 +96,13 @@ void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], 
  * @param sub the substring
  */
 void removeSubstring(char* string, const char* sub);
+
+/**
+* This function will check if the given word is a valid macro name.
+* @param word the word to check
+* @return 1 if the word is a valid macro name, else 0
+*/
+int checkIfMacroNameIsValid(char* word);
 
 
 
