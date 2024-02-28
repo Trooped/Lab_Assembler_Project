@@ -39,7 +39,7 @@ void testCopyMacrosIntoNewFile() {
     FILE* testFile = fopen(testFileName, "w");
     FILE* newFile;
     if (testFile != NULL) {
-        fputs("mcr testmcr\nline1\nline2\nline3\nendmcr\nHello!\n; this is a comment\nwhat's up?\n\n\n\ntestMacro\nfinish\n", testFile);
+        fputs("mcr 1testMacro\nline1\nline2\nline3\nendmcr\nHello!\n; this is a comment\nwhat's up?\n\n\n\n1testMacro\nfinish\n", testFile);
         fclose(testFile);
     } else {
         printf("Failed to open file %s for writing\n", testFileName);

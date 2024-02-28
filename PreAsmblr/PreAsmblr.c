@@ -99,7 +99,7 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
             return;
         }
         else if (checkIfMacroNameIsValid(word)==0){
-            printf("\nError: invalid macro name\n");
+            printf("\nError: invalid macro name\n");/*TODO maybe add a search for 'endmcr', so that the lines wouldn't be copied after this part, if it fails??*/
             return;
         }
         else {/*Macro doesn't exist in the macros array, and has a valid name. create a new instance of it.*/
@@ -246,7 +246,7 @@ void removeSubstring(char* string, const char* sub) {
 int checkIfMacroNameIsValid(char* word){
     int i;
     char* endptr;
-    if (word == NULL) {
+    if (word == NULL || strlen(word)>=MAXMACRONAMELENGTH || (word[0]>= '0' && word[0]<='9')) {
         return 0;
     }
 

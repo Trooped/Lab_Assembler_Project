@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 /*TODO move the definitions to a different file?*/
+#define MAXMACRONAMELENGTH 81 /*Maximum number of characters in a macro name*/
 #define LINES 32 /*Maximum number of lines in a macro, will be adjusted dynamically*/
 #define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
 #define oldFileFormat ".as" /*Constant with the .as file format*/

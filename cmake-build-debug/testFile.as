@@ -1,4 +1,4 @@
-mcr mov
+mcr 1testMacro
 line1
 line2
 line3
@@ -9,5 +9,5 @@ what's up?
 
 
 
-testMacro
+1testMacro
 finish
