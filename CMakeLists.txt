@@ -12,4 +12,6 @@ add_executable(main
         main/main.c
         PreAsmblr/PreAsmblr.c
         PreAsmblr/PreAsmblr.h
-        )
+        AST/AST.c
+        AST/AST.h
+)

@@ -63,6 +63,13 @@ build CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj: C_COMPILER__main_unscanned_
   OBJECT_DIR = CMakeFiles\main.dir
   OBJECT_FILE_DIR = CMakeFiles\main.dir\PreAsmblr
 
+build CMakeFiles/main.dir/AST/AST.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/AST/AST.c || cmake_object_order_depends_target_main
+  DEP_FILE = CMakeFiles\main.dir\AST\AST.c.obj.d
+  FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
+  INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
+  OBJECT_DIR = CMakeFiles\main.dir
+  OBJECT_FILE_DIR = CMakeFiles\main.dir\AST
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target main
@@ -71,7 +78,7 @@ build CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj: C_COMPILER__main_unscanned_
 #############################################
 # Link the executable main.exe
 
-build main.exe: C_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/main/main.c.obj CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj
+build main.exe: C_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/main/main.c.obj CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj CMakeFiles/main.dir/AST/AST.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\main.dir
