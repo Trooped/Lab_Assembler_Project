@@ -14,4 +14,6 @@ add_executable(main
         PreAsmblr/PreAsmblr.h
         AST/AST.c
         AST/AST.h
+        Assembler/firstPass.c
+        Assembler/firstPass.h
 )
