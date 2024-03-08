@@ -27,10 +27,10 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
                 }
 
                 if (isData(word)){
-                    addDataToDataArray("data", lineBuffer,&head, &DC, dataArray);
+                    addToDataArray("data", lineBuffer, &head, &DC, dataArray);
                 }
                 else{
-                    addDataToDataArray("string", lineBuffer,&head, &DC, dataArray);
+                    addToDataArray("string", lineBuffer, &head, &DC, dataArray);
                 }
             }
             else if (isExtern(word)){
@@ -42,19 +42,26 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
             else{ /*TODO the case where it's not data, entry or extern- meaning operation!!*/
                 /*TODO do i need to do something here? lol*/
             }
+            /*TODO maybe it's not any of the options, need to add an error option!*/
+
+
             /*TODO DO I NEED THIS STRTOK? seems useless*/
             strtok(NULL, " \n\r\t"); /* Get the next word.*/
         }
     }
     /*MOVE TO 16, ACCORDING TO THE COURSE'S ALGORITHM.*/
+
+
+
     /*TODO call the linked list memory free operation*/
 }
 
-
+#if 0
+/*TODO i think i can delete this function*/
 void handleLabel(symbolList** head, char* line, int *DC){
     validData *data = NULL;
     char name[MAXLABELNAME];
-    char currentWord[MAXCHARSPERWORD]; /*TODO define it as 30 or something? IDK*/
+    char* currentWord; /*TODO define it as 30 or something? IDK*/
 
     /*Copying the Label name into the name string, without the colon (we know there's one colon because we've tested it earlier).*/
     char* colonPos = strchr(currentWord, ':'); /* Find the position of ':'*/
@@ -101,24 +108,71 @@ void handleLabel(symbolList** head, char* line, int *DC){
         /*TODO add here according to line 10 in the algorithm*/
     }
 
-
-
 }
+#endif
 
 void handleExtern(symbolList** head, char* line) {
-    char currentWord[MAXCHARSPERWORD]; /*TODO define it as 30 or something? IDK*/
+    char* currentWord; /*TODO define it as 30 or something? IDK*/
 
-    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
     while (currentWord!= NULL) {
         addLabel(*head, currentWord, "external", 0);
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
 }
 
+int isDefine(char* word) {
+    if (strcmp(word, ".define") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int isLabel(char* word) {
+    char* colonPos = strchr(word, ':'); /* Find the position of ':'*/
+    if (colonPos != NULL && strlen(word) <= MAXLABELNAME) {
+        return 1;
+    }
+    return 0;
+}
+
+int isData(char* word) {
+    if (strcmp(word, ".data") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int isString(char* word) {
+    if (strcmp(word, ".string") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int isExtern(char* word) {
+    if (strcmp(word, ".extern") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int isEntry(char* word) {
+    if (strcmp(word, ".entry") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int isValidName(char* name){
+    /*TODO add tests to see if the name here isn't already used, and not one of the constants that are out of limit!*/
+}
+
 void handleDefine(symbolList** head, char* line) {
     char name[MAXLABELNAME]; /*TODO handle the maxname already*/
+    char* endptr;
     int value;
-    char currentWord[MAXCHARSPERWORD]; /*TODO define it as 30 or something? IDK*/
+    char* currentWord; /*TODO define it as 30 or something? IDK*/
 
     currentWord = strtok(line, " \n\r\t"); /* Tokenize the line into words*/
     while(currentWord != NULL) {
@@ -126,11 +180,11 @@ void handleDefine(symbolList** head, char* line) {
             if (!searchLabelList(&head, currentWord)){ /*TODO explain and remember that it means it's returning 0 and not 1!*/
                 strncpy(name, currentWord, MAXLABELNAME);
                 currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
-                if (strcmp(currentWord, "=")==0) {/*TODO maybe it's !=0?*/
+                if (strcmp(currentWord, "=")==0) {
                     currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
-                    value = strtol(currentWord);/*TODO can i even use it in c90?*/
+                    value = strtol(currentWord, &endptr, 10);/*TODO can i even use it in c90?*/
                     currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-                    if (isValidValue && currentWord == NULL){
+                    if (*endptr == '\0' && currentWord == NULL){
                         addLabel(*head, name, "define", value);
                     }
                     else{
@@ -148,9 +202,10 @@ void handleDefine(symbolList** head, char* line) {
     }
 
     // Call addLabel with head, name, and value
-    *head = addLabel(*head, name, "define", value);
+    addLabel(*head, name, "define", value);
 }
 
+/*TODO maybe it can be a void function?*/
 /* Function to add a new node at the end of the list */
 symbolList* addLabel(symbolList* head, char* name, char* type, int value) {
     symbolList* newNode = (symbolList*)malloc(sizeof(symbolList));
@@ -188,7 +243,7 @@ int searchLabelList(symbolList** head, char* name, char* type) {
     /* Search for the name in the list*/
     while (current != NULL) {
         if (strcmp(current->name, name) == 0 && strcmp(current->type, type) == 0) {
-            /* Name found in the list, return 0 = error TODO maybe add it as a constant?*/
+            /* Label found in the list, return 0 = error TODO maybe add it as a constant?*/
             return 0;
         }
         current = current->next;
@@ -217,7 +272,7 @@ void deleteSymbolList(symbolList* head) {
     }
 }
 
-void addDataToDataArray(char* type, char* line, symbolList ** head, int *DC, word** dataArray) {
+void addToDataArray(char* type, char* line, symbolList ** head, int *DC, word** dataArray) {
     char* numbers;
     char* token;
     long val;

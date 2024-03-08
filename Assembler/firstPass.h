@@ -16,12 +16,6 @@ typedef struct symbolList {
     struct symbolList* next; /* Pointer to the next node*/
 } symbolList;
 
-typedef struct validData{
-    char* type;
-    int valid;
-    int dataCounter;
-}validData;
-
 
 
 
