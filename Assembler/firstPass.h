@@ -5,8 +5,6 @@
 #include <ctype.h>
 #include "../PreAsmblr/PreAsmblr.h"
 
-#define MAXICDC 2056 /*Maximum number of instructions and data counter*/
-
 
 #ifndef firstPass_H
 #define firstPass_H

@@ -6,13 +6,13 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
     int labelFlag = 0;
     int value;
     char lineBuffer[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
-    char word[MAXCHARSPERWORD]; /*TODO define it as 30 or something? IDK*/
+    char word[MAXCHARSPERWORD]; /*TODO is it large enough??*/
     symbolList* head = NULL; /* Initialize the list to empty*/
     /*TODO maybe if i already define a head, i don't need to do the head = when calling the functyions?*/
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
         labelFlag = 0;
-        word = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
+        strcpy(word, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
         while (word != NULL) {
             if (isDefine(word)){
                 handleDefine(&head, lineBuffer);
@@ -43,7 +43,7 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
                 /*TODO do i need to do something here? lol*/
             }
             /*TODO DO I NEED THIS STRTOK? seems useless*/
-            word = strtok(NULL, " \n\r\t"); /* Get the next word.*/
+            strtok(NULL, " \n\r\t"); /* Get the next word.*/
         }
     }
     /*MOVE TO 16, ACCORDING TO THE COURSE'S ALGORITHM.*/
@@ -53,7 +53,7 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
 
 void handleLabel(symbolList** head, char* line, int *DC){
     validData *data = NULL;
-    char name[MAXNAME];
+    char name[MAXLABELNAME];
     char currentWord[MAXCHARSPERWORD]; /*TODO define it as 30 or something? IDK*/
 
     /*Copying the Label name into the name string, without the colon (we know there's one colon because we've tested it earlier).*/
@@ -116,7 +116,7 @@ void handleExtern(symbolList** head, char* line) {
 }
 
 void handleDefine(symbolList** head, char* line) {
-    char name[MAXNAME]; /*TODO handle the maxname already*/
+    char name[MAXLABELNAME]; /*TODO handle the maxname already*/
     int value;
     char currentWord[MAXCHARSPERWORD]; /*TODO define it as 30 or something? IDK*/
 
@@ -124,7 +124,7 @@ void handleDefine(symbolList** head, char* line) {
     while(currentWord != NULL) {
         if (isValidName){
             if (!searchLabelList(&head, currentWord)){ /*TODO explain and remember that it means it's returning 0 and not 1!*/
-                strncpy(name, currentWord, MAXNAME);
+                strncpy(name, currentWord, MAXLABELNAME);
                 currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
                 if (strcmp(currentWord, "=")==0) {/*TODO maybe it's !=0?*/
                     currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -161,8 +161,8 @@ symbolList* addLabel(symbolList* head, char* name, char* type, int value) {
     }
 
     /* Copy the name and value into the new node */
-    strncpy(newNode->name, name, MAXNAME);
-    strncpy(newNode->type, type, MAXNAME);/*TODO CHANGE THE CONSTANTS HERE OMNG*/
+    strcpy(newNode->name, name);
+    strcpy(newNode->type, type);
     newNode->value = value;
     newNode->next = NULL;
 
@@ -204,8 +204,9 @@ void deleteSymbolListNode(symbolList* node) {
     free(node);
 }
 
+/*TODO call this one in the end of the main function??*/
 /* Function to delete the entire list */
-void deleteLabelList(symbolList* head) {
+void deleteSymbolList(symbolList* head) {
     /* Loop through the list and delete each node */
     symbolList* current = head;
     symbolList* nextNode;
