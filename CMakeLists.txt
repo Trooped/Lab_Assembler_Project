@@ -16,4 +16,6 @@ add_executable(main
         AST/AST.h
         Assembler/firstPass.c
         Assembler/firstPass.h
+        Assembler/assembler.c
+        Assembler/assembler.h
 )
