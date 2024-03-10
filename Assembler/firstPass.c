@@ -280,10 +280,8 @@ int getOperandCode(char* operand, symbolList** head){
 
     if (operand[0] == '#') {
         strcpy(tempOperand, operand+1);
-        val = strtol(tempOperand, &endptr, 10); /* Converts to long and handles +/-*/
 
-        /* Check for invalid characters after the number*/
-        if (*endptr != '\0') { /* If strtol couldn't parse the whole token*/
+        if (!isValidInteger){
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
                 printf("Error: Undefined symbol '%s'\n", token); /*TODO change error!*/
@@ -372,17 +370,6 @@ void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
 }
 
 
-int isValidOperation(char* word, operation* operationsArray) {
-    int i;
-    for (i = 0; i < OPERATIONS; i++) {
-        if (strcmp(word, operationsArray[i].name) == 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-
 
 #if 0
 /*TODO i think i can delete this function*/
@@ -449,52 +436,6 @@ void handleExtern(symbolList** head, char* line) {
     }
 }
 
-int isDefine(char* word) {
-    if (strcmp(word, ".define") == 0) {
-        return 1;
-    }
-    return 0;
-}
-
-int isLabel(char* word) {
-    char* colonPos = strchr(word, ':'); /* Find the position of ':'*/
-    if (colonPos != NULL && strlen(word) <= MAXLABELNAME) {
-        return 1;
-    }
-    return 0;
-}
-
-int isData(char* word) {
-    if (strcmp(word, ".data") == 0) {
-        return 1;
-    }
-    return 0;
-}
-
-int isString(char* word) {
-    if (strcmp(word, ".string") == 0) {
-        return 1;
-    }
-    return 0;
-}
-
-int isExtern(char* word) {
-    if (strcmp(word, ".extern") == 0) {
-        return 1;
-    }
-    return 0;
-}
-
-int isEntry(char* word) {
-    if (strcmp(word, ".entry") == 0) {
-        return 1;
-    }
-    return 0;
-}
-
-int isValidName(char* name){
-    /*TODO add tests to see if the name here isn't already used, and not one of the constants that are out of limit!*/
-}
 
 void handleDefine(symbolList** head, char* line) {
     char name[MAXLABELNAME]; /*TODO handle the maxname already*/
@@ -710,20 +651,6 @@ void addToDataArray(char* type, char* line, symbolList ** head, int *DC, word** 
         /*TODO add an error*/
         return;
     }
-}
-
-int findSymbolValue(symbolList **head, const char* name,char* type, int* value) {
-    symbolList* current = *head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            if (strcmp(current->type, type) == 0) {
-                *value = current->value;
-                return 1;
-            }
-        }
-        current = current->next;
-    }
-    return 0;
 }
 
 /*TODO add a free data struct function*/

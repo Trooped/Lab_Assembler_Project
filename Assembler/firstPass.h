@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "../PreAsmblr/PreAsmblr.h"
+#include "assembler.h"
+#include "analyzationAndUtilities.h"
 
 
 #ifndef firstPass_H
