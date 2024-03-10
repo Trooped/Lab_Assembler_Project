@@ -4,6 +4,8 @@
 /*TODO MAYBE create the lists in the asmblr.c file and send them here?*/
 void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operation *operationsArray, symbolList *symbolTable, symbolList *externalSymbols, symbolList *entrySymbols, int *IC, int *DC) {
     int labelFlag = 0;
+    int operation = 0;
+    int L;
     int value;
     char lineBuffer[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
     char word[MAXCHARSPERWORD]; /*TODO is it large enough??*/
@@ -40,7 +42,25 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
                 /*TODO according to line 11*/
             }
             else{ /*TODO the case where it's not data, entry or extern- meaning operation!!*/
-                /*TODO do i need to do something here? lol*/
+                addLabel(&head, word, "code", IC+100);
+                strtok(NULL, " \n\r\t"); /* Get the next word.*/
+                operation = isValidOperation(word, operationsArray);
+
+                if (operation == -1){
+                    /*TODO print an error on wrong operation name and stuff and exit or something*/
+                }
+                else{
+                    L = handleOperation(&head, instructionArray, operation, lineBuffer, IC, operationsArray);
+                    if (L == -1){
+                        /*TODO print an error on wrong operation name and stuff and exit or something*/
+                    }
+                    else{
+                        IC += L;
+                    }
+                }
+
+
+
             }
             /*TODO maybe it's not any of the options, need to add an error option!*/
 
@@ -55,6 +75,314 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
 
     /*TODO call the linked list memory free operation*/
 }
+
+int handleOperation(symbolList** head, word** instructionArray, int operation, char* line, int *IC, operation* operationsArray) {
+    int L = 0;
+    int opcode;
+    int firstOperand;
+    int secondOperand;
+    int last2bits;/*TODO IS IT NECESSARY?*/
+
+    char operands[MAXOPERANDS][MAXOPERANDLENGTH]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
+    fillOperandsArray(operands, MAXOPERANDS, MAXOPERANDLENGTH, '\0');
+
+
+    parseOperands(line, operands); /*TODO change it to just separate the operands using a comma, the rest'll take care of itself*/
+
+    if (operationsArray[operation].numOfOperands ==0) {
+        if (operands[0][0] != '\0') {
+            /*TODO add an error, too many operands*/
+            /*TODO exit.*/
+        }
+        else{
+            firstOperand = 0;
+            secondOperand = 0;
+        }
+    }
+    else if (operationsArray[operation].numOfOperands ==1) {
+        if (operands[1][0] != '\0') {
+            /*TODO add an error, too many operands*/
+            /*TODO exit.*/
+        }
+        else{
+            firstOperand = getOperandCode(operands[0], head); /*TODO am i sending this correctly?*/
+            secondOperand = 0;
+        }
+    }
+    else if (operationsArray[operation].numOfOperands ==2) {
+        if (operands[2][0] != '\0') {
+            /*TODO add an error, too many operands*/
+            /*TODO exit.*/
+        }
+        else{
+            firstOperand = getOperandCode(operands[0], head); /*TODO am i sending this correctly?*/
+            secondOperand = getOperandCode(operands[1], head); /*TODO am i sending this correctly?*/
+        }
+    }
+    /*TODO do i need another condition?*/
+
+    /*TODO important!! everything stops here potentially!*/
+    if (firstOperand == -999 || secondOperand == -999) {
+        /*TODO add an error, wrong operand code*/
+        /*TODO exit.*/
+    }
+
+    if (firstOperand == 2){
+        L++;
+    }
+    if (secondOperand == 2){
+        L++;
+    }
+
+    switch(operation){
+        case 0: /*mov*/
+            if (secondOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else {
+
+            }
+            break;
+        case 1: /*cmp*/
+            /*TODO everything is legal here.*/
+            break;
+        case 2: /*add*/
+            if (secondOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 3: /*sub*/
+            if (secondOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 4: /*lea*/
+            if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+        case 5: /*not*/
+            if (firstOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 6: /*clr*/
+            if (firstOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 7: /*inc*/
+            if (firstOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 8: /*dec*/
+            if (firstOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 9: /*jmp*/
+            if (firstOperand == 0 || firstOperand==2){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 10: /*bne*/
+            if (firstOperand == 0 || firstOperand==2){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 11: /*red*/
+            if (firstOperand == 0){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 12: /*prn*/
+            /*TODO should i translate everything here?*/
+            break;
+        case 13: /*jsr*/
+            if (firstOperand == 0 || firstOperand==2){
+                /*TODO add an exit error!*/
+            }
+            else{
+                /*TODO should i translate everything here?*/
+            }
+            break;
+        case 14: /*rts*/
+            /*TODO should i translate everything here?*/
+            break;
+        case 15: /*hlt*/
+            /*TODO should i translate everything here?*/
+            break;
+        default:
+            /*TODO add an error*/
+            break;
+    }
+
+    insertInstruction(instructionArray, *IC, operation, firstOperand, secondOperand);
+
+    L += operationsArray[operation].numOfOperands;
+    return L;
+}
+
+void insertInstruction(word* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
+    word newWord;
+    /*TODO remove all of that
+    Start with the first 4 bits as 0000, which we can ignore as the bits are 0 by default.
+    Then shift the opcode to its correct position (6 bits to the left)
+    Then shift the firstOperand 4 bits to the left
+    Then shift the secondOperand 2 bits to the left
+    The last 2 bits are 00 and don't need to be explicitly set
+    */
+    newWord.wordBits = (opcode << 6) | (firstOperand << 4) | (secondOperand << 2);
+    instructionArray[IC] = newWord;
+}
+
+int getOperandCode(char* operand, symbolList** head){
+    /* 0 = instant, constant (#number or #define)
+     * 1 = direct, Label
+     * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
+     * 3 = register, one of the registers.*/
+    int i = 0, j=0;
+    char tempVal[MAXOPERANDLENGTH]; /*TODO WOW I'VE GOTTA CHANGE THIS*/
+    int val;
+    char* endptr;
+    char tempOperand[MAXOPERANDLENGTH];
+
+
+    if (operand[0] == '#') {
+        strcpy(tempOperand, operand+1);
+        val = strtol(tempOperand, &endptr, 10); /* Converts to long and handles +/-*/
+
+        /* Check for invalid characters after the number*/
+        if (*endptr != '\0') { /* If strtol couldn't parse the whole token*/
+            int symbolValue;
+            if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
+                printf("Error: Undefined symbol '%s'\n", token); /*TODO change error!*/
+                return -999; /*TODO add constant for failed function*/
+            }
+            val = symbolValue; /* Use the value from the symbol list*/
+        }
+        return 0;
+    }
+    else if (strcmp(operand, "r0") == 0 || strcmp(operand, "r1") == 0 || strcmp(operand, "r2") == 0 || strcmp(operand, "r3") == 0 || strcmp(operand, "r4") == 0 || strcmp(operand, "r5") == 0 || strcmp(operand, "r6") == 0 || strcmp(operand, "r7") == 0) {
+        return 2;
+    }
+    else{
+        while (operand[i] != '[' || operand[i] != '\0') {
+            tempOperand[i] = operand[i];
+            i++;
+        }
+
+        if (operand[i] == '\0') {
+            if (isLabel(tempOperand) || isValidName(tempOperand)) {
+                return 1;
+            }
+            else {
+                /*TODO add error, wrong label name or w/e*/
+                return -999; /*TODO add constant for failed function*/
+            }
+        }
+        else if (operand[i] == '[') {
+            if (isLabel(tempOperand) || isValidName(tempOperand)) {
+                i++;
+                while (operand[i] != ']' || operand[i] == '\0') {
+                    tempVal[j] = operand[i];
+                    i++;
+                    j++;
+                }
+                if (operand[i]==']'){
+                    val = strtol(tempVal, &endptr, 10); /* Converts to long and handles +/-*/
+
+                    /* Check for invalid characters after the number*/
+                    if (*endptr != '\0') { /* If strtol couldn't parse the whole token*/
+                        int symbolValue;
+                        if (!findSymbolValue(head, token, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
+                            printf("Error: Undefined symbol '%s'\n", token); /*TODO change this too*/
+                            return -999; /*TODO add constant for failed function*/
+                        }
+                        val = symbolValue; /* Use the value from the symbol list*/
+                    }
+                    return 2;
+                }
+                else {
+                    /*TODO add error, doesn't end with ] or something name or w/e*/
+                    return -999; /*TODO add constant for failed function*/
+                }
+            }
+            else {
+                return -999; /*TODO add constant for failed function*/
+            }
+        }
+        else {
+            return -999; /*TODO add constant for failed function*/
+        }
+    }
+    return -999; /*TODO add constant for failed function*/
+}
+
+
+void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
+    int operandIndex = 0, charIndex = 0;
+    int i;
+
+    for (i = 0; input[i] != '\0'; i++) {
+        if (input[i] == ',' && charIndex != 0) { /* Check if comma is not at the start*/
+            operands[operandIndex][charIndex] = '\0'; /* Terminate current operand string*/
+            operandIndex++; /* Move to the next operand*/
+            charIndex = 0; /* Reset character index for the new operand*/
+            while (input[i + 1] && isspace((unsigned char)input[i + 1])) i++; /* Skip spaces after comma*/
+        } else if (!isspace((unsigned char)input[i]) || (charIndex != 0 && isspace((unsigned char)input[i]))) {
+            /* Copy character to the current operand if it's not a leading space*/
+            operands[operandIndex][charIndex++] = input[i];
+        }
+    }
+
+    if (charIndex != 0) { /* Check if there's a trailing operand*/
+        operands[operandIndex][charIndex] = '\0'; /* Terminate the last operand*/
+    }
+}
+
+
+int isValidOperation(char* word, operation* operationsArray) {
+    int i;
+    for (i = 0; i < OPERATIONS; i++) {
+        if (strcmp(word, operationsArray[i].name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 
 #if 0
 /*TODO i think i can delete this function*/

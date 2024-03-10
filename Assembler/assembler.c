@@ -8,6 +8,8 @@ void assembler(FILE* source, const char* fileName){
     word* dataArray = NULL; /* array for data to be put in the memory image */
     word* instructionArray= NULL; /* array for the instructions to be put in the memory image.*/
     List symbolTable = { NULL, NULL }; /* linked list for labels */
+
+
     List externalSymbols = { NULL, NULL }; /* a separate list for the external labels defined,
                                              * to later create .ext file*/
     List entrySymbols = { NULL, NULL }; /* same thing for entries. */
