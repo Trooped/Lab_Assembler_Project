@@ -18,6 +18,8 @@ add_executable(main
         Assembler/firstPass.h
         Assembler/assembler.c
         Assembler/assembler.h
-        Assembler/analyzationAndUtilities.c
-        Assembler/analyzationAndUtilities.h
+        Assembler/utilities.c
+        Assembler/utilities.h
+        Assembler/syntaxAnalyzer.c
+        Assembler/syntaxAnalyzer.h
 )
