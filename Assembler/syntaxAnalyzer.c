@@ -2,7 +2,7 @@
 
 
 
-int getOperandCode(char* operand, symbolList** head, operation* operationsArray){
+int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error* errorInfo){
     /* 0 = instant, constant (#number or #define)
      * 1 = direct, Label
      * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
@@ -20,8 +20,8 @@ int getOperandCode(char* operand, symbolList** head, operation* operationsArray)
         if (!isValidInteger(tempOperand)){
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                printf("Error: Undefined symbol '%s'\n", token); /*TODO change error!*/
-                return -999; /*TODO add constant for failed function*/
+                printError(*errorInfo, "Unvalid Integer or undefined symbol for immediate operand");
+                return -999; /*TODO do I even need to retunr this??*/
             }
             val = symbolValue; /* Use the value from the symbol list*/
         }
@@ -30,23 +30,23 @@ int getOperandCode(char* operand, symbolList** head, operation* operationsArray)
     else if (isRegister(operand)) {
         return 3;
     }
-    else{
+    else{ /*case of Label or Label offset*/
         while (operand[i] != '[' || operand[i] != '\0') {
             tempOperand[i] = operand[i];
             i++;
         }
 
         if (operand[i] == '\0') {
-            if (searchSymbolList(head, tempOperand, "general")) {
+            if (isValidLabelName(tempOperand, operationsArray, head, 0)){
                 return 1;
             }
             else {
-                /*TODO add error, wrong label name or w/e*/
+                printError(*errorInfo, "Undefined Label name");
                 return -999; /*TODO add constant for failed function*/
             }
         }
         else if (operand[i] == '[') {
-            if (searchSymbolList(head, tempOperand, "general")) {
+            if (isValidLabelName(tempOperand, operationsArray, head, 0)) {
                 i++;
                 while (operand[i] != ']' || operand[i] == '\0') {
                     tempVal[j] = operand[i];
@@ -57,7 +57,7 @@ int getOperandCode(char* operand, symbolList** head, operation* operationsArray)
                     if (!isValidInteger(tempOperand)){
                         int symbolValue;
                         if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printf("Error: Undefined symbol '%s'\n", token); /*TODO change error!*/
+                            printError(*errorInfo, "Unvalid Integer or undefined symbol for offset operand");
                             return -999; /*TODO add constant for failed function*/
                         }
                         val = symbolValue; /* Use the value from the symbol list*/
@@ -65,18 +65,20 @@ int getOperandCode(char* operand, symbolList** head, operation* operationsArray)
                     return 2;
                 }
                 else {
-                    /*TODO add error, doesn't end with ] or something name or w/e*/
+                    printError(*errorInfo, "Unvalid offset declaration, doesn't end with ']'");
                     return -999; /*TODO add constant for failed function*/
                 }
             }
             else {
+                printError(*errorInfo, "Undefined Label");
                 return -999; /*TODO add constant for failed function*/
             }
         }
         else {
-            return -999; /*TODO add constant for failed function*/
+            printError(*errorInfo, "Unvalid operand"); /*TODO what the hell is this case? need to test this*/
         }
     }
+    printError(*errorInfo, "Unvalid operand")
     return -999; /*TODO add constant for failed function*/
 }
 

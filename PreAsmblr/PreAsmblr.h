@@ -13,7 +13,7 @@
 #define oldFileFormat ".as" /*Constant with the .as file format*/
 #define newFileFormat ".am" /*Constant with the .am file format*/
 #define MAXMACROS 32 /*Starter number for number of macros, dynamically allocated further on*/
-#define MAXFILENAME 256 /*Maximum file name length*/
+#define MAXFILENAME 64 /*Maximum file name length*/
 
 /**
  * This struct will define each macro, it's lines (the actual lines of a text, a 2d pointer array) and a lines counter.

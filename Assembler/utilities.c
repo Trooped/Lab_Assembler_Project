@@ -39,61 +39,52 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
 }
 
 
-
-/*TODO maybe it can be a void function?*/
 /* Function to add a new node at the end of the list */
-symbolList* addLabel(symbolList* head, char* name, char* type, int value) {
-    symbolList* newNode = (symbolList*)malloc(sizeof(symbolList));
-    if(newNode == NULL) {
-        /* If malloc fails, print an error and exit TODO DONT EXIT!!! FIND OUT WHAT TO DO DIFFERENTLY*/
-        fprintf(stderr, "Out of memory\n");
-        exit(1);
+void addLabel(symbolList** head, char* name, char* type, int value, error* errorInfo) {
+    symbolList* newNode = NULL;
+    if (name == NULL || name[0] == '\0') {
+        printError(*errorInfo, "Empty label isn't allowed");
+        return; /* Early return to avoid processing further*/
     }
 
-    /*Empty Label isn't allowed TODO add an error code*/
-    if (strcmp(name, NULL) == 0){
-        return;
+    newNode = (symbolList*)malloc(sizeof(symbolList));
+    if (newNode == NULL) {
+        printError(*errorInfo, "Out of memory");
+        return; /*TODO Consider how to handle memory errors in your application context*/
     }
 
-    /* Copy the name and value into the new node */
-    strcpy(newNode->name, name);
-    strcpy(newNode->type, type);
+    /* Initialize the new node*/
+    strncpy(newNode->name, name, MAXNAME - 1);
+    newNode->name[MAXNAME - 1] = '\0'; /* Ensure null termination*/
+    strncpy(newNode->type, type, MAXNAME - 1);
+    newNode->type[MAXNAME - 1] = '\0'; /* Ensure null termination*/
     newNode->value = value;
     newNode->next = NULL;
 
-    if (head == NULL) {
-        /* If the list is empty, the new node becomes the head of the list */
-        head = newNode;
+    if (*head == NULL) {
+        *head = newNode; /* Set new node as the head if list is empty*/
     } else {
-        /* If the list is not empty, find the last node and link the new node to it */
-        symbolList* current = head;
+        /* Append the new node to the end of the list*/
+        symbolList* current = *head;
         while (current->next != NULL) {
             current = current->next;
         }
         current->next = newNode;
     }
-
-    /* Return the head of the list */
-    return head;
 }
 
-/* Function to delete a node */
-void deleteSymbolListNode(symbolList* node) {
-    /* Free the memory allocated for the node */
-    free(node);
-}
 
 /*TODO call this one in the end of the main function??*/
 /* Function to delete the entire list */
-void deleteSymbolList(symbolList* head) {
-    /* Loop through the list and delete each node */
-    symbolList* current = head;
-    symbolList* nextNode;
+void deleteSymbolList(symbolList** head) {
+    symbolList* current = *head;
+    symbolList* nextNode = NULL;
     while (current != NULL) {
         nextNode = current->next;
-        deleteSymbolListNode(current);
+        free(current);
         current = nextNode;
     }
+    *head = NULL; /* Ensure the caller's head pointer is set to NULL*/
 }
 
 void insertInstructionIntoArray(word* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
@@ -115,4 +106,28 @@ void addValueToDataArray(word **dataArray, int DC, int value) {
     dataArray[DC] = &newWord;
 }
 
+void printError(error errorInfo, char* errorDescription){
+    errorInfo.errorFlag = 1;
+    snprintf(errorInfo.errorDescription, sizeof(errorInfo.errorDescription), "%s", errorDescription);
+    printf("Error in file %s: %s\n", errorInfo.fileName, errorInfo.errorDescription);
+}
+
+void incrementDataSymbolValues(symbolList* head, int byValue) {
+    symbolList* current = head;
+    while (current != NULL) {
+        if (strcmp(current->type, "data") == 0) {
+            current->value += byValue;
+        }
+        current = current->next;
+    }
+}
+
+void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
+    int i, j;
+    for (i = 0; i < MAXOPERANDS; i++) {
+        for (j = 0; j < MAXOPERANDLENGTH; j++) {
+            operands[i][j] = '\0';
+        }
+    }
+}
 

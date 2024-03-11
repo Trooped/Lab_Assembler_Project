@@ -3,29 +3,34 @@
 
 
 void assembler(FILE* source, const char* fileName){
-    char newFileName[MAX_FILE_NAME];
-    FILE* objectFile, *entFile, *extFile;
+    char newFileName[MAXFILENAME];
+    FILE* objectFile; /* *entFile, *extFile;*/ /*TODO maybe i need to initialize?*/
     word* dataArray = NULL; /* array for data to be put in the memory image */
     word* instructionArray= NULL; /* array for the instructions to be put in the memory image.*/
-    List symbolTable = { NULL, NULL }; /* linked list for labels */
+    symbolList* symbolTable = NULL; /* linked list for labels */ /*TODO maybe i need to initialize?*/
 
-
-    List externalSymbols = { NULL, NULL }; /* a separate list for the external labels defined,
-                                             * to later create .ext file*/
-    List entrySymbols = { NULL, NULL }; /* same thing for entries. */
     operation operationsArray[OPERATIONS] = {{"mov", 0, 2}, {"cmp", 1, 2}, {"add", 2, 2}, {"sub", 3, 2}, {"lea", 4, 2}, {"not", 5, 1}, {"clr", 6, 1}, {"inc", 7, 1}, {"dec", 8, 1}, {"jmp", 9, 1}, {"bne", 10, 1}, {"red", 11, 1}, {"prn", 12, 1}, {"jsr", 13, 1}, {"rts", 14, 0}, {"hlt", 15, 0}};
     int IC = 0, DC = 0; /* instruction counter and data counter */
+
+    error errorInfo = {0, fileName, " "}; /* error flag, file name, error description */
 
 
     /*initializing both of the arrays*/
     initializeDataArray(&dataArray, 0);
     initializeInstructionArray(&instructionArray, 0);
 
+    /*call firstPass function*/
 
-    /*TODO take care of the above stuff^
-     * and also, I need to call the firstPass function from here*/
+    firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
+    if (errorInfo.errorFlag == 1) {
+        /*TODO print error and exit*/
+        return;
+    }
 
+    incrementDataSymbolValues(symbolTable.next, 100);
+
+    /*TODO call secondPass function*/
 
 }
 

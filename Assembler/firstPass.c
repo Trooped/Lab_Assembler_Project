@@ -2,67 +2,65 @@
 
 
 /*TODO MAYBE create the lists in the asmblr.c file and send them here?*/
-void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operation *operationsArray, symbolList *symbolTable, symbolList *externalSymbols, symbolList *entrySymbols, int *IC, int *DC) {
+void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operation *operationsArray, symbolList** symbolTable, int *IC, int *DC, error *errorInfo){
     int labelFlag = 0;
     int operation = 0;
     int L;
-    int value;
     char lineBuffer[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
     char word[MAXLABELNAME]; /*TODO is it large enough??*/
-    symbolList* head = NULL; /* Initialize the list to empty*/
     /*TODO maybe if i already define a head, i don't need to do the head = when calling the functyions?*/
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
+        L = 0;
         labelFlag = 0;
         strcpy(word, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
         while (word != NULL) {
             if (isDefine(word)){
-                handleDefine(&head, &operationsArray, lineBuffer);
+                handleDefine(symbolTable, &operationsArray, lineBuffer, &errorInfo);
             }
-            else if (isValidLabelName(word, operationsArray, head, 1)){ /*checks if the first word is a label name TODO CHANGE COMMENT*/
+            else if (isValidLabelName(word, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
                 labelFlag = 1;
             }
             else if (isData(word) || isString(word)){
                 if (labelFlag) {
-                    addLabel(&head, word, "data", *DC);
+                    addLabel(symbolTable, word, "data", *DC, errorInfo);
                 }
 
                 if (isData(word)){
-                    handleData("data", lineBuffer, &head, &DC, dataArray);
+                    handleData("data", lineBuffer, symbolTable, &DC, dataArray);
                 }
                 else{
-                    handleData("string", lineBuffer, &head, &DC, dataArray);
+                    handleData("string", lineBuffer, symbolTable, &DC, dataArray);
                 }
             }
             else if (isExtern(word)){
-                handleExtern(&head, lineBuffer);
+                handleExtern(symbolTable, lineBuffer);
             }
             else if (isEntry(word)){ /*TODO do i even need this in the first pass?*/
                 /*TODO according to line 11*/
             }
-            else{ /*TODO the case where it's not data, entry or extern- meaning operation!!*/
-                addLabel(&head, word, "code", *IC+100);
+            else if (isValidOperation(word)){ /*TODO the case where it's not data, entry or extern- meaning operation!!*/
+                addLabel(symbolTable, word, "code", *IC+100);
                 strtok(NULL, " \n\r\t"); /* Get the next word.*/
                 operation = isValidOperation(word, operationsArray);
 
                 if (operation == -1){
-                    /*TODO print an error on wrong operation name and stuff and exit or something*/
+                    printError(errorInfo, "Invalid operation");
                 }
                 else{
-                    L = handleOperation(&head, instructionArray, operation, lineBuffer, IC, operationsArray);
+                    L = handleOperation(symbolTable, instructionArray, operation, lineBuffer, IC, operationsArray);
                     if (L == -1){
-                        /*TODO print an error on wrong operation name and stuff and exit or something*/
+                        printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
                     }
                     else{
                         IC += L;
                     }
                 }
 
-
-
             }
-            /*TODO maybe it's not any of the options, need to add an error option!*/
-
+            else{
+                printError(errorInfo, "Invalid operation, label, or directive");
+            }
 
             /*TODO DO I NEED THIS STRTOK? seems useless*/
             strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -70,28 +68,21 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
     }
     /*MOVE TO 16, ACCORDING TO THE COURSE'S ALGORITHM.*/
 
-
-
-    /*TODO call the linked list memory free operation*/
+    /*TODO call the linked list memory free operation, or actually do this after the second pass.*/
 }
 
-int handleOperation(symbolList** head, word** instructionArray, int opcode, char* line, int *IC, operation *operationsArray) {
+int handleOperation(symbolList** head, word** instructionArray, int opcode, char* line, int *IC, operation *operationsArray, error *errorInfo) {
     int L = 0;
     int firstOperand;
     int secondOperand;
-    int last2bits;/*TODO IS IT NECESSARY?*/
-
     char operands[MAXOPERANDS][MAXOPERANDLENGTH]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
-    /*TODO write this function VVV*/
-    fillOperandsArray(operands, MAXOPERANDS, MAXOPERANDLENGTH, '\0');
 
-
-    parseOperands(line, operands); /*TODO change it to just separate the operands using a comma, the rest'll take care of itself*/
+    initializeOperandsArray(operands);
+    parseOperands(line, operands);
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
-            /*TODO add an error, too many operands*/
-            /*TODO exit.*/
+            printError(errorInfo, "Error: Too many operands for %s operation", operationsArray[opcode].name);
         }
         else{
             firstOperand = 0;
@@ -100,8 +91,7 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
     }
     else if (operationsArray[opcode].numOfOperands == 1) {
         if (operands[1][0] != '\0') {
-            /*TODO add an error, too many operands*/
-            /*TODO exit.*/
+            printError(errorInfo, "Error: Too many operands for %s operation", operationsArray[opcode].name);
         }
         else{
             firstOperand = getOperandCode(operands[0], head, operationsArray); /*TODO am i sending this correctly?*/
@@ -110,17 +100,17 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
         if (operands[2][0] != '\0') {
-            /*TODO add an error, too many operands*/
-            /*TODO exit.*/
+            printError(errorInfo, "Error: Too many operands for %s operation", operationsArray[opcode].name);
         }
         else{
             firstOperand = getOperandCode(operands[0], head, operationsArray); /*TODO am i sending this correctly?*/
             secondOperand = getOperandCode(operands[1], head, operationsArray); /*TODO am i sending this correctly?*/
         }
     }
-    /*TODO do i need another condition?*/
+    /*TODO do i need another condition? MAYBE I NEED SOMETHING ELSE?? LIKE TOO LITTLE OPERANDS?*/
 
     /*TODO important!! everything stops here potentially!*/
+    /*TODO it seems like I've already taken care of this part in the operandCode function, but welp*/
     if (firstOperand == -999 || secondOperand == -999) {
         /*TODO add an error, wrong operand code*/
         /*TODO exit.*/
@@ -136,10 +126,7 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
     switch(opcode){
         case 0: /*mov*/
             if (secondOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else {
-
+                printError(errorInfo, "Error: Cannot move to an immediate operand");
             }
             break;
         case 1: /*cmp*/
@@ -147,15 +134,12 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
             break;
         case 2: /*add*/
             if (secondOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Cannot add into an immediate operand");
             }
             break;
         case 3: /*sub*/
             if (secondOperand == 0){
-                /*TODO add an exit error!*/
+                printError(errorInfo, "Error: Cannot subtract from an immediate operand");
             }
             else{
                 /*TODO should i translate everything here?*/
@@ -163,54 +147,37 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
             break;
         case 4: /*lea*/
             if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
-                /*TODO add an exit error!*/
+                printError(errorInfo, "Error: Illegal operands for lea");
             }
-            else{
-                /*TODO should i translate everything here?*/
-            }
+            break; /*TODO maybe spread these^ for 3 different errors?*/
         case 5: /*not*/
             if (firstOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Cannot negate an immediate operand");
             }
             break;
         case 6: /*clr*/
             if (firstOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Cannot clear an immediate operand");
             }
             break;
         case 7: /*inc*/
             if (firstOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Cannot increment an immediate operand");
             }
             break;
         case 8: /*dec*/
             if (firstOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Cannot decrement an immediate operand");
             }
             break;
         case 9: /*jmp*/
             if (firstOperand == 0 || firstOperand==2){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Illegal operands for jmp");
             }
             break;
         case 10: /*bne*/
             if (firstOperand == 0 || firstOperand==2){
-                /*TODO add an exit error!*/
+                printError(errorInfo, "Error: Illegal operands for bne");
             }
             else{
                 /*TODO should i translate everything here?*/
@@ -218,31 +185,22 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
             break;
         case 11: /*red*/
             if (firstOperand == 0){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Cannot read into an immediate operand");
             }
             break;
         case 12: /*prn*/
-            /*TODO should i translate everything here?*/
             break;
         case 13: /*jsr*/
             if (firstOperand == 0 || firstOperand==2){
-                /*TODO add an exit error!*/
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Error: Illegal operands for jsr");
             }
             break;
         case 14: /*rts*/
-            /*TODO should i translate everything here?*/
             break;
         case 15: /*hlt*/
-            /*TODO should i translate everything here?*/
             break;
         default:
-            /*TODO add an error*/
+            printError(errorInfo, "Error: Invalid operation");
             break;
     }
 
@@ -253,7 +211,7 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
 }
 
 
-void handleData(char* type, char* line, symbolList ** head, int *DC, word** dataArray) {
+void handleData(char* type, char* line, symbolList** head, int *DC, word** dataArray, error *errorInfo) {
     char* numbers;
     char* token;
     long val;
@@ -265,8 +223,8 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
         /* Skip the ".data" part to get to the numbers*/
         numbers = strstr(line, ".data");
         if (!numbers) {
-            printf("Error: Line does not start with .data\n");
-            return;
+            printError(errorInfo, "Error: No numbers found after .data");
+            return; /*TODO should I return here?*/
         }
         numbers += strlen(".data"); /* Move past ".data"*/
 
@@ -283,16 +241,16 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
         token = strtok(numbers, ",");
         while (token) {
             if (dataCounter>= MAXDATAVALUESINARRAY){
-                /*TODO add an error*/
+                printError(errorInfo, "Error: Too many data values inserted, max is %s", MAXDATAVALUESINARRAY);
                 return;
             }
 
             if (currentSize >= maxSize) {
-                // Increase the dataArray size by another chunk
+                /* Increase the dataArray size by another chunk*/
                 maxSize += dataSize;
                 *dataArray = realloc(*dataArray, maxSize * sizeof(word));
                 if (!*dataArray) {
-                    printf("Error: Memory allocation failed\n");
+                    printf("Error: Memory allocation failed\n"); /*TODO handle memory allocation errors differently!*/
                     return;
                 }
             }
@@ -303,8 +261,8 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
             if (!isValidInteger(token)){
                 int symbolValue;
                 if (!findSymbolValue(head, token, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                    printf("Error: Undefined symbol '%s'\n", token); /*TODO change error!*/
-                    return; /*TODO add constant for failed function*/
+                    printError(errorInfo, "Unvalid Integer or Undefined symbol '%s'", token);
+                    return; /*TODO should i not return?*/
                 }
                 val = symbolValue; /* Use the value from the symbol list*/
             }
@@ -313,8 +271,8 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
             addValueToDataArray(dataArray, *DC, val);
             currentSize++;
             (*DC)++;
-            *DC = currentSize; /*TODO do i even need to do this?*/
-            dataCounter++; /*how many data is saved in the current array?*/
+            *DC = currentSize; /*TODO do i even need to do this? IT SEEMS WRONGGGGGGGGGGGG*/
+            dataCounter++; /*how many data values is stored in the current array?*/
 
 
             /* Get the next token*/
@@ -330,13 +288,14 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
         maxSize = currentSize + dataSize; /* Max size before next reallocation*/
         *dataArray = realloc(*dataArray, maxSize * sizeof(word));
         if (!*dataArray) {
-            printf("Error: Memory allocation failed\n");
+            printf("Error: Memory allocation failed\n"); /*TODO handle memory allocation bugs*/
             return;
         }
 
         strcpy(copiedLine, spacePos + 1); /* Copy the characters*/
         if (copiedLine == NULL) {/*TODO meaning that there's no space after .data or nothing?*/
-            /*TODO add an error and don't add it to the label list*/
+            printError(errorInfo, "Error: No valid string was found after .string");
+            return; /*TODO should I return here?*/
         }
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine) - 1] == '"') {
             for (i = 1; i < strlen(copiedLine-1); i++) {
@@ -345,7 +304,7 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
                     maxSize += dataSize;
                     *dataArray = realloc(*dataArray, maxSize * sizeof(word));
                     if (!*dataArray) {
-                        printf("Error: Memory allocation failed\n");
+                        printf("Error: Memory allocation failed\n"); /*TODO handle memory managemebnt errorssssss*/
                         return;
                     }
                 }
@@ -358,12 +317,12 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
             (*DC)++;
         }
         else {
-            /*TODO add an error*/
-            return;
+            printError(errorInfo, "Error: No valid string was found after .string");
+            return; /*TODO should I return?*/
         }
     }
     else{
-        /*TODO add an error*/
+        printError(errorInfo, "Error: No valid data directive was found");
         return;
     }
 }
@@ -373,7 +332,7 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, word** data
 
 /*TODO I need to just add the next label after extern, and if there's mroe than 1 then error?*/
 void handleExtern(symbolList** head, char* line) {
-    char* currentWord; /*TODO define it as 30 or something? IDK*/
+    char* currentWord;
 
     currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
     while (currentWord!= NULL) {
@@ -383,15 +342,14 @@ void handleExtern(symbolList** head, char* line) {
 }
 
 
-void handleDefine(symbolList** head, operation* operationsArray, char* line) {
+void handleDefine(symbolList** head, operation* operationsArray, char* line, error *errorInfo) {
     char name[MAXLABELNAME]; /*TODO handle the maxname already*/
-    char* endptr;
     int value;
     char* currentWord; /*TODO define it as 30 or something? IDK*/
 
     currentWord = strtok(line, " \n\r\t"); /* Tokenize the line into words*/
     while(currentWord != NULL) {
-        if (isValidLabelName(currentWord, NULL, head, 1)){
+        if (isValidLabelName(currentWord, operationsArray, head, 0)){
             if (!searchSymbolList(&head, currentWord, "define")){ /*TODO explain and remember that it means it's returning 0 and not 1!*/
                 strncpy(name, currentWord, MAXLABELNAME);
                 currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -400,26 +358,27 @@ void handleDefine(symbolList** head, operation* operationsArray, char* line) {
                     if (!isValidInteger(currentWord)){
                         int symbolValue;
                         if (!findSymbolValue(head, currentWord, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printf("Error: Undefined symbol '%s'\n", token); /*TODO change error!*/
-                            return; /*TODO add constant for failed function*/
+                            printError(errorInfo, "Unvalid Integer or Undefined symbol '%s'", currentWord);
+                            return; /*TODO do I need to return from here?*/
                         }
                         value = symbolValue; /* Use the value from the symbol list*/
                     }
                     else{
-                        /*TODO add an error and don't add it to the label list*/
+                        value = atoi(currentWord); /*TODO should I convert it like this?*/
                     }
                 }
             }
             else{
-                /*TODO add an error and don't add it to the label list*/
+                printError(errorInfo, ".define symbol already exists");
+                return; /*TODO do I need to return from here?*/
             }
         }
-        else{
-            /*TODO add an error and don't add it to the label list*/
+        else{;
+            printError(errorInfo, "Not a valid .define symbol name");
+            return; /*TODO do I need to return from here?*/
         }
     }
-
-    // Call addLabel with head, name, and value
+    /* Passed all tests, call addLabel with head, name, type and value*/
     addLabel(*head, name, "define", value);
 }
 
