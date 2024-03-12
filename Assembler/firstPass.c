@@ -3,7 +3,6 @@
 
 void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
     int labelFlag = 0;
-    int skipFlag = 0;
     int operation = 0;
     int L;
     char lineBuffer[MAXCHARSPERLINE];
@@ -12,7 +11,6 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     /*TODO maybe if i already define a head, i don't need to do the head = when calling the functyions?*/
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
-        skipFlag = 0;
         tempLine[0] = '\0';
         strncpy(tempLine, lineBuffer, MAXCHARSPERLINE); /*TODO call all of the functions with tempLine, and not with lineBuffer.*/
         tempLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
@@ -24,12 +22,10 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
         labelFlag = 0;
         /*strcpy(currentWord, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
-        while (currentWord != NULL && !skipFlag) {
+        while (currentWord != NULL) {
             if (isDefine(currentWord)){
-                if (!handleDefine(symbolTable, operationsArray, tempLine, errorInfo)){
-                    skipFlag = 1;
-                    break;
-                }
+                handleDefine(symbolTable, operationsArray, tempLine, errorInfo);
+                break;
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first binaryWord is a valid label definition*/
                 labelFlag = 1;
@@ -65,7 +61,6 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 L = handleOperation(symbolTable, instructionArray, operation, lineBuffer, IC, operationsArray, errorInfo);
                 if (L == -1){
                     printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
-                    skipFlag = 1;
                     break;
                 }
                 else{
@@ -75,7 +70,6 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             }
             else{
                 printError(errorInfo, "Invalid operation, label, or directive");
-                skipFlag = 1;
                 break;
             }
 
@@ -315,44 +309,63 @@ void handleExtern(symbolList** head, char* line, error** errorInfo){
 
 
 int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
-    char name[MAXLABELNAME];
-    int value;
-    char* currentWord;
+    char name[MAXLABELNAME] = {0};
+    int value = 0;
+    char* ptr = line;
 
-    currentWord = strtok(line, " \n\r\t"); /* Tokenize the line into words*/
-    currentWord = strtok(NULL, " \n\r\t"); /* This gets the next token after '.define'*/
-    while(currentWord != NULL) {
-        if (isValidLabelName(currentWord, operationsArray, head, 0)){
-            if (searchSymbolList(head, currentWord, "define")){ /*TODO explain and remember that it means it's returning 0 and not 1!*/
-                strncpy(name, currentWord, MAXLABELNAME);
-                currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
-                if (strcmp(currentWord, "=")==0) {
-                    currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
-                    if (!isValidInteger(currentWord)){
-                        int symbolValue;
-                        if (!findSymbolValue(head, currentWord, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printError(errorInfo, "Unvalid Integer or Undefined symbol for '.define'");
-                            return 0; /*TODO do I need to return from here?*/
-                        }
-                        value = symbolValue; /* Use the value from the symbol list*/
-                    }
-                    else{
-                        value = atoi(currentWord); /*TODO should I convert it like this?*/
-                    }
-                }
-            }
-            else{
-                printError(errorInfo, ".define symbol already exists");
-                return 0; /*TODO do I need to return from here?*/
-            }
-        }
-        else{;
-            printError(errorInfo, "Not a valid .define symbol name");
-            return 0; /*TODO do I need to return from here?*/
-        }
-        currentWord = strtok(NULL, " \n\r\t"); /* This gets the next token after '.define'*/
+    /* Skip past ".define", assuming 'line' starts with this directive*/
+    ptr += strlen(".define");
+
+    /* Skip whitespace after ".define"*/
+    while (*ptr == ' ' || *ptr == '\t') ptr++;
+
+    /* Copy the name until we hit a space, tab, or '='*/
+    char* startName = ptr;
+    while (*ptr && *ptr != ' ' && *ptr != '\t' && *ptr != '=') ptr++;
+    int nameLength = ptr - startName;
+    if (nameLength >= MAXLABELNAME) nameLength = MAXLABELNAME - 1;
+    strncpy(name, startName, nameLength);
+    name[nameLength] = '\0';
+
+    if (!isValidLabelName(name, operationsArray, head, 0)) {
+        printError(errorInfo, "Not a valid .define symbol name");
+        return 0;
     }
-    /* Passed all tests, call addLabel with head, name, type and value*/
+
+    if (!searchSymbolList(head, name, "define")) {
+        printError(errorInfo, ".define symbol already exists");
+        return 0;
+    }
+
+    /* Skip to '='*/
+    while (*ptr && *ptr != '=') ptr++;
+    if (!*ptr) {
+        printError(errorInfo, "Missing '=' in .define statement");
+        return 0;
+    }
+    ptr++; /* Move past '='*/
+
+    /* Skip whitespace after '='*/
+    while (*ptr == ' ' || *ptr == '\t') ptr++;
+
+    /* ptr should now point at the start of the value*/
+    char* valueStr = ptr;
+    char* endValue = ptr;
+    while (*endValue && *endValue != ' ' && *endValue != '\t' && *endValue != '\n' && *endValue != '\r') endValue++;
+    *endValue = '\0'; /* Temporarily terminate the string for value conversion*/
+
+    if (!isValidInteger(valueStr)) {
+        int symbolValue;
+        if (!findSymbolValue(head, valueStr,"define", &symbolValue)) {
+            printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
+            return 0;
+        }
+        value = symbolValue; /* Use the value from the symbol list*/
+    } else {
+        value = atoi(valueStr);
+    }
+
+    /* Passed all tests, call addLabel with head, name, type, and value*/
     addLabel(head, name, "define", value, errorInfo);
     return 1;
 }
