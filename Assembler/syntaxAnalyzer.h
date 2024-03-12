@@ -2,6 +2,7 @@
 #define SYNTAXANALYZER_H
 
 #include "dataStructuresAndConstants.h"
+#include "utilities.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -12,6 +13,8 @@
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo);
 
 void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
+
+void trimWhitespace(char* str);
 
 int isDefine(char* word);
 

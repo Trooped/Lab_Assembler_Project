@@ -1,7 +1,5 @@
 .define sz = 2
+MAIN:	mov r3, LIST[sz]
+STR: .string "abcdef"
 .define len = 4
-.define x = ab
-.define y = cd
-define z - 5
-.define sz = 5
-.define length                              =2048
+LIST: .data 6, -9, len

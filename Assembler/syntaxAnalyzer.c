@@ -13,14 +13,13 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
     char* endptr;
     char tempOperand[MAXOPERANDLENGTH];
 
-
     if (operand[0] == '#') {
         strcpy(tempOperand, operand+1);
 
         if (!isValidInteger(tempOperand)){
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                printError(*errorInfo, "Unvalid Integer or undefined symbol for immediate operand");
+                printError(errorInfo, "Unvalid Integer or undefined symbol for immediate operand");
                 return -999; /*TODO do I even need to retunr this??*/
             }
             val = symbolValue; /* Use the value from the symbol list*/
@@ -31,17 +30,18 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         return 3;
     }
     else{ /*case of Label or Label offset*/
-        while (operand[i] != '[' || operand[i] != '\0') {
+        while (operand[i] != '[' && operand[i] != '\0') {
             tempOperand[i] = operand[i];
             i++;
         }
+        tempOperand[i] = '\0'; /*Null terminating the temp String*/
 
         if (operand[i] == '\0') {
             if (isValidLabelName(tempOperand, operationsArray, head, 0)){
                 return 1;
             }
             else {
-                printError(*errorInfo, "Undefined Label name");
+                printError(errorInfo, "Undefined Label name");
                 return -999; /*TODO add constant for failed function*/
             }
         }
@@ -53,11 +53,12 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     i++;
                     j++;
                 }
+                tempVal[j] = '\0'; /*Null terminating the temp String*/
                 if (operand[i]==']'){
-                    if (!isValidInteger(tempOperand)){
+                    if (!isValidInteger(tempVal)){
                         int symbolValue;
-                        if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printError(*errorInfo, "Unvalid Integer or undefined symbol for offset operand");
+                        if (!findSymbolValue(head, tempVal, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
+                            printError(errorInfo, "Unvalid Integer or undefined symbol for offset operand");
                             return -999; /*TODO add constant for failed function*/
                         }
                         val = symbolValue; /* Use the value from the symbol list*/
@@ -65,46 +66,60 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     return 2;
                 }
                 else {
-                    printError(*errorInfo, "Unvalid offset declaration, doesn't end with ']'");
+                    printError(errorInfo, "Unvalid offset declaration, doesn't end with ']'");
                     return -999; /*TODO add constant for failed function*/
                 }
             }
             else {
-                printError(*errorInfo, "Undefined Label");
+                printError(errorInfo, "Undefined Label");
                 return -999; /*TODO add constant for failed function*/
             }
         }
         else {
-            printError(*errorInfo, "Unvalid operand"); /*TODO what the hell is this case? need to test this*/
+            printError(errorInfo, "Unvalid operand"); /*TODO what the hell is this case? need to test this*/
         }
     }
-    printError(*errorInfo, "Unvalid operand");
+    printError(errorInfo, "Unvalid operand");
     return -999; /*TODO add constant for failed function*/
 }
 
 
-void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
-    int operandIndex = 0, charIndex = 0;
-    int i;
+void parseOperands(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
+    /* Assuming line is positioned at the start of operands*/
+    char* token;
+    int operandIndex = 0;
 
-    for (i = 0; input[i] != '\0'; i++) {
-        if (input[i] == ',' && charIndex != 0) { /* Check if comma is not at the start*/
-            operands[operandIndex][charIndex] = '\0'; /* Terminate current operand string*/
-            operandIndex++; /* Move to the next operand*/
-            charIndex = 0; /* Reset character index for the new operand*/
-            while (input[i + 1] && isspace((unsigned char)input[i + 1])) i++; /* Skip spaces after comma*/
-        } else if (!isspace((unsigned char)input[i]) || (charIndex != 0 && isspace((unsigned char)input[i]))) {
-            /* Copy character to the current operand if it's not a leading space*/
-            operands[operandIndex][charIndex++] = input[i];
-        }
-    }
-
-    if (charIndex != 0) { /* Check if there's a trailing operand*/
-        operands[operandIndex][charIndex] = '\0'; /* Terminate the last operand*/
+    /* Tokenize the line by commas to extract operands*/
+    token = strtok(line, ",");
+    while(token != NULL && operandIndex < MAXOPERANDS) {
+        trimWhitespace(token); /* Remove leading and trailing whitespace*/
+        strncpy(operands[operandIndex++], token, MAXOPERANDLENGTH - 1);
+        operands[operandIndex - 1][MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null termination*/
+        token = strtok(NULL, ",");
     }
 }
 
+void trimWhitespace(char* str) {
+    int start = 0, end = 0;
+    int i, length;
 
+    /* Trim leading space */
+    while (isspace((unsigned char)str[start])) start++;
+
+    /* Find end of string */
+    length = strlen(str);
+    end = length - 1;
+
+    /* Trim trailing space */
+    while (end > start && isspace((unsigned char)str[end])) end--;
+
+    /* Shift everything to the left */
+    length = end - start + 1;
+    for (i = 0; i < length; i++) {
+        str[i] = str[i + start];
+    }
+    str[i] = '\0';  /* Null-terminate the modified string*/
+}
 
 
 int isDefine(char* word) {

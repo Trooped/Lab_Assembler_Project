@@ -20,7 +20,6 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
 
         L = 0;
         labelFlag = 0;
-        /*strcpy(currentWord, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while (currentWord != NULL) {
             if (isDefine(currentWord)){
@@ -30,16 +29,18 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first binaryWord is a valid label definition*/
                 labelFlag = 1;
             }
-            else if (isData(currentWord) || isString(currentWord)){  /*TODO add this test like the !handleDefine, to skip and break!!*/
+            else if (isData(currentWord) || isString(currentWord)){
                 if (labelFlag) {
                     addLabel(symbolTable, currentWord, "data", *DC, errorInfo);
                 }
 
                 if (isData(currentWord)){
-                    handleData("data", lineBuffer, symbolTable, DC, dataArray, errorInfo);
+                    handleData("data", tempLine, symbolTable, DC, dataArray, errorInfo);
+                    break;
                 }
                 else{
-                    handleData("string", lineBuffer, symbolTable, DC, dataArray, errorInfo);
+                    handleData("string", tempLine, symbolTable, DC, dataArray, errorInfo);
+                    break;
                 }
             }
             else if (isExtern(currentWord)){
@@ -58,7 +59,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                     printError(errorInfo, "Invalid operation");
                 }
                  */
-                L = handleOperation(symbolTable, instructionArray, operation, lineBuffer, IC, operationsArray, errorInfo);
+                L = handleOperation(symbolTable, instructionArray, operation, tempLine, IC, operationsArray, errorInfo);
                 if (L == -1){
                     printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
                     break;
@@ -84,12 +85,29 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
 
 int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo) {
     int L = 0;
+    char* colon;
     int firstOperand;
     int secondOperand;
     char operands[MAXOPERANDS][MAXOPERANDLENGTH]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
-
     initializeOperandsArray(operands);
+
+
+    /* Skip label if present*/
+    colon = strchr(line, ':');
+    if (colon) {
+        line = colon + 1; /* Move past the colon*/
+    }
+
+    /* Move past any whitespace after the label or start of the line*/
+    while (isspace((unsigned char)*line)) line++;
+
+    /* Skip the operation (3 letters) and any space after it*/
+    line += strlen(operationsArray[opcode].name);
+    while (isspace((unsigned char)*line)) line++;
+
+    /* Now 'line' should be positioned at the start of the operands*/
     parseOperands(line, operands);
+
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {

@@ -3,6 +3,8 @@
 
 
 void assembler(FILE* source, const char* fileName){
+    int i; /*TODO FOR TESTING, DELETE LATER!!!*/
+
     char newFileName[MAXFILENAME];
     FILE* objectFile; /* *entFile, *extFile;*/ /*TODO maybe i need to initialize?*/
     binaryWord dataArray[MAXDATA]; /* array for data to be put in the memory image */
@@ -38,6 +40,14 @@ void assembler(FILE* source, const char* fileName){
 
     /*TODO TESTINGGGGGGGGG*/
     printSymbolList(symbolTable);
+    printf("\nIC: %d\n", IC);
+    printf("DC: %d\n", DC);
+    for (i = 0; i < DC; i++) {
+        printf("dataArray[%d]: %d\n", i, dataArray[i].wordBits);
+    }
+    for (i = 0; i < IC; i++) {
+        printf("instructionArray[%d]: %d\n", i, instructionArray[i].wordBits);
+    }
     /*TODO testinggggggggggggggggggggg*/
 
 
