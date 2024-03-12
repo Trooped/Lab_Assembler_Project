@@ -2,7 +2,7 @@
 
 
 
-int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error* errorInfo){
+int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error** errorInfo){
     /* 0 = instant, constant (#number or #define)
      * 1 = direct, Label
      * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
@@ -78,7 +78,7 @@ int getOperandCode(char* operand, symbolList** head, operation* operationsArray,
             printError(*errorInfo, "Unvalid operand"); /*TODO what the hell is this case? need to test this*/
         }
     }
-    printError(*errorInfo, "Unvalid operand")
+    printError(*errorInfo, "Unvalid operand");
     return -999; /*TODO add constant for failed function*/
 }
 

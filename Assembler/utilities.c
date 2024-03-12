@@ -40,16 +40,16 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
 
 
 /* Function to add a new node at the end of the list */
-void addLabel(symbolList** head, char* name, char* type, int value, error* errorInfo) {
+void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo) {
     symbolList* newNode = NULL;
     if (name == NULL || name[0] == '\0') {
-        printError(*errorInfo, "Empty label isn't allowed");
+        printError(errorInfo, "Empty label isn't allowed");
         return; /* Early return to avoid processing further*/
     }
 
     newNode = (symbolList*)malloc(sizeof(symbolList));
     if (newNode == NULL) {
-        printError(*errorInfo, "Out of memory");
+        printError(errorInfo, "Out of memory");
         return; /*TODO Consider how to handle memory errors in your application context*/
     }
 
@@ -100,19 +100,19 @@ void insertInstructionIntoArray(word* instructionArray, int IC, int opcode, int 
     instructionArray[IC] = newWord;
 }
 
-void addValueToDataArray(word **dataArray, int DC, int value) {
+void addValueToDataArray(word* dataArray, int DC, int value) {
     word newWord;
     newWord.wordBits = value;
-    dataArray[DC] = &newWord;
+    dataArray[DC] = newWord;
 }
 
-void printError(error errorInfo, char* errorDescription){
+void printError(error** errorInfo, char* errorDescription){
     errorInfo.errorFlag = 1;
     snprintf(errorInfo.errorDescription, sizeof(errorInfo.errorDescription), "%s", errorDescription);
     printf("Error in file %s: %s\n", errorInfo.fileName, errorInfo.errorDescription);
 }
 
-void incrementDataSymbolValues(symbolList* head, int byValue) {
+void incrementDataSymbolValues(symbolList** head, int byValue) {
     symbolList* current = head;
     while (current != NULL) {
         if (strcmp(current->type, "data") == 0) {
@@ -128,6 +128,15 @@ void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
         for (j = 0; j < MAXOPERANDLENGTH; j++) {
             operands[i][j] = '\0';
         }
+    }
+}
+
+/*TODO DELETE THIS FUNCTION after testing!!!!!!!!! AND ITS .H VARIANT*/
+void printSymbolList(const symbolList* head) {
+    printf("Symbol Table Contents:\n");
+    while (head != NULL) {
+        printf("Name: %s, Type: %s, Value: %d\n", head->name, head->type, head->value);
+        head = head->next; /* Move to the next node*/
     }
 }
 

@@ -11,7 +11,7 @@
 #include "utilities.h"
 
 
-int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error* errorInfo);
+int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error** errorInfo);
 
 void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 

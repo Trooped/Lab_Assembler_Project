@@ -2,7 +2,7 @@
 
 
 /*TODO MAYBE create the lists in the asmblr.c file and send them here?*/
-void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operation *operationsArray, symbolList** symbolTable, int *IC, int *DC, error *errorInfo){
+void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operation *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
     int labelFlag = 0;
     int operation = 0;
     int L;
@@ -16,7 +16,7 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
         strcpy(word, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
         while (word != NULL) {
             if (isDefine(word)){
-                handleDefine(symbolTable, &operationsArray, lineBuffer, &errorInfo);
+                handleDefine(symbolTable, operationsArray, lineBuffer, &errorInfo);
             }
             else if (isValidLabelName(word, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
                 labelFlag = 1;
@@ -66,12 +66,13 @@ void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operat
             strtok(NULL, " \n\r\t"); /* Get the next word.*/
         }
     }
-    /*MOVE TO 16, ACCORDING TO THE COURSE'S ALGORITHM.*/
+
+    /*TODO return here*/
 
     /*TODO call the linked list memory free operation, or actually do this after the second pass.*/
 }
 
-int handleOperation(symbolList** head, word** instructionArray, int opcode, char* line, int *IC, operation *operationsArray, error *errorInfo) {
+int handleOperation(symbolList** head, word* instructionArray, int opcode, char* line, int *IC, operation *operationsArray, error** errorInfo) {
     int L = 0;
     int firstOperand;
     int secondOperand;
@@ -211,12 +212,11 @@ int handleOperation(symbolList** head, word** instructionArray, int opcode, char
 }
 
 
-void handleData(char* type, char* line, symbolList** head, int *DC, word** dataArray, error *errorInfo) {
+void handleData(char* type, char* line, symbolList** head, int *DC, word* dataArray, error** errorInfo) {
     char* numbers;
     char* token;
     long val;
     int dataCounter = 0;
-    int dataSize, currentSize, maxSize, maxString;
     char copiedLine[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
     char* endptr;
     if (strcmp(type, ".data") == 0) {
@@ -228,31 +228,11 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word** dataA
         }
         numbers += strlen(".data"); /* Move past ".data"*/
 
-        /* Allocate or extend the dataArray initially or in chunks*/
-        dataSize = 16; /* Define a reasonable data size*/
-        currentSize = *DC; /* Current size of dataArray*/
-        maxSize = currentSize + dataSize; /* Max size before next reallocation*/
-        *dataArray = realloc(*dataArray, maxSize * sizeof(word));
-        if (!*dataArray) {
-            printf("Error: Memory allocation failed\n");
-            return;
-        }
-
         token = strtok(numbers, ",");
         while (token) {
             if (dataCounter>= MAXDATAVALUESINARRAY){
                 printError(errorInfo, "Error: Too many data values inserted, max is %s", MAXDATAVALUESINARRAY);
                 return;
-            }
-
-            if (currentSize >= maxSize) {
-                /* Increase the dataArray size by another chunk*/
-                maxSize += dataSize;
-                *dataArray = realloc(*dataArray, maxSize * sizeof(word));
-                if (!*dataArray) {
-                    printf("Error: Memory allocation failed\n"); /*TODO handle memory allocation errors differently!*/
-                    return;
-                }
             }
 
             /* Trim leading spaces from the token*/
@@ -269,11 +249,8 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word** dataA
 
             /* Store the integer and increment DC*/
             addValueToDataArray(dataArray, *DC, val);
-            currentSize++;
             (*DC)++;
-            *DC = currentSize; /*TODO do i even need to do this? IT SEEMS WRONGGGGGGGGGGGG*/
             dataCounter++; /*how many data values is stored in the current array?*/
-
 
             /* Get the next token*/
             token = strtok(NULL, ",");
@@ -283,35 +260,15 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word** dataA
         int i;
         char *spacePos = strchr(line, ' '); /* Find the position of the first data element*/
 
-        maxString = 66; /* Define a reasonable data size*/
-        currentSize = *DC; /* Current size of dataArray*/
-        maxSize = currentSize + dataSize; /* Max size before next reallocation*/
-        *dataArray = realloc(*dataArray, maxSize * sizeof(word));
-        if (!*dataArray) {
-            printf("Error: Memory allocation failed\n"); /*TODO handle memory allocation bugs*/
-            return;
-        }
-
         strcpy(copiedLine, spacePos + 1); /* Copy the characters*/
-        if (copiedLine == NULL) {/*TODO meaning that there's no space after .data or nothing?*/
+        if (strcmp(copiedLine, NULL) == 0) {/*TODO meaning that there's no space after .data or nothing?*/
             printError(errorInfo, "Error: No valid string was found after .string");
             return; /*TODO should I return here?*/
         }
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine) - 1] == '"') {
             for (i = 1; i < strlen(copiedLine-1); i++) {
-                if (currentSize >= maxSize) {
-                    // Increase the dataArray size by another chunk
-                    maxSize += dataSize;
-                    *dataArray = realloc(*dataArray, maxSize * sizeof(word));
-                    if (!*dataArray) {
-                        printf("Error: Memory allocation failed\n"); /*TODO handle memory managemebnt errorssssss*/
-                        return;
-                    }
-                }
-
                 addValueToDataArray(dataArray, *DC, copiedLine[i]);
-                currentSize++;
-                (*DC) = currentSize;
+                (*DC)++;
             }
             addValueToDataArray(dataArray, *DC, '\0'); /*TODO should it just be 0??? adding 1 for the null terminator.*/
             (*DC)++;
@@ -334,7 +291,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word** dataA
 void handleExtern(symbolList** head, char* line) {
     char* currentWord;
 
-    currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
     while (currentWord!= NULL) {
         addLabel(*head, currentWord, "external", 0);
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -342,7 +299,7 @@ void handleExtern(symbolList** head, char* line) {
 }
 
 
-void handleDefine(symbolList** head, operation* operationsArray, char* line, error *errorInfo) {
+void handleDefine(symbolList** head, operation* operationsArray, char* line, error** errorInfo) {
     char name[MAXLABELNAME]; /*TODO handle the maxname already*/
     int value;
     char* currentWord; /*TODO define it as 30 or something? IDK*/

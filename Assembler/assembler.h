@@ -13,8 +13,8 @@
 #define MAXFILENAME 64 /*Maximum file name length*/ /*TODO change the definitions that are more global to one file, maybe inside main.h??*/
 #define MAXNAME 32 /*Maximum name length*/ /*TODO order in those fucking defines omg*/
 #define WORDSIZE 14 /*Word size*/
-#define MAXDATA 1024 /*Maximum number of data in the array*/
-#define MAXINSTRUCTIONS 1024 /*Maximum number of instructions in the array*/
+#define MAXDATA 2048 /*Maximum number of data in the array*/
+#define MAXINSTRUCTIONS 2048 /*Maximum number of instructions in the array*/
 #define MAXDATAVALUESINARRAY 36 /*Maximum number of data values in an array*/
 #define MAXCHARSPERLINE 80 /*Maximum number of characters in a line, not including null terminator \0 */
 #define MAXLABELNAME 31 /*Maximum number of characters in a label name*/
@@ -48,9 +48,9 @@ typedef struct errorInfo{
     char errorDescription[MAXERRORDESCRIPTION]; /*TODO maybe turn this into an array of chars with fixed size?*/
 }error;
 
-void initializeDataArray(word** dataArray, int initialValue);
+void initializeDataArray(word* dataArray, int initialValue);
 
-void initializeInstructionArray(word** instructionArray, int initialValue);
+void initializeInstructionArray(word* instructionArray, int initialValue);
 
 
 #endif /*_ASSEMBLER_H*/
