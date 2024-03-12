@@ -12,8 +12,6 @@ add_executable(main
         main/main.c
         PreAsmblr/PreAsmblr.c
         PreAsmblr/PreAsmblr.h
-        AST/AST.c
-        AST/AST.h
         Assembler/firstPass.c
         Assembler/firstPass.h
         Assembler/assembler.c
@@ -22,4 +20,6 @@ add_executable(main
         Assembler/utilities.h
         Assembler/syntaxAnalyzer.c
         Assembler/syntaxAnalyzer.h
+        main/main.h
+        Assembler/dataStructuresAndConstants.h
 )

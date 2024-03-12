@@ -2,7 +2,7 @@
 
 
 
-int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error** errorInfo){
+int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo){
     /* 0 = instant, constant (#number or #define)
      * 1 = direct, Label
      * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
@@ -144,7 +144,7 @@ int isEntry(char* word) {
 }
 
 /*TODO add errors!*/
-int isValidLabelName(char* name, operation* operationsArray, symbolList** head, int colonFlag){
+int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** head, int colonFlag){
     int i;
     char lastChar = name[strlen(name) - 1];
 
@@ -157,7 +157,7 @@ int isValidLabelName(char* name, operation* operationsArray, symbolList** head, 
     }
 
     /* Check if the name is bigger than the maximum possible number (31), or if it's one of the operations, or if it already exists in the symbol table.*/
-    if (strlen(name) > MAXLABELNAME || isValidOperation(name, operationsArray) != -1 || searchSymbolList(head, name, "general") == 0 ){
+    if (strlen(name) > MAXLABELNAME || isValidOperation(name, operationsArray) != -1){
         return 0;
     }
     /*check if the name is one of the registers*/
@@ -182,9 +182,9 @@ int isValidLabelName(char* name, operation* operationsArray, symbolList** head, 
 
 
 
-int isValidOperation(char* word, operation* operationsArray) {
+int isValidOperation(char* word, operationInfo* operationsArray) {
     int i;
-    for (i = 0; i < OPERATIONS; i++) {
+    for (i = 0; i < NUMOFOPERATIONS; i++) {
         if (strcmp(word, operationsArray[i].name) == 0) {
             return i;
         }

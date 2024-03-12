@@ -5,14 +5,27 @@
 void assembler(FILE* source, const char* fileName){
     char newFileName[MAXFILENAME];
     FILE* objectFile; /* *entFile, *extFile;*/ /*TODO maybe i need to initialize?*/
-    word dataArray[MAXDATA]; /* array for data to be put in the memory image */
-    word instructionArray[MAXINSTRUCTIONS]; /* array for the instructions to be put in the memory image.*/
+    binaryWord dataArray[MAXDATA]; /* array for data to be put in the memory image */
+    binaryWord instructionArray[MAXINSTRUCTIONS]; /* array for the instructions to be put in the memory image.*/
     symbolList* symbolTable = NULL; /* linked list for labels */ /*TODO maybe i need to initialize?*/
 
-    operation operationsArray[OPERATIONS] = {{"mov", 0, 2}, {"cmp", 1, 2}, {"add", 2, 2}, {"sub", 3, 2}, {"lea", 4, 2}, {"not", 5, 1}, {"clr", 6, 1}, {"inc", 7, 1}, {"dec", 8, 1}, {"jmp", 9, 1}, {"bne", 10, 1}, {"red", 11, 1}, {"prn", 12, 1}, {"jsr", 13, 1}, {"rts", 14, 0}, {"hlt", 15, 0}};
+    /*TODO maybe declare this in a separate function / just in the constants file?*/
+    operationInfo operationsArray[NUMOFOPERATIONS] = {{"mov", 0, 2}, {"cmp", 1, 2}, {"add", 2, 2}, {"sub", 3, 2}, {"lea", 4, 2}, {"not", 5, 1}, {"clr", 6, 1}, {"inc", 7, 1}, {"dec", 8, 1}, {"jmp", 9, 1}, {"bne", 10, 1}, {"red", 11, 1}, {"prn", 12, 1}, {"jsr", 13, 1}, {"rts", 14, 0}, {"hlt", 15, 0}};
     int IC = 0, DC = 0; /* instruction counter and data counter */
 
-    error errorInfo = {0, fileName, " "}; /* error flag, file name, error description */
+
+    /*TODO initialize it correctly using a function!!!!!!!!*/
+    error* errorInfo = malloc(sizeof(error));
+    if (errorInfo == NULL) {
+        /* Handle memory allocation failure*/
+        fprintf(stderr, "Failed to allocate memory for errorInfo\n");
+        return;
+    }
+    /* Initialize errorInfo*/
+    errorInfo->errorFlag = 0;
+    strcpy(errorInfo->fileName, fileName);
+    errorInfo->errorDescription[0] = '\0';
+
 
 
     /*initializing both of the arrays*/
@@ -23,46 +36,43 @@ void assembler(FILE* source, const char* fileName){
 
     firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
-    if (errorInfo.errorFlag == 1) {
+    /*TODO TESTINGGGGGGGGG*/
+    printSymbolList(symbolTable);
+    /*TODO testinggggggggggggggggggggg*/
+
+
+    if (errorInfo->errorFlag == 1) {
         /*TODO print error and exit*/
+        deleteSymbolList(symbolTable);
         return;
     }
 
     incrementDataSymbolValues(symbolTable, 100);
 
+
+
+
     /*TODO call secondPass function*/
 
+
+    deleteSymbolList(symbolTable);
 }
 
 
-void initializeDataArray(word* dataArray, int initialValue) {
+void initializeDataArray(binaryWord* dataArray, int initialValue) {
     int i;
-    // Allocate memory for initialSize elements
-    *dataArray = malloc(MAXDATA * sizeof(word));
-    if (*dataArray == NULL) {
-        // Handle memory allocation failure
-        printf("Error: Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
 
-    // Initialize each element
+    /* Initialize each element*/
     for (i = 0; i < MAXDATA; i++) {
-        (*dataArray)[i].wordBits = initialValue;
+        dataArray[i].wordBits = initialValue;
     }
 }
 
-void initializeInstructionArray(word* instructionArray, int initialValue) {
+void initializeInstructionArray(binaryWord* instructionArray, int initialValue) {
     int i;
-    // Allocate memory for initialSize elements
-    *instructionArray = malloc(MAXINSTRUCTIONS * sizeof(word));
-    if (*instructionArray == NULL) {
-        // Handle memory allocation failure
-        printf("Error: Memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
 
-    // Initialize each element
+    /* Initialize each element*/
     for (i = 0; i < MAXINSTRUCTIONS; i++) {
-        (*instructionArray)[i].wordBits = initialValue;
+        instructionArray[i].wordBits = initialValue;
     }
 }

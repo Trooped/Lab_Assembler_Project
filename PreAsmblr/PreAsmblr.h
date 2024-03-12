@@ -5,11 +5,12 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include "../main/main.h"
+#include "../Assembler/dataStructuresAndConstants.h"
 
 /*TODO move the definitions to a different file?*/
 #define MAXMACRONAMELENGTH 81 /*Maximum number of characters in a macro name*/
 #define LINES 32 /*Maximum number of lines in a macro, will be adjusted dynamically*/
-#define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
 #define oldFileFormat ".as" /*Constant with the .as file format*/
 #define newFileFormat ".am" /*Constant with the .am file format*/
 #define MAXMACROS 32 /*Starter number for number of macros, dynamically allocated further on*/
@@ -56,7 +57,7 @@ void processFileLines(FILE* source, FILE* resultFile, macro **macros, int *macro
  * @param source the old file
  * @param resultFile the new file
  * @param lineBuffer the buffer for the current line
- * @param word the current word
+ * @param word the current binaryWord
  * @param macros the macros array
  * @param macroCount the number of macros
  * @param currentLine the current line
@@ -74,7 +75,7 @@ void freeMacrosMemory(macro **macros, int macroCount);
 
 /**
  * This function will check if a macro exists in the macros array.
- * @param word the current word
+ * @param word the current binaryWord
  * @param macroCount the number of macros
  * @param macros the macros array
  * @return 1 if the macro exists, 0 otherwise
@@ -99,9 +100,9 @@ void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], 
 void removeSubstring(char* string, const char* sub);
 
 /**
-* This function will check if the given word is a valid macro name.
-* @param word the word to check
-* @return 1 if the word is a valid macro name, else 0
+* This function will check if the given binaryWord is a valid macro name.
+* @param word the binaryWord to check
+* @return 1 if the binaryWord is a valid macro name, else 0
 */
 int checkIfMacroNameIsValid(char* word);
 

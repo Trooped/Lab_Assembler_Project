@@ -1,8 +1,19 @@
 # ninja log v5
 59	116	7302325188144043	PreAsmblr.exe	564ece06dc1bc667
 6	59	7302325187598894	CMakeFiles/PreAsmblr.dir/PreAsmblr/PreAsmblr.c.obj	5fb407ba9d5901fb
-64	121	7308096996714278	main.exe	6d42234e5e99ef4
+72	133	7319723873512476	main.exe	dc8365b7701fb997
 2	54	7302325187548894	CMakeFiles/PreAsmblr.dir/main/main.c.obj	2de758c328d91d17
-1	99	7318061453579616	build.ninja	480b297fd001fa84
-1	57	7308095830852597	CMakeFiles/main.dir/main/main.c.obj	252652062adadc12
-2	64	7308096996156289	CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj	1d8e0ae4d8604ade
+0	76	7319676431513593	build.ninja	480b297fd001fa84
+7	80	7319696264687528	CMakeFiles/main.dir/main/main.c.obj	252652062adadc12
+2	84	7319696264722616	CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj	1d8e0ae4d8604ade
+11	85	7319696264732613	CMakeFiles/main.dir/Assembler/assembler.c.obj	f670076413473cf3
+32	97	7319696264857727	CMakeFiles/main.dir/Assembler/utilities.c.obj	e023c9409dbb710
+2	70	7319723872906640	CMakeFiles/main.dir/Assembler/syntaxAnalyzer.c.obj	111f56850e9e18fb
+7	72	7319723872926636	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
+11	77	7319726977807084	CMakeFiles/main.dir/Assembler/assembler.c.obj	f670076413473cf3
+6	77	7319726977807084	CMakeFiles/main.dir/main/main.c.obj	252652062adadc12
+1	82	7319726977817081	CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj	1d8e0ae4d8604ade
+15	89	7319726977932167	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
+89	152	7319726978533450	main.exe	dc8365b7701fb997
+1	65	7319730884024903	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
+66	127	7319730884617112	main.exe	dc8365b7701fb997

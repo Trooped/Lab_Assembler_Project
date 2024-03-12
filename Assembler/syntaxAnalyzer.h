@@ -1,17 +1,15 @@
 #ifndef SYNTAXANALYZER_H
 #define SYNTAXANALYZER_H
 
-#include "assembler.h"
+#include "dataStructuresAndConstants.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
-#include "firstPass.h"
-#include "utilities.h"
 
 
-int getOperandCode(char* operand, symbolList** head, operation* operationsArray, error** errorInfo);
+int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo);
 
 void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 
@@ -25,9 +23,9 @@ int isExtern(char* word);
 
 int isEntry(char* word);
 
-int isValidLabelName(char* name, operation* operationsArray, symbolList** head, int colonFlag);
+int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** head, int colonFlag);
 
-int isValidOperation(char* word, operation* operationsArray);
+int isValidOperation(char* word, operationInfo* operationsArray);
 
 int isValidInteger(char* str);
 

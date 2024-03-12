@@ -1,0 +1,7 @@
+.define sz = 2
+.define len = 4
+.define x = ab
+.define y = cd
+define z - 5
+.define sz = 5
+.define length=4

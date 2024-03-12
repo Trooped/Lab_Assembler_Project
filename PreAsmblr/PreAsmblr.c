@@ -9,15 +9,18 @@
  * @return the new file
  */
 FILE* createNewFileAndWriteMacros(FILE* source, const char* oldFileName) {
+    char oldFileNameCopy[MAXFILENAME];
     char newFileName[MAXFILENAME];
     FILE * resultFile;
     int macroArrSize = MAXMACROS; /* Maximum number of macros*/
     int tmpSize = 0;
     int macroCount = 0;
-    macro **macros = allocateMemoryToMacros(macroArrSize);
+    macro **macros = allocateMemoryToMacros(macroArrSize); /*TODO did i handle macros memory fail??*/
 
-    removeSubstring(oldFileName, oldFileFormat);/*TODO IS IT EVEN NEEDED? REMOVE.AS*/
-    sprintf(newFileName, "%s%s", oldFileName, newFileFormat);
+    strcpy(oldFileNameCopy, oldFileName);
+
+    removeSubstring(oldFileNameCopy, oldFileFormat);/*TODO IS IT EVEN NEEDED? REMOVE.AS*/
+    sprintf(newFileName, "%s%s", oldFileNameCopy, newFileFormat);
 
     resultFile = fopen(newFileName, "w+");
     if (resultFile == NULL) {
@@ -80,7 +83,7 @@ void processFileLines(FILE* source, FILE* resultFile, macro **macros, int *macro
  * @param source the old file
  * @param resultFile the new file
  * @param lineBuffer the current line
- * @param word the current word
+ * @param word the current binaryWord
  * @param macros the macros array
  * @param macroCount the number of macros
  * @param currentLine the current line
@@ -91,7 +94,7 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
     int i;
     int tempLineCounter=LINES;
     macro **newMacros = NULL;
-    word = strtok(NULL, " \n\r\t"); /* Get the next word, which is the macro's name.*/
+    word = strtok(NULL, " \n\r\t"); /* Get the next binaryWord, which is the macro's name.*/
     if (word != NULL) {
         /*Checking if the macro already exists in the macro array, or if it's valid. if any apply: return.*/
         if (checkIfMacroExists(word, *macroCount, *macros)) {
@@ -132,18 +135,18 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
             strcpy((*macros)[*macroCount]->macroName, word);
             (*macros)[*macroCount]->linesCounter = 0;
 
-            /*Checking if there's another word after the macro's name, which leads to an error.*/
-            word = strtok(NULL, " \n\r\t"); /* Get the word following the macro's name */
+            /*Checking if there's another binaryWord after the macro's name, which leads to an error.*/
+            word = strtok(NULL, " \n\r\t"); /* Get the binaryWord following the macro's name */
             if (word != NULL) {
-                /*another word after macro name, exit the program!*/
-                printf("\nError: macro name cannot be followed by another word\n");
+                /*another binaryWord after macro name, exit the program!*/
+                printf("\nError: macro name cannot be followed by another binaryWord\n");
                 fclose(resultFile);
                 return;
             }
 
             /*Write the macro's lines into the macros array's relevant macro element. (so we can copy it later into the new file)*/
             while (fgets(lineBuffer, MAXCHARSPERLINE, source) != NULL) {
-                strcpy(currentLine, lineBuffer);/*TODO maybe not use strstr, and just check the first word?*/
+                strcpy(currentLine, lineBuffer);/*TODO maybe not use strstr, and just check the first binaryWord?*/
                 if (strstr(currentLine, "endmcr") != NULL) {/*If we find endmcr in our line, then we terminate the process of copying.*/
                     break;
                 }
@@ -187,11 +190,11 @@ void freeMacrosMemory(macro **macros, int macroCount) {
 
 
 /**
- * This function will check if the given word is an existing macro.
- * @param word the word to check
+ * This function will check if the given binaryWord is an existing macro.
+ * @param word the binaryWord to check
  * @param macroCount the number of macros
  * @param macros the macros array
- * @return 1 if the word is a macro, else 0
+ * @return 1 if the binaryWord is a macro, else 0
  */
 int checkIfMacroExists(char* word, int macroCount, macro *macros[]){
     int i;
@@ -238,10 +241,10 @@ void removeSubstring(char* string, const char* sub) {
 }
 
 /**
- * This function will check if the given word is a valid macro name.
+ * This function will check if the given binaryWord is a valid macro name.
  * TODO do i need to pause the program if the macro name is invalid?
- * @param word the word to check
- * @return 1 if the word is a valid macro name, else 0
+ * @param word the binaryWord to check
+ * @return 1 if the binaryWord is a valid macro name, else 0
  */
 int checkIfMacroNameIsValid(char* word){
     int i;
@@ -250,16 +253,16 @@ int checkIfMacroNameIsValid(char* word){
         return 0;
     }
 
-    strtol(word, &endptr, 10); /* Try to convert the word to a long integer*/
+    strtol(word, &endptr, 10); /* Try to convert the binaryWord to a long integer*/
     if (*endptr == '\0') { /* If the conversion is successful, endptr should point to the null terminator*/
-        return 0; /* Return 0 (false) if the word is a number*/
+        return 0; /* Return 0 (false) if the binaryWord is a number*/
     }
 
     char* savedWords[] = {".data", ".string", ".entry", ".extern", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt"};
     int numSavedWords = sizeof(savedWords) / sizeof(savedWords[0]);
     for (i = 0; i < numSavedWords; i++) {
         if (strcmp(word, savedWords[i]) == 0) {
-            return 0; /* Return 0 (false) if the word is a saved word*/
+            return 0; /* Return 0 (false) if the binaryWord is a saved binaryWord*/
         }
     }
     return 1;

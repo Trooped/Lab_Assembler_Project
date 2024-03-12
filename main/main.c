@@ -1,17 +1,14 @@
-/*TODO add the correct files!
-#include "../root.h"
-#include "../pre/pre.h"
-#include "../assembly/assembly.h"
-*/
+/*TODO add the correct files!*/
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
-#include "../PreAsmblr/PreAsmblr.h"
+#include "main.h"
 
 /*TODO why is this here?*/
-int lineCount=0; /* for error reporting */
-int error; /* to indicate an error has been encountered */
+/*int lineCount=0; /* for error reporting */
+/*int error; /* to indicate an error has been encountered */
 
 
 /*----------------------------------------TESTING------------------------------*/
@@ -66,13 +63,28 @@ void testCopyMacrosIntoNewFile() {
     remove("testFilenewFileFormat");
 }
 
+void testAssembler() {
+
+    const char* testFileName = "testFileDefine";
+    FILE* testFile = fopen(testFileName, "r");
+    if (testFile != NULL) {
+        assembler(testFile, testFileName);
+        fclose(testFile);
+    } else {
+        printf("Failed to open file %s\n", testFileName);
+    }
+
+}
+
 
 /*----------------------------------------TESTING------------------------------*/
 
 
 
 int main(int argc, char** argv) {
-    testCopyMacrosIntoNewFile();
+    /*testCopyMacrosIntoNewFile();*/
+    testAssembler();
+
     return 0;
 /*----------------------------------------TESTING------------------------------*/
 

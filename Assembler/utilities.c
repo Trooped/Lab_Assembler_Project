@@ -87,8 +87,8 @@ void deleteSymbolList(symbolList** head) {
     *head = NULL; /* Ensure the caller's head pointer is set to NULL*/
 }
 
-void insertInstructionIntoArray(word* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
-    word newWord;
+void insertInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
+    binaryWord newWord;
     /*TODO remove all of that
     Start with the first 4 bits as 0000, which we can ignore as the bits are 0 by default.
     Then shift the opcode to its correct position (6 bits to the left)
@@ -100,16 +100,16 @@ void insertInstructionIntoArray(word* instructionArray, int IC, int opcode, int 
     instructionArray[IC] = newWord;
 }
 
-void addValueToDataArray(word* dataArray, int DC, int value) {
-    word newWord;
+void addValueToDataArray(binaryWord* dataArray, int DC, int value) {
+    binaryWord newWord;
     newWord.wordBits = value;
     dataArray[DC] = newWord;
 }
 
 void printError(error** errorInfo, char* errorDescription){
-    errorInfo.errorFlag = 1;
-    snprintf(errorInfo.errorDescription, sizeof(errorInfo.errorDescription), "%s", errorDescription);
-    printf("Error in file %s: %s\n", errorInfo.fileName, errorInfo.errorDescription);
+    (*errorInfo)->errorFlag = 1;
+    snprintf((*errorInfo)->errorDescription, sizeof((*errorInfo)->errorDescription), "%s", errorDescription);
+    printf("Error in file %s: %s\n", (*errorInfo)->fileName, (*errorInfo)->errorDescription);
 }
 
 void incrementDataSymbolValues(symbolList** head, int byValue) {

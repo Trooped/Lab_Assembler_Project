@@ -1,78 +1,94 @@
 #include "firstPass.h"
 
 
-/*TODO MAYBE create the lists in the asmblr.c file and send them here?*/
-void firstPass(FILE *sourceFile, word *dataArray, word *instructionArray, operation *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
+void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
     int labelFlag = 0;
+    int skipFlag = 0;
     int operation = 0;
     int L;
-    char lineBuffer[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
-    char word[MAXLABELNAME]; /*TODO is it large enough??*/
+    char lineBuffer[MAXCHARSPERLINE];
+    char tempLine[MAXCHARSPERLINE];
+    char* currentWord; /*TODO is it large enough??*/
     /*TODO maybe if i already define a head, i don't need to do the head = when calling the functyions?*/
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
+        skipFlag = 0;
+        tempLine[0] = '\0';
+        strncpy(tempLine, lineBuffer, MAXCHARSPERLINE); /*TODO call all of the functions with tempLine, and not with lineBuffer.*/
+        tempLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
+
+        /*TODO TESTING PURPOSES*/
+        printf("lineBuffer: %s\n", lineBuffer);
+
         L = 0;
         labelFlag = 0;
-        strcpy(word, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
-        while (word != NULL) {
-            if (isDefine(word)){
-                handleDefine(symbolTable, operationsArray, lineBuffer, &errorInfo);
+        /*strcpy(currentWord, strtok(lineBuffer, " \n\r\t")); /* Tokenize the line into words*/
+        currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
+        while (currentWord != NULL && !skipFlag) {
+            if (isDefine(currentWord)){
+                if (!handleDefine(symbolTable, operationsArray, tempLine, errorInfo)){
+                    skipFlag = 1;
+                    break;
+                }
             }
-            else if (isValidLabelName(word, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
+            else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first binaryWord is a valid label definition*/
                 labelFlag = 1;
             }
-            else if (isData(word) || isString(word)){
+            else if (isData(currentWord) || isString(currentWord)){  /*TODO add this test like the !handleDefine, to skip and break!!*/
                 if (labelFlag) {
-                    addLabel(symbolTable, word, "data", *DC, errorInfo);
+                    addLabel(symbolTable, currentWord, "data", *DC, errorInfo);
                 }
 
-                if (isData(word)){
-                    handleData("data", lineBuffer, symbolTable, &DC, dataArray);
+                if (isData(currentWord)){
+                    handleData("data", lineBuffer, symbolTable, DC, dataArray, errorInfo);
                 }
                 else{
-                    handleData("string", lineBuffer, symbolTable, &DC, dataArray);
+                    handleData("string", lineBuffer, symbolTable, DC, dataArray, errorInfo);
                 }
             }
-            else if (isExtern(word)){
-                handleExtern(symbolTable, lineBuffer);
+            else if (isExtern(currentWord)){
+                handleExtern(symbolTable, lineBuffer, errorInfo);
             }
-            else if (isEntry(word)){ /*TODO do i even need this in the first pass?*/
+            else if (isEntry(currentWord)){ /*TODO do i even need this in the first pass?*/
                 /*TODO according to line 11*/
             }
-            else if (isValidOperation(word)){ /*TODO the case where it's not data, entry or extern- meaning operation!!*/
-                addLabel(symbolTable, word, "code", *IC+100);
-                strtok(NULL, " \n\r\t"); /* Get the next word.*/
-                operation = isValidOperation(word, operationsArray);
+            else if (isValidOperation(currentWord, operationsArray)!=-1){ /*TODO the case where it's not data, entry or extern- meaning operationInfo!!*/
+                addLabel(symbolTable, currentWord, "code", *IC+100, errorInfo);
+                strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+                operation = isValidOperation(currentWord, operationsArray);
 
+                /*
                 if (operation == -1){
                     printError(errorInfo, "Invalid operation");
                 }
+                 */
+                L = handleOperation(symbolTable, instructionArray, operation, lineBuffer, IC, operationsArray, errorInfo);
+                if (L == -1){
+                    printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
+                    skipFlag = 1;
+                    break;
+                }
                 else{
-                    L = handleOperation(symbolTable, instructionArray, operation, lineBuffer, IC, operationsArray);
-                    if (L == -1){
-                        printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
-                    }
-                    else{
-                        IC += L;
-                    }
+                    IC += L;
                 }
 
             }
             else{
                 printError(errorInfo, "Invalid operation, label, or directive");
+                skipFlag = 1;
+                break;
             }
 
-            /*TODO DO I NEED THIS STRTOK? seems useless*/
-            strtok(NULL, " \n\r\t"); /* Get the next word.*/
+            currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
         }
     }
 
     /*TODO return here*/
 
-    /*TODO call the linked list memory free operation, or actually do this after the second pass.*/
+    /*TODO call the linked list memory free operationInfo, or actually do this after the second pass.*/
 }
 
-int handleOperation(symbolList** head, word* instructionArray, int opcode, char* line, int *IC, operation *operationsArray, error** errorInfo) {
+int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo) {
     int L = 0;
     int firstOperand;
     int secondOperand;
@@ -83,7 +99,7 @@ int handleOperation(symbolList** head, word* instructionArray, int opcode, char*
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
-            printError(errorInfo, "Error: Too many operands for %s operation", operationsArray[opcode].name);
+            printError(errorInfo, "Error: Too many operands for a 0 operand operationInfo");
         }
         else{
             firstOperand = 0;
@@ -92,20 +108,20 @@ int handleOperation(symbolList** head, word* instructionArray, int opcode, char*
     }
     else if (operationsArray[opcode].numOfOperands == 1) {
         if (operands[1][0] != '\0') {
-            printError(errorInfo, "Error: Too many operands for %s operation", operationsArray[opcode].name);
+            printError(errorInfo, "Error: Too many operands for a 1 operand operationInfo");
         }
         else{
-            firstOperand = getOperandCode(operands[0], head, operationsArray); /*TODO am i sending this correctly?*/
+            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /*TODO am i sending this correctly?*/
             secondOperand = 0;
         }
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
         if (operands[2][0] != '\0') {
-            printError(errorInfo, "Error: Too many operands for %s operation", operationsArray[opcode].name);
+            printError(errorInfo, "Error: Too many operands for a 2 operand operationInfo");
         }
         else{
-            firstOperand = getOperandCode(operands[0], head, operationsArray); /*TODO am i sending this correctly?*/
-            secondOperand = getOperandCode(operands[1], head, operationsArray); /*TODO am i sending this correctly?*/
+            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /*TODO am i sending this correctly?*/
+            secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo); /*TODO am i sending this correctly?*/
         }
     }
     /*TODO do i need another condition? MAYBE I NEED SOMETHING ELSE?? LIKE TOO LITTLE OPERANDS?*/
@@ -201,7 +217,7 @@ int handleOperation(symbolList** head, word* instructionArray, int opcode, char*
         case 15: /*hlt*/
             break;
         default:
-            printError(errorInfo, "Error: Invalid operation");
+            printError(errorInfo, "Error: Invalid operationInfo");
             break;
     }
 
@@ -212,13 +228,12 @@ int handleOperation(symbolList** head, word* instructionArray, int opcode, char*
 }
 
 
-void handleData(char* type, char* line, symbolList** head, int *DC, word* dataArray, error** errorInfo) {
+void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
     char* numbers;
     char* token;
     long val;
     int dataCounter = 0;
     char copiedLine[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
-    char* endptr;
     if (strcmp(type, ".data") == 0) {
         /* Skip the ".data" part to get to the numbers*/
         numbers = strstr(line, ".data");
@@ -231,7 +246,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word* dataAr
         token = strtok(numbers, ",");
         while (token) {
             if (dataCounter>= MAXDATAVALUESINARRAY){
-                printError(errorInfo, "Error: Too many data values inserted, max is %s", MAXDATAVALUESINARRAY);
+                printError(errorInfo, "Error: Too many data values inserted");
                 return;
             }
 
@@ -241,7 +256,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word* dataAr
             if (!isValidInteger(token)){
                 int symbolValue;
                 if (!findSymbolValue(head, token, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                    printError(errorInfo, "Unvalid Integer or Undefined symbol '%s'", token);
+                    printError(errorInfo, ("Unvalid Integer or Undefined symbol '%s'", token));
                     return; /*TODO should i not return?*/
                 }
                 val = symbolValue; /* Use the value from the symbol list*/
@@ -288,35 +303,36 @@ void handleData(char* type, char* line, symbolList** head, int *DC, word* dataAr
 
 
 /*TODO I need to just add the next label after extern, and if there's mroe than 1 then error?*/
-void handleExtern(symbolList** head, char* line) {
+void handleExtern(symbolList** head, char* line, error** errorInfo){
     char* currentWord;
 
-    currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+    currentWord = strtok(line, " \n\r\t"); /* Get the next binaryWord.*/
     while (currentWord!= NULL) {
-        addLabel(*head, currentWord, "external", 0);
-        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+        addLabel(head, currentWord, "external", 0, errorInfo);
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
     }
 }
 
 
-void handleDefine(symbolList** head, operation* operationsArray, char* line, error** errorInfo) {
-    char name[MAXLABELNAME]; /*TODO handle the maxname already*/
+int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
+    char name[MAXLABELNAME];
     int value;
-    char* currentWord; /*TODO define it as 30 or something? IDK*/
+    char* currentWord;
 
     currentWord = strtok(line, " \n\r\t"); /* Tokenize the line into words*/
+    currentWord = strtok(NULL, " \n\r\t"); /* This gets the next token after '.define'*/
     while(currentWord != NULL) {
         if (isValidLabelName(currentWord, operationsArray, head, 0)){
-            if (!searchSymbolList(&head, currentWord, "define")){ /*TODO explain and remember that it means it's returning 0 and not 1!*/
+            if (searchSymbolList(head, currentWord, "define")){ /*TODO explain and remember that it means it's returning 0 and not 1!*/
                 strncpy(name, currentWord, MAXLABELNAME);
-                currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
+                currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                 if (strcmp(currentWord, "=")==0) {
-                    currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
+                    currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                     if (!isValidInteger(currentWord)){
                         int symbolValue;
                         if (!findSymbolValue(head, currentWord, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printError(errorInfo, "Unvalid Integer or Undefined symbol '%s'", currentWord);
-                            return; /*TODO do I need to return from here?*/
+                            printError(errorInfo, "Unvalid Integer or Undefined symbol for '.define'");
+                            return 0; /*TODO do I need to return from here?*/
                         }
                         value = symbolValue; /* Use the value from the symbol list*/
                     }
@@ -327,17 +343,17 @@ void handleDefine(symbolList** head, operation* operationsArray, char* line, err
             }
             else{
                 printError(errorInfo, ".define symbol already exists");
-                return; /*TODO do I need to return from here?*/
+                return 0; /*TODO do I need to return from here?*/
             }
         }
         else{;
             printError(errorInfo, "Not a valid .define symbol name");
-            return; /*TODO do I need to return from here?*/
+            return 0; /*TODO do I need to return from here?*/
         }
+        currentWord = strtok(NULL, " \n\r\t"); /* This gets the next token after '.define'*/
     }
     /* Passed all tests, call addLabel with head, name, type and value*/
-    addLabel(*head, name, "define", value);
+    addLabel(head, name, "define", value, errorInfo);
+    return 1;
 }
 
-
-/*TODO add a free data struct function*/
