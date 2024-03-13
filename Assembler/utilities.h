@@ -29,5 +29,6 @@ void incrementDataSymbolValues(symbolList** head, int byValue);
 void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 
 void printSymbolList(const symbolList* head);
+void printBits(int value);
 
 #endif

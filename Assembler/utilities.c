@@ -139,4 +139,12 @@ void printSymbolList(const symbolList* head) {
         head = head->next; /* Move to the next node*/
     }
 }
+/*TODO delete!!!!!!!!!!!!*/
+void printBits(int value) {
+    int i;
+    for (i = WORDSIZE - 1; i >= 0; i--) {
+        int bit = (value >> i) & 1;
+        printf("%d", bit);
+    }
+}
 

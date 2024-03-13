@@ -7,6 +7,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     int L;
     char lineBuffer[MAXCHARSPERLINE];
     char tempLine[MAXCHARSPERLINE];
+    char tempLabel[MAXLABELNAME];
     char* currentWord; /*TODO is it large enough??*/
     /*TODO maybe if i already define a head, i don't need to do the head = when calling the functyions?*/
 
@@ -28,10 +29,11 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first binaryWord is a valid label definition*/
                 labelFlag = 1;
+                strncpy(tempLabel, currentWord, MAXLABELNAME);
             }
             else if (isData(currentWord) || isString(currentWord)){
                 if (labelFlag) {
-                    addLabel(symbolTable, currentWord, "data", *DC, errorInfo);
+                    addLabel(symbolTable, tempLabel, "data", *DC, errorInfo);
                 }
 
                 if (isData(currentWord)){
@@ -50,7 +52,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 /*TODO according to line 11*/
             }
             else if (isValidOperation(currentWord, operationsArray)!=-1){ /*TODO the case where it's not data, entry or extern- meaning operationInfo!!*/
-                addLabel(symbolTable, currentWord, "code", *IC+100, errorInfo);
+                addLabel(symbolTable, tempLabel, "code", *IC+100, errorInfo);
                 strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                 operation = isValidOperation(currentWord, operationsArray);
 
@@ -65,7 +67,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                     break;
                 }
                 else{
-                    IC += L;
+                    (*IC) += L;
                 }
 
             }
@@ -235,7 +237,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
 
     insertInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
 
-    L += operationsArray[opcode].numOfOperands;
+    L += operationsArray[opcode].numOfOperands + 1;
     return L;
 }
 
@@ -246,7 +248,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
     long val;
     int dataCounter = 0;
     char copiedLine[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
-    if (strcmp(type, ".data") == 0) {
+    if (strcmp(type, "data") == 0) {
         /* Skip the ".data" part to get to the numbers*/
         numbers = strstr(line, ".data");
         if (!numbers) {
@@ -273,6 +275,9 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
                 }
                 val = symbolValue; /* Use the value from the symbol list*/
             }
+            else{
+                val = atoi(token);
+            }
 
             /* Store the integer and increment DC*/
             addValueToDataArray(dataArray, *DC, val);
@@ -284,16 +289,18 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
         }
     }
     else if (strcmp(type, "string")==0) {
+        char* stringPosition = strstr(line, ".string");
         int i;
-        char *spacePos = strchr(line, ' '); /* Find the position of the first data element*/
 
-        strcpy(copiedLine, spacePos + 1); /* Copy the characters*/
-        if (strcmp(copiedLine, NULL) == 0) {/*TODO meaning that there's no space after .data or nothing?*/
+
+        strcpy(copiedLine, stringPosition + strlen(".string") + 1); /* Copy the characters AFTER the .string declaration.*/
+        if (copiedLine[0] == '\0') {/*TODO meaning that there's no space after .data or nothing?*/
             printError(errorInfo, "Error: No valid string was found after .string");
             return; /*TODO should I return here?*/
         }
-        if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine) - 1] == '"') {
-            for (i = 1; i < strlen(copiedLine-1); i++) {
+        trimWhitespace(copiedLine); /* Remove leading and trailing whitespace*/
+        if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
+            for (i = 1; i < strlen(copiedLine)-1; i++) {
                 addValueToDataArray(dataArray, *DC, copiedLine[i]);
                 (*DC)++;
             }

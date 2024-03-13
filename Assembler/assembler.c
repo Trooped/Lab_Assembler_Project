@@ -43,10 +43,14 @@ void assembler(FILE* source, const char* fileName){
     printf("\nIC: %d\n", IC);
     printf("DC: %d\n", DC);
     for (i = 0; i < DC; i++) {
-        printf("dataArray[%d]: %d\n", i, dataArray[i].wordBits);
+        printf("dataArray[%d]: ", i);
+        printBits(dataArray[i].wordBits);
+        printf("\n");
     }
     for (i = 0; i < IC; i++) {
-        printf("instructionArray[%d]: %d\n", i, instructionArray[i].wordBits);
+        printf("instructionArray[%d]: ", i);
+        printBits(instructionArray[i].wordBits);
+        printf("\n");
     }
     /*TODO testinggggggggggggggggggggg*/
 
