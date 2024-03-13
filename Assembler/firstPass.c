@@ -27,7 +27,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 handleDefine(symbolTable, operationsArray, tempLine, errorInfo);
                 break;
             }
-            else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first binaryWord is a valid label definition*/
+            else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
                 labelFlag = 1;
                 strncpy(tempLabel, currentWord, MAXLABELNAME);
             }
@@ -46,13 +46,17 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 }
             }
             else if (isExtern(currentWord)){
-                handleExtern(symbolTable, lineBuffer, errorInfo);
+                handleExtern(symbolTable, tempLine, errorInfo, operationsArray);
+                break;
             }
             else if (isEntry(currentWord)){ /*TODO do i even need this in the first pass?*/
-                /*TODO according to line 11*/
+                checkEntrySyntax(symbolTable, tempLine, errorInfo, operationsArray);
+                break;
             }
             else if (isValidOperation(currentWord, operationsArray)!=-1){ /*TODO the case where it's not data, entry or extern- meaning operationInfo!!*/
-                addLabel(symbolTable, tempLabel, "code", *IC+100, errorInfo);
+                if (labelFlag) {
+                    addLabel(symbolTable, tempLabel, "code", *IC+100, errorInfo);
+                }
                 strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                 operation = isValidOperation(currentWord, operationsArray);
 
@@ -125,8 +129,8 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             printError(errorInfo, "Error: Too many operands for a 1 operand operationInfo");
         }
         else{
-            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /*TODO am i sending this correctly?*/
-            secondOperand = 0;
+            firstOperand = 0;
+            secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
         }
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
@@ -182,32 +186,32 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             }
             break; /*TODO maybe spread these^ for 3 different errors?*/
         case 5: /*not*/
-            if (firstOperand == 0){
+            if (secondOperand == 0){
                 printError(errorInfo, "Error: Cannot negate an immediate operand");
             }
             break;
         case 6: /*clr*/
-            if (firstOperand == 0){
+            if (secondOperand == 0){
                 printError(errorInfo, "Error: Cannot clear an immediate operand");
             }
             break;
         case 7: /*inc*/
-            if (firstOperand == 0){
+            if (secondOperand == 0){
                 printError(errorInfo, "Error: Cannot increment an immediate operand");
             }
             break;
         case 8: /*dec*/
-            if (firstOperand == 0){
+            if (secondOperand == 0){
                 printError(errorInfo, "Error: Cannot decrement an immediate operand");
             }
             break;
         case 9: /*jmp*/
-            if (firstOperand == 0 || firstOperand==2){
+            if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Error: Illegal operands for jmp");
             }
             break;
         case 10: /*bne*/
-            if (firstOperand == 0 || firstOperand==2){
+            if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Error: Illegal operands for bne");
             }
             else{
@@ -215,14 +219,14 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             }
             break;
         case 11: /*red*/
-            if (firstOperand == 0){
+            if (secondOperand == 0){
                 printError(errorInfo, "Error: Cannot read into an immediate operand");
             }
             break;
         case 12: /*prn*/
             break;
         case 13: /*jsr*/
-            if (firstOperand == 0 || firstOperand==2){
+            if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Error: Illegal operands for jsr");
             }
             break;
@@ -264,8 +268,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
                 return;
             }
 
-            /* Trim leading spaces from the token*/
-            while (isspace((unsigned char)*token)) token++;
+            trimWhitespace(token); /* Remove leading and trailing whitespace*/
 
             if (!isValidInteger(token)){
                 int symbolValue;
@@ -322,13 +325,26 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
 
 
 /*TODO I need to just add the next label after extern, and if there's mroe than 1 then error?*/
-void handleExtern(symbolList** head, char* line, error** errorInfo){
+void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray){
     char* currentWord;
+    int flag = 0;
 
-    currentWord = strtok(line, " \n\r\t"); /* Get the next binaryWord.*/
+    currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     while (currentWord!= NULL) {
-        addLabel(head, currentWord, "external", 0, errorInfo);
-        currentWord= strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+        if (flag){
+            printError(errorInfo, "Extraneous text after First label of .extern");
+            return;
+        }
+        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
+            printError(errorInfo, "Not a valid .extern symbol name");
+            return;
+        }
+        else {
+            addLabel(head, currentWord, "external", 0, errorInfo);
+            flag = 1;
+        }
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
 }
 

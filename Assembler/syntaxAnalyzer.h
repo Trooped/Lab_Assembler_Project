@@ -24,6 +24,8 @@ int isString(char* word);
 
 int isExtern(char* word);
 
+void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray);
+
 int isEntry(char* word);
 
 int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** head, int colonFlag);

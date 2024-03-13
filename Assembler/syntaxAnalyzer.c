@@ -207,6 +207,27 @@ int isValidOperation(char* word, operationInfo* operationsArray) {
     return -1;
 }
 
+void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray) {
+    char* currentWord;
+    int flag = 0;
+
+    currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    while (currentWord!= NULL) {
+        if(flag){
+            printError(errorInfo, "Extraneous text after Label definition for .entry");
+            return;
+        }
+        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
+            printError(errorInfo, "Not a valid .entry symbol name");
+            return;
+        }
+        else{
+            flag = 1;
+        }
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
+}
 
 
 /*TODO add a relevant error message*/
