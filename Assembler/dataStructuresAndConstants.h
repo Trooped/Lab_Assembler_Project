@@ -31,7 +31,7 @@ typedef struct binaryWord{
 
 typedef struct operations{
     char* name;
-    int opcode;
+    int code;
     int numOfOperands;
 }operationInfo;
 

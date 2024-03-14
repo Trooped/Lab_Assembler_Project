@@ -28,6 +28,10 @@ void incrementDataSymbolValues(symbolList** head, int byValue);
 
 void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 
+void initializeErrorInfo(error** errorInfo, char* fileName);
+
+void initializeOperationsArray(operationInfo* operationsArray);
+
 void printSymbolList(const symbolList* head);
 void printBits(int value);
 

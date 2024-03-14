@@ -1,35 +1,30 @@
 #include "assembler.h"
-/*TODO add more stuff to include*/
-
 
 void assembler(FILE* source, const char* fileName){
-    int i; /*TODO FOR TESTING, DELETE LATER!!!*/
-
-    char newFileName[MAXFILENAME];
-    FILE* objectFile; /* *entFile, *extFile;*/ /*TODO maybe i need to initialize?*/
     binaryWord dataArray[MAXDATA]; /* array for data to be put in the memory image */
     binaryWord instructionArray[MAXINSTRUCTIONS]; /* array for the instructions to be put in the memory image.*/
-    symbolList* symbolTable = NULL; /* linked list for labels */ /*TODO maybe i need to initialize?*/
-
-    /*TODO maybe declare this in a separate function / just in the constants file?*/
-    operationInfo operationsArray[NUMOFOPERATIONS] = {{"mov", 0, 2}, {"cmp", 1, 2}, {"add", 2, 2}, {"sub", 3, 2}, {"lea", 4, 2}, {"not", 5, 1}, {"clr", 6, 1}, {"inc", 7, 1}, {"dec", 8, 1}, {"jmp", 9, 1}, {"bne", 10, 1}, {"red", 11, 1}, {"prn", 12, 1}, {"jsr", 13, 1}, {"rts", 14, 0}, {"hlt", 15, 0}};
+    symbolList* symbolTable = NULL; /* linked list for labels */
+    error* errorInfo; /* Empty errorInfo struct for errors!*/
+    operationInfo operationsArray[NUMOFOPERATIONS];
     int IC = 0, DC = 0; /* instruction counter and data counter */
 
+    int i; /*TODO FOR TESTING, DELETE LATER!!!*/
 
-    /*TODO initialize it correctly using a function!!!!!!!!*/
-    error* errorInfo = malloc(sizeof(error));
-    if (errorInfo == NULL) {
-        /* Handle memory allocation failure*/
-        fprintf(stderr, "Failed to allocate memory for errorInfo\n");
-        return;
-    }
-    /* Initialize errorInfo*/
-    errorInfo->errorFlag = 0;
-    strcpy(errorInfo->fileName, fileName);
-    errorInfo->errorDescription[0] = '\0';
+    initializeOperationsArray(operationsArray); /*initialize operations array according to the known operations*/
 
 
 
+
+
+
+    /*TODO I want it here??*/
+    char newFileName[MAXFILENAME];
+    FILE* objectFile; /* *entFile, *extFile;*/
+
+
+    /*TODO real start of assembler function!*/
+
+    initializeErrorInfo(&errorInfo, fileName); /*initialize errorInfo struct*/
     /*initializing both of the arrays*/
     initializeDataArray(dataArray, 0);
     initializeInstructionArray(instructionArray, 0);
@@ -56,12 +51,13 @@ void assembler(FILE* source, const char* fileName){
 
 
     if (errorInfo->errorFlag == 1) {
-        /*TODO print error and exit*/
-        deleteSymbolList(symbolTable);
+        printf("Errors found during parsing process for your program, exiting\n");
+        deleteSymbolList(&symbolTable);
+        free(errorInfo);
         return;
     }
 
-    incrementDataSymbolValues(symbolTable, 100);
+    incrementDataSymbolValues(&symbolTable, 100);
 
 
 
@@ -69,7 +65,7 @@ void assembler(FILE* source, const char* fileName){
     /*TODO call secondPass function*/
 
 
-    deleteSymbolList(symbolTable);
+    deleteSymbolList(&symbolTable);
 }
 
 

@@ -8,8 +8,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     char lineBuffer[MAXCHARSPERLINE];
     char tempLine[MAXCHARSPERLINE];
     char tempLabel[MAXLABELNAME];
-    char* currentWord; /*TODO is it large enough??*/
-    /*TODO maybe if i already define a head, i don't need to do the head = when calling the functyions?*/
+    char* currentWord;
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
         tempLine[0] = '\0';
