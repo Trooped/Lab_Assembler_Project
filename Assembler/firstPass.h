@@ -14,7 +14,7 @@
 
 void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo);
 
-int handleOperation(symbolList** head, binaryWord* instructionArray, int operation, char* line, int *IC, operationInfo* operationsArray, error** errorInfo);
+int handleOperation(symbolList** head, binaryWord* instructionArray, int operation, char* line, int *IC, operationInfo* operationsArray, error** errorInfo, int isSecondPass);
 
 void handleData(char* type, char* line, symbolList ** head, int *DC, binaryWord* dataArray, error** errorInfo);
 

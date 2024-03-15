@@ -2,6 +2,7 @@
 #define UTILITIES_H
 
 #include "dataStructuresAndConstants.h"
+#include "syntaxAnalyzer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -12,6 +13,8 @@
 int findSymbolValue(symbolList **head, const char* name,char* type, int* value);
 
 int searchSymbolList(symbolList** head, char* name, char* type);
+
+void markLabelAsEntry(symbolList** head, char* line, error** errorInfo);
 
 void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo);
 

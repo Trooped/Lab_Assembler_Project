@@ -51,7 +51,7 @@ void assembler(FILE* source, const char* fileName){
 
 
     if (errorInfo->errorFlag == 1) {
-        printf("Errors found during parsing process for your program, exiting\n");
+        printf("%d Errors were found in your program, exiting the process\n", errorInfo->counter);
         deleteSymbolList(&symbolTable);
         free(errorInfo);
         return;

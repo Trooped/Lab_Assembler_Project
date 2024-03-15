@@ -8,7 +8,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
      * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
      * 3 = register, one of the registers.*/
     int i = 0, j=0;
-    char tempVal[MAXOPERANDLENGTH]; /*TODO WOW I'VE GOTTA CHANGE THIS*/
+    char tempVal[MAXOPERANDLENGTH];
     int val;
     char* endptr;
     char tempOperand[MAXOPERANDLENGTH];
@@ -19,7 +19,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         if (!isValidInteger(tempOperand)){
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                printError(errorInfo, "Unvalid Integer or undefined symbol for immediate operand");
+                printError(errorInfo, "Invalid Integer or undefined symbol for immediate operand");
                 return -999; /*TODO do I even need to retunr this??*/
             }
             val = symbolValue; /* Use the value from the symbol list*/
@@ -84,7 +84,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
 }
 
 
-void parseOperands(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
+void parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
     /* Assuming line is positioned at the start of operands*/
     char* token;
     int operandIndex = 0;
@@ -96,6 +96,40 @@ void parseOperands(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
         strncpy(operands[operandIndex++], token, MAXOPERANDLENGTH - 1);
         operands[operandIndex - 1][MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null termination*/
         token = strtok(NULL, ",");
+    }
+}
+
+void parseOperandsSecondPass(const char* operand, char** outOperand, char** outLabelOrDefine) {
+    if (operand == NULL) {
+        *outOperand = NULL;
+        *outLabelOrDefine = NULL;
+        return;
+    }
+
+    /* Find the first occurrence of '[' which might indicate a label or define*/
+    char* bracketPos = strchr(operand, '[');
+
+    if (bracketPos == NULL) {
+        /* No bracket found, the entire operand is just the operand*/
+        *outOperand = strdup(operand);
+        *outLabelOrDefine = NULL;
+    } else {
+        /* Extract operand up to the bracket*/
+        int operandLen = bracketPos - operand;
+        *outOperand = (char*)malloc(operandLen + 1);
+        strncpy(*outOperand, operand, operandLen);
+        (*outOperand)[operandLen] = '\0'; /* Null-terminate*/
+
+        /* Check if there's a corresponding closing ']'*/
+        char* endBracketPos = strchr(bracketPos, ']');
+        if (endBracketPos != NULL) {
+            int labelLen = endBracketPos - bracketPos - 1;
+            *outLabelOrDefine = (char*)malloc(labelLen + 1);
+            strncpy(*outLabelOrDefine, bracketPos + 1, labelLen);
+            (*outLabelOrDefine)[labelLen] = '\0'; /* Null-terminate*/
+        } else {
+            *outLabelOrDefine = NULL; /* Malformed operand*/
+        }
     }
 }
 
@@ -220,6 +254,10 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
         }
         else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
             printError(errorInfo, "Not a valid .entry symbol name");
+            return;
+        }
+        else if (searchSymbolList(head, currentWord, "extern") == 0) {
+            printError(errorInfo, "Invalid .entry symbol name, it's already defined as .extern");
             return;
         }
         else{

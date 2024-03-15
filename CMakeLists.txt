@@ -22,4 +22,6 @@ add_executable(main
         Assembler/syntaxAnalyzer.h
         main/main.h
         Assembler/dataStructuresAndConstants.h
+        Assembler/secondPass.c
+        Assembler/secondPass.h
 )

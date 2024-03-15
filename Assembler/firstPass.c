@@ -6,65 +6,67 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     int operation = 0;
     int L;
     char lineBuffer[MAXCHARSPERLINE];
-    char tempLine[MAXCHARSPERLINE];
-    char tempLabel[MAXLABELNAME];
+    char fullLine[MAXCHARSPERLINE];
+    char tempLabelName[MAXLABELNAME];
     char* currentWord;
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
-        tempLine[0] = '\0';
-        strncpy(tempLine, lineBuffer, MAXCHARSPERLINE); /*TODO call all of the functions with tempLine, and not with lineBuffer.*/
-        tempLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
+        fullLine[0] = '\0';
+        strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);
+        fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
+        strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
 
         /*TODO TESTING PURPOSES*/
         printf("lineBuffer: %s\n", lineBuffer);
+        /* TODO TSTINGGGGGGG*/
 
         L = 0;
         labelFlag = 0;
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while (currentWord != NULL) {
             if (isDefine(currentWord)){
-                handleDefine(symbolTable, operationsArray, tempLine, errorInfo);
+                handleDefine(symbolTable, operationsArray, fullLine, errorInfo);
                 break;
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
                 labelFlag = 1;
-                strncpy(tempLabel, currentWord, MAXLABELNAME);
+                strncpy(tempLabelName, currentWord, MAXLABELNAME);
             }
             else if (isData(currentWord) || isString(currentWord)){
                 if (labelFlag) {
-                    addLabel(symbolTable, tempLabel, "data", *DC, errorInfo);
+                    addLabel(symbolTable, tempLabelName, "data", *DC, errorInfo);
                 }
 
                 if (isData(currentWord)){
-                    handleData("data", tempLine, symbolTable, DC, dataArray, errorInfo);
+                    handleData("data", fullLine, symbolTable, DC, dataArray, errorInfo);
                     break;
                 }
                 else{
-                    handleData("string", tempLine, symbolTable, DC, dataArray, errorInfo);
+                    handleData("string", fullLine, symbolTable, DC, dataArray, errorInfo);
                     break;
                 }
             }
             else if (isExtern(currentWord)){
-                handleExtern(symbolTable, tempLine, errorInfo, operationsArray);
+                handleExtern(symbolTable, fullLine, errorInfo, operationsArray);
                 break;
             }
-            else if (isEntry(currentWord)){ /*TODO do i even need this in the first pass?*/
-                checkEntrySyntax(symbolTable, tempLine, errorInfo, operationsArray);
+            else if (isEntry(currentWord)){
+                checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray);
                 break;
             }
-            else if (isValidOperation(currentWord, operationsArray)!=-1){ /*TODO the case where it's not data, entry or extern- meaning operationInfo!!*/
+            else if (isValidOperation(currentWord, operationsArray)!=-1){
                 if (labelFlag) {
-                    addLabel(symbolTable, tempLabel, "code", *IC+100, errorInfo);
+                    addLabel(symbolTable, tempLabelName, "code", *IC + 100, errorInfo);
                 }
                 strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                 operation = isValidOperation(currentWord, operationsArray);
 
-                /*
+                /* TODO do i need it?
                 if (operation == -1){
                     printError(errorInfo, "Invalid operation");
                 }
                  */
-                L = handleOperation(symbolTable, instructionArray, operation, tempLine, IC, operationsArray, errorInfo);
+                L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 0);
                 if (L == -1){
                     printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
                     break;
@@ -82,18 +84,15 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
         }
     }
-
-    /*TODO return here*/
-
-    /*TODO call the linked list memory free operationInfo, or actually do this after the second pass.*/
 }
 
-int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo) {
+int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo, int isSecondPass) {
     int L = 0;
+    int i;
     char* colon;
     int firstOperand;
     int secondOperand;
-    char operands[MAXOPERANDS][MAXOPERANDLENGTH]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
+    char operands[MAXOPERANDS][MAXOPERANDLENGTH];
     initializeOperandsArray(operands);
 
 
@@ -111,12 +110,15 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     while (isspace((unsigned char)*line)) line++;
 
     /* Now 'line' should be positioned at the start of the operands*/
-    parseOperands(line, operands);
+    parseOperandsFirstPass(line, operands);
 
+    for(i = 0; i<MAXOPERANDS; i++){
+        printf("operand %d: %s\n", i, operands[i]);
+    }
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
-            printError(errorInfo, "Error: Too many operands for a 0 operand operationInfo");
+            printError(errorInfo, "Too many operands for a 0 operand operationInfo");
         }
         else{
             firstOperand = 0;
@@ -125,7 +127,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     }
     else if (operationsArray[opcode].numOfOperands == 1) {
         if (operands[1][0] != '\0') {
-            printError(errorInfo, "Error: Too many operands for a 1 operand operationInfo");
+            printError(errorInfo, "Too many operands for a 1 operand operationInfo");
         }
         else{
             firstOperand = 0;
@@ -134,14 +136,15 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
         if (operands[2][0] != '\0') {
-            printError(errorInfo, "Error: Too many operands for a 2 operand operationInfo");
+            printError(errorInfo, "Too many operands for a 2 operand operationInfo");
         }
         else{
-            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /*TODO am i sending this correctly?*/
-            secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo); /*TODO am i sending this correctly?*/
+            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
+            secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo);
         }
     }
     /*TODO do i need another condition? MAYBE I NEED SOMETHING ELSE?? LIKE TOO LITTLE OPERANDS?*/
+
 
     /*TODO important!! everything stops here potentially!*/
     /*TODO it seems like I've already taken care of this part in the operandCode function, but welp*/
@@ -149,6 +152,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         /*TODO add an error, wrong operand code*/
         /*TODO exit.*/
     }
+
 
     if (firstOperand == 2){
         L++;
@@ -160,73 +164,66 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     switch(opcode){
         case 0: /*mov*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot move to an immediate operand");
+                printError(errorInfo, "Cannot move to an immediate operand");
             }
             break;
         case 1: /*cmp*/
-            /*TODO everything is legal here.*/
             break;
         case 2: /*add*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot add into an immediate operand");
+                printError(errorInfo, "Cannot add into an immediate operand");
             }
             break;
         case 3: /*sub*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot subtract from an immediate operand");
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Cannot subtract from an immediate operand");
             }
             break;
         case 4: /*lea*/
             if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
-                printError(errorInfo, "Error: Illegal operands for lea");
+                printError(errorInfo, "Illegal operands for lea operation");
             }
-            break; /*TODO maybe spread these^ for 3 different errors?*/
+            break;
         case 5: /*not*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot negate an immediate operand");
+                printError(errorInfo, "Cannot negate an immediate operand");
             }
             break;
         case 6: /*clr*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot clear an immediate operand");
+                printError(errorInfo, "Cannot clear an immediate operand");
             }
             break;
         case 7: /*inc*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot increment an immediate operand");
+                printError(errorInfo, "Cannot increment an immediate operand");
             }
             break;
         case 8: /*dec*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot decrement an immediate operand");
+                printError(errorInfo, "Cannot decrement an immediate operand");
             }
             break;
         case 9: /*jmp*/
             if (secondOperand == 0 || secondOperand==2){
-                printError(errorInfo, "Error: Illegal operands for jmp");
+                printError(errorInfo, "Illegal operands for jmp");
             }
             break;
         case 10: /*bne*/
             if (secondOperand == 0 || secondOperand==2){
-                printError(errorInfo, "Error: Illegal operands for bne");
-            }
-            else{
-                /*TODO should i translate everything here?*/
+                printError(errorInfo, "Illegal operands for bne");
             }
             break;
         case 11: /*red*/
             if (secondOperand == 0){
-                printError(errorInfo, "Error: Cannot read into an immediate operand");
+                printError(errorInfo, "Cannot read into an immediate operand");
             }
             break;
         case 12: /*prn*/
             break;
         case 13: /*jsr*/
             if (secondOperand == 0 || secondOperand==2){
-                printError(errorInfo, "Error: Illegal operands for jsr");
+                printError(errorInfo, "Illegal operands for jsr");
             }
             break;
         case 14: /*rts*/
@@ -234,13 +231,24 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 15: /*hlt*/
             break;
         default:
-            printError(errorInfo, "Error: Invalid operationInfo");
+            printError(errorInfo, "Invalid operationInfo");
             break;
     }
 
-    insertInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
+    if (firstOperand == 3 &&  secondOperand == 3){ /*Sharing one binary word with 2 registers*/
+        L--;
+    }
 
-    L += operationsArray[opcode].numOfOperands + 1;
+    L += operationsArray[opcode].numOfOperands + 1; /* The number of operands + the operation itself*/
+
+    if (!isSecondPass){
+        insertInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
+    }
+    else if (operationsArray[opcode].numOfOperands != 0){
+        insertOperandsIntoInstructionArray(instructionArray, L, *IC, operands, head, errorInfo);
+    }
+
+
     return L;
 }
 
@@ -250,20 +258,20 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
     char* token;
     long val;
     int dataCounter = 0;
-    char copiedLine[MAXCHARSPERLINE]; /*TODO define a maxcharsperlines in this firstPass maybe?*/
+    char copiedLine[MAXCHARSPERLINE];
     if (strcmp(type, "data") == 0) {
         /* Skip the ".data" part to get to the numbers*/
         numbers = strstr(line, ".data");
         if (!numbers) {
-            printError(errorInfo, "Error: No numbers found after .data");
-            return; /*TODO should I return here?*/
+            printError(errorInfo, "No values found after .data");
+            return;
         }
         numbers += strlen(".data"); /* Move past ".data"*/
 
         token = strtok(numbers, ",");
         while (token) {
             if (dataCounter>= MAXDATAVALUESINARRAY){
-                printError(errorInfo, "Error: Too many data values inserted");
+                printError(errorInfo, "Too many data values inserted");
                 return;
             }
 
@@ -296,9 +304,9 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
 
 
         strcpy(copiedLine, stringPosition + strlen(".string") + 1); /* Copy the characters AFTER the .string declaration.*/
-        if (copiedLine[0] == '\0') {/*TODO meaning that there's no space after .data or nothing?*/
-            printError(errorInfo, "Error: No valid string was found after .string");
-            return; /*TODO should I return here?*/
+        if (copiedLine[0] == '\0') {
+            printError(errorInfo, "No valid string was found after .string");
+            return;
         }
         trimWhitespace(copiedLine); /* Remove leading and trailing whitespace*/
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
@@ -306,24 +314,18 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
                 addValueToDataArray(dataArray, *DC, copiedLine[i]);
                 (*DC)++;
             }
-            addValueToDataArray(dataArray, *DC, '\0'); /*TODO should it just be 0??? adding 1 for the null terminator.*/
+            addValueToDataArray(dataArray, *DC, '\0');
             (*DC)++;
         }
         else {
-            printError(errorInfo, "Error: No valid string was found after .string");
-            return; /*TODO should I return?*/
+            printError(errorInfo, "No valid string was found after .string");
+            return;
         }
-    }
-    else{
-        printError(errorInfo, "Error: No valid data directive was found");
-        return;
     }
 }
 
 
 
-
-/*TODO I need to just add the next label after extern, and if there's mroe than 1 then error?*/
 void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray){
     char* currentWord;
     int flag = 0;
@@ -352,6 +354,10 @@ int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, 
     char name[MAXLABELNAME] = {0};
     int value = 0;
     char* ptr = line;
+    char* startName;
+    int nameLength;
+    char* valueStr;
+    char* endValue;
 
     /* Skip past ".define", assuming 'line' starts with this directive*/
     ptr += strlen(".define");
@@ -360,9 +366,9 @@ int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, 
     while (*ptr == ' ' || *ptr == '\t') ptr++;
 
     /* Copy the name until we hit a space, tab, or '='*/
-    char* startName = ptr;
+    startName = ptr;
     while (*ptr && *ptr != ' ' && *ptr != '\t' && *ptr != '=') ptr++;
-    int nameLength = ptr - startName;
+    nameLength = ptr - startName;
     if (nameLength >= MAXLABELNAME) nameLength = MAXLABELNAME - 1;
     strncpy(name, startName, nameLength);
     name[nameLength] = '\0';
@@ -389,8 +395,8 @@ int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, 
     while (*ptr == ' ' || *ptr == '\t') ptr++;
 
     /* ptr should now point at the start of the value*/
-    char* valueStr = ptr;
-    char* endValue = ptr;
+    valueStr = ptr;
+    endValue = ptr;
     while (*endValue && *endValue != ' ' && *endValue != '\t' && *endValue != '\n' && *endValue != '\r') endValue++;
     *endValue = '\0'; /* Temporarily terminate the string for value conversion*/
 

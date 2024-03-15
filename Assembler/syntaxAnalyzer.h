@@ -12,7 +12,9 @@
 
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo);
 
-void parseOperands(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
+void parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
+
+void parseOperandsSecondPass(const char* operand, char** outOperand, char** outLabelOrDefine);
 
 void trimWhitespace(char* str);
 

@@ -13,13 +13,14 @@
 #define MAXOPERANDS 4 /*Maximum number of operands in an instruction + 2 spaces for error handling*/
 #define MAXOPERANDLENGTH 32 /*Maximum number of characters in an operand*/
 #define MININTEGER (-2048)
-#define MAXINTEGER 2048
+#define MAXINTEGER 2047
 #define MAXERRORDESCRIPTION 64 /*Maximum number of characters in an error description*/
 #define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
 
 typedef struct symbolList {
     char name[MAXNAME]; /* Label name*/
-    char type[MAXNAME]; /*define, data, extern, entry or code*/
+    char type[MAXNAME]; /*define, data, extern, or code*/
+    int isEntry;
     int value; /* Label value*/
     struct symbolList* next; /* Pointer to the next node*/
 } symbolList;
@@ -37,7 +38,9 @@ typedef struct operations{
 
 typedef struct errorInfo{
     int errorFlag;
+    int counter;
     char fileName[MAXFILENAME];
+    char lineText[MAXCHARSPERLINE];
     char errorDescription[MAXERRORDESCRIPTION]; /*TODO maybe turn this into an array of chars with fixed size?*/
 }error;
 
