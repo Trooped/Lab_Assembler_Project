@@ -3,6 +3,7 @@
 
 #include "dataStructuresAndConstants.h"
 #include "firstPass.h"
+#include "secondPass.h"
 #include "string.h"
 #include "stdio.h"
 #include "stdlib.h"

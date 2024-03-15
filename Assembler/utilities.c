@@ -186,7 +186,7 @@ void deleteSymbolList(symbolList** head) {
     *head = NULL; /* Ensure the caller's head pointer is set to NULL*/
 }
 
-void insertInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
+void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
     binaryWord newWord;
     /*TODO remove all of that
     Start with the first 4 bits as 0000, which we can ignore as the bits are 0 by default.
@@ -199,7 +199,7 @@ void insertInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode
     instructionArray[IC] = newWord;
 }
 
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo) {
+void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source) {
     int val;
     binaryWord newWord;
 
@@ -212,65 +212,37 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
         }
         newWord.wordBits = val & 0xFFF;
     }
-    else if(searchSymbolList(head, operand, "data")==0){
-        findSymbolValue(head, operand, "data", &val);
-        if (isSymbolExtern){
-            /*TODO add 01 after the val*/
+    else if (operand[0] == 'r') { /*TODO handle the case where it's both of the registers!!*/
+        int regNum = atoi(operand + 1);
+        if(source){ /*IF IT'S THE SOURCE REGISTER*/
+            newWord.wordBits = regNum << 5;
         }
         else{
-            /*TODO add 10 after the val*/
+            newWord.wordBits = regNum << 2;
         }
-
-        newWord.wordBits = val & 0xFFF;
+    }
+    else if(searchSymbolList(head, operand, "data")==0){
+        findSymbolValue(head, operand, "data", &val);
+        if (isSymbolExtern(head, operand) == 1){
+            newWord.wordBits = 0x0001;
+        }
+        else{
+            findSymbolValue(head, operand, "data", &val);
+            newWord.wordBits = (val << 2) | 0x0002;
+        }
+    }
+    else{
+        printError(errorInfo, "Label not found in the symbol table");
     }
 
-
-    else if (operand[0] == 'r') { /*TODO handle the case where it's both of the registers!!*/
-        if(source){ /*IF IT'S THE SOURCE REGISTER*/
-
-        }
-        val = atoi(operand + 1);
-        addValueToDataArray(instructionArray, *IC, val);
-        (*IC)++;
-    }
-    else if (operand[0] == '[') {
-        char tempVal[MAXOPERANDLENGTH];
-        int j = 0;
-        int k = 1;
-        while (operand[k] != ']' && operand[k] != '\0') {
-            tempVal[j] = operand[k];
-            j++;
-            k++;
-        }
-        tempVal[j] = '\0'; /*Null terminating the temp String*/
-        if (!isValidInteger(tempVal)) {
-            int symbolValue;
-            if (!findSymbolValue(head, tempVal, "define", &symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                printError(errorInfo, "Unvalid Integer or undefined symbol for offset operand");
-                return;
-            }
-            val = symbolValue; /* Use the value from the symbol list*/
-        }
-        addValueToDataArray(instructionArray, *IC, val);
-        (*IC)++;
-    }
-    else {
-        if (!findSymbolValue(head, operand, "define", &val)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-            printError(errorInfo, "Undefined symbol for operand");
-            return;
-        }
-        addValueToDataArray(instructionArray, *IC, val);
-        (*IC)++;
-    }
-
-
-    newWord.wordBits = val;
     instructionArray[IC] = newWord;
 }
 
 void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo){
+    binaryWord newWord;
     int i;
     char currentWord[MAXOPERANDLENGTH];
+    int regNumSource, regNumDest;
 
     char* firstOperand;
     char* labelOrDefineFirst;
@@ -280,94 +252,27 @@ void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfL
     parseOperandsSecondPass(operands[0], &firstOperand, &labelOrDefineFirst);
     parseOperandsSecondPass(operands[1], &secondOperand, &labelOrDefineSecond);
 
-    insertInstruction(instructionArray, IC+1, firstOperand, head, errorInfo);
+    if(isRegister(firstOperand) && isRegister(secondOperand)){
+        regNumSource = atoi(firstOperand + 1);
+        regNumDest = atoi(secondOperand + 1);
+        newWord.wordBits = (regNumSource << 8) | (regNumDest << 2);
+        instructionArray[(*IC)+1] = newWord;
+        return;
+    }
+
+    convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+1, firstOperand, head, errorInfo,1);
     if (labelOrDefineFirst != NULL) {
-        insertInstruction(instructionArray, IC+2, labelOrDefineFirst, head, errorInfo);
-        insertInstruction(instructionArray, IC+3, secondOperand, head, errorInfo);
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+2, labelOrDefineFirst, head, errorInfo,0);
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+3, secondOperand, head, errorInfo,0);
         if (labelOrDefineSecond != NULL) {
-            insertInstruction(instructionArray, IC+4, labelOrDefineSecond, head, errorInfo);
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+4, labelOrDefineSecond, head, errorInfo,0);
         }
     }
     else{
-        insertInstruction(instructionArray, IC+2, secondOperand, head, errorInfo);
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+2, secondOperand, head, errorInfo,0);
         if (labelOrDefineSecond != NULL) {
-            insertInstruction(instructionArray, IC+3, labelOrDefineSecond, head, errorInfo);
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+3, labelOrDefineSecond, head, errorInfo,0);
         }
-    }
-
-
-
-
-
-
-    for (i = 1; i <= numOfLines; i++){
-
-        strncpy(currentWord, operands[i-1], MAXOPERANDLENGTH);
-        currentWord[MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null termination TODO IS THIS NEEDED?*/
-
-        if (currentWord[0] == '#') {
-            int val;
-            if (!isValidInteger(currentWord + 1)) {
-                findSymbolValue(head, currentWord + 1, "define", &val);
-            }
-            else {
-                val = atoi(currentWord + 1);
-            }
-            addToArray(instructionArray, (*IC)+i, val);
-        }
-        else if (currentWord[0] == 'r') {
-            if(isValidRegister(firstOperand) && isValidRegister(secondOperand)){
-                /*TODO add it as one word and skip the loop*/
-            }
-
-
-
-
-
-
-
-            int val;
-            if (!isValidRegister(currentWord)) {
-                printError(errorInfo, "Invalid Register");
-                return;
-            }
-            val = atoi(currentWord + 1);
-            addValueToDataArray(instructionArray, *IC, val);
-            (*IC)++;
-        }
-        else if (currentWord[0] == '[') {
-            int val;
-            char tempVal[MAXOPERANDLENGTH];
-            int j = 0;
-            int k = 1;
-            while (currentWord[k] != ']' && currentWord[k] != '\0') {
-                tempVal[j] = currentWord[k];
-                j++;
-                k++;
-            }
-            tempVal[j] = '\0'; /*Null terminating the temp String*/
-            if (!isValidInteger(tempVal)) {
-                int symbolValue;
-                if (!findSymbolValue(head, tempVal, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                    printError(errorInfo, "Unvalid Integer or undefined symbol for offset operand");
-                    return;
-                }
-                val = symbolValue; /* Use the value from the symbol list*/
-            }
-            addValueToDataArray(instructionArray, *IC, val);
-            (*IC)++;
-        }
-        else {
-            int val;
-            if (!findSymbolValue(head, currentWord, "define",&val)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                printError(errorInfo, "Undefined symbol for operand");
-                return;
-            }
-            addValueToDataArray(instructionArray, *IC, val);
-            (*IC)++;
-        }
-
-
     }
 
 }

@@ -59,11 +59,25 @@ void assembler(FILE* source, const char* fileName){
 
     incrementDataSymbolValues(&symbolTable, 100);
 
+    rewind(source); /*reset the file pointer to the beginning of the file*/
+    secondPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
 
-
-    /*TODO call secondPass function*/
-
+    /*TODO TESTINGGGGGGGGG*/
+    printSymbolList(symbolTable);
+    printf("\nIC: %d\n", IC);
+    printf("DC: %d\n", DC);
+    for (i = 0; i < DC; i++) {
+        printf("dataArray[%d]: ", i);
+        printBits(dataArray[i].wordBits);
+        printf("\n");
+    }
+    for (i = 0; i < IC; i++) {
+        printf("instructionArray[%d]: ", i);
+        printBits(instructionArray[i].wordBits);
+        printf("\n");
+    }
+    /*TODO testinggggggggggggggggggggg*/
 
     deleteSymbolList(&symbolTable);
 }

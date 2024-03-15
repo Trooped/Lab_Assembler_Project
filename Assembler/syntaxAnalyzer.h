@@ -16,6 +16,8 @@ void parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLE
 
 void parseOperandsSecondPass(const char* operand, char** outOperand, char** outLabelOrDefine);
 
+int isSymbolExtern(symbolList** head, char* symbolName);
+
 void trimWhitespace(char* str);
 
 int isDefine(char* word);

@@ -27,3 +27,13 @@
 2	63	7322165739858887	CMakeFiles/main.dir/Assembler/utilities.c.obj	e023c9409dbb710
 2	67	7322165953004730	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
 68	129	7322165953589529	main.exe	ce0b7ee50e96f94b
+24	129	7322313165178691	CMakeFiles/main.dir/Assembler/secondPass.c.obj	212df57390cc59c2
+1	129	7322313165188691	CMakeFiles/main.dir/main/main.c.obj	252652062adadc12
+20	129	7322313165188691	CMakeFiles/main.dir/Assembler/assembler.c.obj	f670076413473cf3
+17	130	7322313165198691	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
+13	132	7322313165208688	CMakeFiles/main.dir/Assembler/syntaxAnalyzer.c.obj	111f56850e9e18fb
+6	132	7322313165208688	CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj	1d8e0ae4d8604ade
+9	133	7322313165228696	CMakeFiles/main.dir/Assembler/utilities.c.obj	e023c9409dbb710
+139	312	7322313166984150	main.exe	ce0b7ee50e96f94b
+2	61	7322315755817418	CMakeFiles/main.dir/Assembler/assembler.c.obj	f670076413473cf3
+61	122	7322315756409106	main.exe	ce0b7ee50e96f94b

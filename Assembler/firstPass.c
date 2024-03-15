@@ -242,12 +242,11 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     L += operationsArray[opcode].numOfOperands + 1; /* The number of operands + the operation itself*/
 
     if (!isSecondPass){
-        insertInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
+        insertFirstInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
     }
     else if (operationsArray[opcode].numOfOperands != 0){
-        insertOperandsIntoInstructionArray(instructionArray, L, *IC, operands, head, errorInfo);
+        insertOperandsIntoInstructionArray(instructionArray, L, IC, operands, head, errorInfo);
     }
-
 
     return L;
 }

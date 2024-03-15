@@ -21,7 +21,11 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
 
 void deleteSymbolList(symbolList** head);
 
-void insertInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
+void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
+
+void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source);
+
+void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo);
 
 void addValueToDataArray(binaryWord* dataArray, int DC, int value);
 

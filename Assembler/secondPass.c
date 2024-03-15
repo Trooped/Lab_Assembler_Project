@@ -17,6 +17,8 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
         L = 0;
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while(currentWord != NULL){
+            /*TODO check first if it's like a define or something, if it is i can skip this fucker*/
+            /*TODO in general, don't forget about the first command, which is usually not one of the operands or w/e*/
             if (searchSymbolList(symbolTable, currentWord, "general") == 0) { /* Label found in the list*/
                 currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                 break; /*MAYBE STAY IN THE LOOP?*/
@@ -28,17 +30,9 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
                 markLabelAsEntry(symbolTable, fullLine, errorInfo);
                 break;
             }
-            else{/*operation*/
-                int operation = isValidOperation(currentWord, operationsArray);
-                handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 1);
-                break;
-            }
-
-
-
-
-
-
+            int operation = isValidOperation(currentWord, operationsArray);
+            L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 1);
+            (*IC) += L;
 
             currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
         }

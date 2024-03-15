@@ -133,6 +133,10 @@ void parseOperandsSecondPass(const char* operand, char** outOperand, char** outL
     }
 }
 
+int isSymbolExtern(symbolList** head, char* symbolName){
+    return searchSymbolList(head, symbolName, "extern");
+}
+
 void trimWhitespace(char* str) {
     int start = 0, end = 0;
     int i, length;
