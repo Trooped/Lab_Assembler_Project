@@ -3,15 +3,15 @@
 
 int findSymbolValue(symbolList **head, const char* name,char* type, int* value) {
     symbolList* current = *head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            if (strcmp(current->type, type) == 0) {
-                *value = current->value;
-                return 1;
+        while (current != NULL) {
+            if (strcmp(current->name, name) == 0) {
+                if (strcmp(current->type, type) == 0) {
+                    *value = current->value;
+                    return 1;
+                }
             }
+            current = current->next;
         }
-        current = current->next;
-    }
     return 0;
 }
 
@@ -26,15 +26,25 @@ void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     while (current != NULL) {
         if (strcmp(current->name, entryLabelName) == 0) {
             current->isEntry = 1;
+            return;
         }
         current = current->next;
     }
     printError(errorInfo, ".entry Label not found in the symbol table");
 }
 
+char* removeColon(char* label) {
+    char* newLabel = label;
+    if (label[strlen(label) - 1] == ':') {
+        label[strlen(label) - 1] = '\0'; /* Remove the colon*/
+    }
+    return newLabel;
+}
+
 
 int searchSymbolList(symbolList** head, char* name, char* type) {
     symbolList* current = *head;
+    trimWhitespace(name);
 
     /* Search for the name in the list*/
     while (current != NULL) {
@@ -58,6 +68,7 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
 
 /* Function to add a new node at the end of the list */
 void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo) {
+    int i;
     symbolList* newNode = NULL;
     if (name == NULL || name[0] == '\0') {
         printError(errorInfo, "Empty label isn't allowed");
@@ -77,6 +88,10 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
     newNode->type[MAXNAME - 1] = '\0'; /* Ensure null termination*/
     newNode->value = value;
     newNode->next = NULL;
+    newNode->isEntry = 0;
+    for (i = 0; i < MAXEXTERNALADDRESSES; i++) {
+        newNode->externalAddresses[i] = -1;
+    }
 
     if (*head == NULL) {
         *head = newNode; /* Set new node as the head if list is empty*/
@@ -199,7 +214,7 @@ void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int o
     instructionArray[IC] = newWord;
 }
 
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source) {
+void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset) {
     int val;
     binaryWord newWord;
 
@@ -210,7 +225,16 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
         else {
             val = atoi(operand + 1);
         }
-        newWord.wordBits = val & 0xFFF;
+        newWord.wordBits = val << 2 | 0;
+    }
+    else if (offset){
+        if (!isValidInteger(operand)) {
+            findSymbolValue(head, operand, "define", &val);
+        }
+        else {
+            val = atoi(operand);
+        }
+        newWord.wordBits = val << 2 | 0;
     }
     else if (operand[0] == 'r') { /*TODO handle the case where it's both of the registers!!*/
         int regNum = atoi(operand + 1);
@@ -221,14 +245,14 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
             newWord.wordBits = regNum << 2;
         }
     }
-    else if(searchSymbolList(head, operand, "data")==0){
-        findSymbolValue(head, operand, "data", &val);
-        if (isSymbolExtern(head, operand) == 1){
+    else if(searchSymbolList(head, operand, "general")==0){
+        if (isSymbolExtern(head, operand)){
+            addExternAddress(head, operand, IC+100);
             newWord.wordBits = 0x0001;
         }
         else{
             findSymbolValue(head, operand, "data", &val);
-            newWord.wordBits = (val << 2) | 0x0002;
+            newWord.wordBits = ( val << 2) | 0x0002;
         }
     }
     else{
@@ -238,40 +262,64 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
     instructionArray[IC] = newWord;
 }
 
+void addExternAddress(symbolList** head, char* name, int address){
+    int i=0;
+    symbolList* current = *head;
+    while (current != NULL) {
+        if (strcmp(current->name, name) == 0) {
+            while (current->externalAddresses[i] != -1) {
+                i++;
+            }
+            current->externalAddresses[i] = address;
+            return;
+        }
+        current = current->next;
+    }
+}
+
 void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo){
     binaryWord newWord;
-    int i;
-    char currentWord[MAXOPERANDLENGTH];
     int regNumSource, regNumDest;
 
-    char* firstOperand;
-    char* labelOrDefineFirst;
-    char* secondOperand;
-    char* labelOrDefineSecond;
+    char firstOperand[MAXOPERANDLENGTH];
+    char labelOrDefineFirst[MAXOPERANDLENGTH];
+    char secondOperand[MAXOPERANDLENGTH];
+    char labelOrDefineSecond[MAXOPERANDLENGTH];
+    firstOperand[0] = '\0';
+    labelOrDefineFirst[0] = '\0';
+    secondOperand[0] = '\0';
+    labelOrDefineSecond[0] = '\0';
 
-    parseOperandsSecondPass(operands[0], &firstOperand, &labelOrDefineFirst);
-    parseOperandsSecondPass(operands[1], &secondOperand, &labelOrDefineSecond);
 
-    if(isRegister(firstOperand) && isRegister(secondOperand)){
-        regNumSource = atoi(firstOperand + 1);
-        regNumDest = atoi(secondOperand + 1);
-        newWord.wordBits = (regNumSource << 8) | (regNumDest << 2);
+    if (numOfLines>0) {
+        parseOperandsSecondPass(operands[0], &firstOperand, &labelOrDefineFirst);
+    }
+    if (numOfLines>2) {
+        parseOperandsSecondPass(operands[1], &secondOperand, &labelOrDefineSecond);
+    }
+
+    if(isRegister(operands[0]) && isRegister(operands[1])){
+        regNumSource = atoi(operands[0] + 1);
+        regNumDest = atoi(operands[1] + 1);
+        newWord.wordBits = (regNumSource << 5) | (regNumDest << 2);
         instructionArray[(*IC)+1] = newWord;
         return;
     }
 
-    convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+1, firstOperand, head, errorInfo,1);
-    if (labelOrDefineFirst != NULL) {
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+2, labelOrDefineFirst, head, errorInfo,0);
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+3, secondOperand, head, errorInfo,0);
-        if (labelOrDefineSecond != NULL) {
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+4, labelOrDefineSecond, head, errorInfo,0);
+    convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+1, firstOperand, head, errorInfo,1, 0);
+    if (labelOrDefineFirst[0] != '\0') {
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, labelOrDefineFirst, head, errorInfo,0, 1);
+        if (secondOperand[0] != '\0') {
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 3, secondOperand, head, errorInfo, 0, 0);
+            if (labelOrDefineSecond[0] != '\0') {
+                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, labelOrDefineSecond, head, errorInfo, 0, 1);
+            }
         }
     }
-    else{
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+2, secondOperand, head, errorInfo,0);
-        if (labelOrDefineSecond != NULL) {
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, IC+3, labelOrDefineSecond, head, errorInfo,0);
+    else if (secondOperand[0] != '\0'){
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, secondOperand, head, errorInfo,0, 0);
+        if (labelOrDefineSecond[0] != '\0') {
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, labelOrDefineSecond, head, errorInfo,0, 1);
         }
     }
 
@@ -332,9 +380,21 @@ void initializeErrorInfo(error** errorInfo, char* fileName) {
 
 /*TODO DELETE THIS FUNCTION after testing!!!!!!!!! AND ITS .H VARIANT*/
 void printSymbolList(const symbolList* head) {
+    int i;
     printf("Symbol Table Contents:\n");
     while (head != NULL) {
         printf("Name: %s, Type: %s, Value: %d\n", head->name, head->type, head->value);
+        if (head->isEntry) {
+            printf("This label is an entry\n");
+        }
+        if (head->externalAddresses[0] != -1) {
+            printf("This label is external\n");
+            for (i = 0; i < MAXEXTERNALADDRESSES; i++) {
+                if (head->externalAddresses[i] != -1) {
+                    printf("External address: %d\n", head->externalAddresses[i]);
+                }
+            }
+        }
         head = head->next; /* Move to the next node*/
     }
 }

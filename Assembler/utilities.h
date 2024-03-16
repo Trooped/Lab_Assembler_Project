@@ -12,18 +12,21 @@
 
 int findSymbolValue(symbolList **head, const char* name,char* type, int* value);
 
+char* removeColon(char* label);
+
 int searchSymbolList(symbolList** head, char* name, char* type);
 
 void markLabelAsEntry(symbolList** head, char* line, error** errorInfo);
 
 void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo);
 
+void addExternAddress(symbolList** head, char* name, int address);
 
 void deleteSymbolList(symbolList** head);
 
 void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
 
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source);
+void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset);
 
 void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo);
 

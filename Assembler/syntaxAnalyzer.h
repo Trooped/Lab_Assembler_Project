@@ -14,8 +14,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
 
 void parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 
-void parseOperandsSecondPass(const char* operand, char** outOperand, char** outLabelOrDefine);
-
+void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine);
 int isSymbolExtern(symbolList** head, char* symbolName);
 
 void trimWhitespace(char* str);

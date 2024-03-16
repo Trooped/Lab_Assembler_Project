@@ -99,42 +99,48 @@ void parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLEN
     }
 }
 
-void parseOperandsSecondPass(const char* operand, char** outOperand, char** outLabelOrDefine) {
+void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine) {
+    char* bracketPos;
+
     if (operand == NULL) {
-        *outOperand = NULL;
-        *outLabelOrDefine = NULL;
+        outOperand[0] = '\0'; /* Indicate empty string*/
+        outLabelOrDefine[0] = '\0'; /* Indicate empty string*/
         return;
     }
 
-    /* Find the first occurrence of '[' which might indicate a label or define*/
-    char* bracketPos = strchr(operand, '[');
+    /* Find the first occurrence of '[' which might indicate a label or define */
+    bracketPos = strchr(operand, '[');
 
     if (bracketPos == NULL) {
-        /* No bracket found, the entire operand is just the operand*/
-        *outOperand = strdup(operand);
-        *outLabelOrDefine = NULL;
+        /* No bracket found, the entire operand is just the operand */
+        strncpy(outOperand, operand, MAXOPERANDLENGTH - 1);
+        outOperand[MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null-termination*/
+        outLabelOrDefine[0] = '\0'; /* Indicate empty string*/
     } else {
-        /* Extract operand up to the bracket*/
+        /* Extract operand up to the bracket */
         int operandLen = bracketPos - operand;
-        *outOperand = (char*)malloc(operandLen + 1);
-        strncpy(*outOperand, operand, operandLen);
-        (*outOperand)[operandLen] = '\0'; /* Null-terminate*/
+        operandLen = (operandLen < MAXOPERANDLENGTH - 1) ? operandLen : MAXOPERANDLENGTH - 1;
+        strncpy(outOperand, operand, operandLen);
+        outOperand[operandLen] = '\0'; /* Null-terminate*/
 
-        /* Check if there's a corresponding closing ']'*/
+        /* Check if there's a corresponding closing ']' */
         char* endBracketPos = strchr(bracketPos, ']');
         if (endBracketPos != NULL) {
             int labelLen = endBracketPos - bracketPos - 1;
-            *outLabelOrDefine = (char*)malloc(labelLen + 1);
-            strncpy(*outLabelOrDefine, bracketPos + 1, labelLen);
-            (*outLabelOrDefine)[labelLen] = '\0'; /* Null-terminate*/
+            labelLen = (labelLen < MAXOPERANDLENGTH - 1) ? labelLen : MAXOPERANDLENGTH - 1;
+            strncpy(outLabelOrDefine, bracketPos + 1, labelLen);
+            outLabelOrDefine[labelLen] = '\0'; /* Null-terminate*/
         } else {
-            *outLabelOrDefine = NULL; /* Malformed operand*/
+            outLabelOrDefine[0] = '\0'; /* Malformed operand, indicate empty string*/
         }
     }
 }
 
 int isSymbolExtern(symbolList** head, char* symbolName){
-    return searchSymbolList(head, symbolName, "extern");
+    if (searchSymbolList(head, symbolName, "external") == 0){
+        return 1;
+    }
+    return 0;
 }
 
 void trimWhitespace(char* str) {

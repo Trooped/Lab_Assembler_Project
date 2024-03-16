@@ -14,25 +14,34 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
         fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
 
+        /*TODO TESTING PURPOSES*/
+        printf("lineBuffer: %s\n", lineBuffer);
+        /* TODO TSTINGGGGGGG*/
+
+
         L = 0;
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while(currentWord != NULL){
             /*TODO check first if it's like a define or something, if it is i can skip this fucker*/
             /*TODO in general, don't forget about the first command, which is usually not one of the operands or w/e*/
-            if (searchSymbolList(symbolTable, currentWord, "general") == 0) { /* Label found in the list*/
-                currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
-                break; /*MAYBE STAY IN THE LOOP?*/
+            if (isDefine(currentWord)){
+                break;
             }
-            else if (isData(currentWord) || isString(currentWord)  || isExtern(currentWord)) {
+            if (searchSymbolList(symbolTable, removeColon(currentWord), "general") == 0) { /* Label found in the list*/
+                currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+            }
+            if (isData(currentWord) || isString(currentWord)  || isExtern(currentWord)) {
                 break;
             }
             else if (isEntry(currentWord)) {
                 markLabelAsEntry(symbolTable, fullLine, errorInfo);
                 break;
             }
+
             int operation = isValidOperation(currentWord, operationsArray);
-            L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 1);
+            L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo,1);
             (*IC) += L;
+            break;
 
             currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
         }

@@ -16,11 +16,13 @@
 #define MAXINTEGER 2047
 #define MAXERRORDESCRIPTION 64 /*Maximum number of characters in an error description*/
 #define MAXCHARSPERLINE (80+1) /*Maximum number of characters per line*/
+#define MAXEXTERNALADDRESSES 64
 
 typedef struct symbolList {
     char name[MAXNAME]; /* Label name*/
     char type[MAXNAME]; /*define, data, extern, or code*/
     int isEntry;
+    int externalAddresses[MAXEXTERNALADDRESSES];
     int value; /* Label value*/
     struct symbolList* next; /* Pointer to the next node*/
 } symbolList;

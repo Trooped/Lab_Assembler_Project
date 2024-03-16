@@ -17,7 +17,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
 
         /*TODO TESTING PURPOSES*/
-        printf("lineBuffer: %s\n", lineBuffer);
+        /*printf("lineBuffer: %s\n", lineBuffer);*/
         /* TODO TSTINGGGGGGG*/
 
         L = 0;
@@ -112,9 +112,6 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     /* Now 'line' should be positioned at the start of the operands*/
     parseOperandsFirstPass(line, operands);
 
-    for(i = 0; i<MAXOPERANDS; i++){
-        printf("operand %d: %s\n", i, operands[i]);
-    }
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
