@@ -2,6 +2,8 @@
 #define DATASTRUCTURESANDCONSTANTS_H
 
 
+#include <stdio.h>
+
 #define NUMOFOPERATIONS 16 /*Number of operations*/
 #define MAXFILENAME 64 /*Maximum file name length*/ /*TODO change the definitions that are more global to one file, maybe inside main.h??*/
 #define MAXNAME 32 /*Maximum name length*/ /*TODO order in those fucking defines omg*/
@@ -43,7 +45,7 @@ typedef struct errorInfo{
     int counter;
     char fileName[MAXFILENAME];
     char lineText[MAXCHARSPERLINE];
-    char errorDescription[MAXERRORDESCRIPTION]; /*TODO maybe turn this into an array of chars with fixed size?*/
+    FILE* file;
 }error;
 
 

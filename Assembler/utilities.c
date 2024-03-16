@@ -77,8 +77,8 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
 
     newNode = (symbolList*)malloc(sizeof(symbolList));
     if (newNode == NULL) {
-        printError(errorInfo, "Out of memory");
-        return; /*TODO Consider how to handle memory errors in your application context*/
+        printError(errorInfo, "Failed to allocate memory for new Symbol Table node");
+        closeFileAndExit(errorInfo, head);
     }
 
     /* Initialize the new node*/
@@ -360,20 +360,33 @@ void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
     }
 }
 
-void initializeErrorInfo(error** errorInfo, char* fileName) {
+void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileName, FILE* file) {
     *errorInfo = malloc(sizeof(error));
     if (*errorInfo == NULL) {
-        /* Handle memory allocation failure TODO how to handle memory allocation fail?*/
         fprintf(stderr, "Failed to allocate memory for errorInfo\n");
-        return;
+        closeFileAndExit(errorInfo, symbolTable);
     }
     /* Initialize errorInfo*/
     (*errorInfo)->errorFlag = 0;
     (*errorInfo)->counter = 0;
     strcpy((*errorInfo)->fileName, fileName);
-    (*errorInfo)->errorDescription[0] = '\0';
+    (*errorInfo)->file = NULL;
+    (*errorInfo)->lineText[0] = '\0';
 }
 
+
+void closeFileAndExit(error** errorInfo, symbolList** symbolTable) {
+    if ((*errorInfo)->file != NULL) {
+        fclose((*errorInfo)->file);
+    }
+    if ((*errorInfo) != NULL) {
+        free(*errorInfo);
+    }
+    if ((*symbolTable) != NULL) {
+        deleteSymbolList(symbolTable);
+    }
+    exit(1);
+}
 
 
 

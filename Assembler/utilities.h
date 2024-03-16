@@ -22,6 +22,8 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
 
 void addExternAddress(symbolList** head, char* name, int address);
 
+void closeFileAndExit(error** errorInfo, symbolList** symbolTable);
+
 void deleteSymbolList(symbolList** head);
 
 void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
@@ -38,7 +40,7 @@ void incrementDataSymbolValues(symbolList** head, int byValue);
 
 void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 
-void initializeErrorInfo(error** errorInfo, char* fileName);
+void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileName, FILE* file);
 
 void initializeOperationsArray(operationInfo* operationsArray);
 

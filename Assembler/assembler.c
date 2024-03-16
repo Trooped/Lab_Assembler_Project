@@ -14,17 +14,17 @@ void assembler(FILE* source, const char* fileName){
 
 
 
-
-
-
     /*TODO I want it here??*/
     char newFileName[MAXFILENAME];
     FILE* objectFile; /* *entFile, *extFile;*/
 
 
+
+
+
     /*TODO real start of assembler function!*/
 
-    initializeErrorInfo(&errorInfo, fileName); /*initialize errorInfo struct*/
+    initializeErrorInfo(&errorInfo,&symbolTable, fileName, source); /*initialize errorInfo struct*/
     /*initializing both of the arrays*/
     initializeDataArray(dataArray, 0);
     initializeInstructionArray(instructionArray, 0);
@@ -35,9 +35,7 @@ void assembler(FILE* source, const char* fileName){
 
     if (errorInfo->errorFlag == 1) {
         printf("%d Errors were found in your program, exiting the process\n", errorInfo->counter);
-        deleteSymbolList(&symbolTable);
-        free(errorInfo);
-        return;
+        closeFileAndExit(&errorInfo, &symbolTable);
     }
 
     incrementDataSymbolValues(&symbolTable, (IC)+100);
@@ -54,17 +52,20 @@ void assembler(FILE* source, const char* fileName){
     for (i = 0; i < DC; i++) {
         printf("dataArray[%d]: ", i);
         printBits(dataArray[i].wordBits);
+        printf("\t decimal: %d", instructionArray[i].wordBits);
         printf("\n");
     }
     for (i = 0; i < IC; i++) {
         printf("instructionArray[%d]: ", i);
         printBits(instructionArray[i].wordBits);
+        printf("\t decimal: %d", instructionArray[i].wordBits);
         printf("\n");
     }
 
     /*TODO testinggggggggggggggggggggg*/
 
     deleteSymbolList(&symbolTable);
+    free(errorInfo);
 }
 
 

@@ -45,7 +45,7 @@ macro** allocateMemoryToMacros(int macroArrSize) {
     macro **macros = (macro**)malloc(macroArrSize * sizeof(macro*));
     if (macros == NULL) {
         fprintf(stderr, "Failed to allocate memory for macros.\n");
-        return NULL; /* Return NULL to indicate failure */
+        return NULL; /* TODO exit the program!!! */
     }
     return macros;
 }
