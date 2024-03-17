@@ -68,6 +68,12 @@ void assembler(FILE* source, const char* fileName){
         printf("\n");
     }
 
+    if (errorInfo->errorFlag == 1) {
+        printf("%d Errors were found in your program, exiting the process\n", errorInfo->counter);
+        closeFileAndExit(&errorInfo, &symbolTable);
+    }
+
+
     /*TODO testinggggggggggggggggggggg*/
 
     deleteSymbolList(&symbolTable);

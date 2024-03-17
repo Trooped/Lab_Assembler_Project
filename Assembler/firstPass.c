@@ -57,11 +57,21 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 }
             }
             else if (isExtern(currentWord)){
-                handleExtern(symbolTable, fullLine, errorInfo, operationsArray);
+                if (labelFlag) { /*TODO do i need to add a warning? because this label is ignored*/
+                    handleExtern(symbolTable, fullLine, errorInfo, operationsArray, 1);
+                }
+                else{
+                    handleExtern(symbolTable, fullLine, errorInfo, operationsArray, 0);
+                }
                 break;
             }
             else if (isEntry(currentWord)){
-                checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray);
+                if (labelFlag) { /*TODO do i need to add a warning? because this label is ignored*/
+                    checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray,1);
+                }
+                else{
+                    checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray, 0);
+                }
                 break;
             }
             else if (isValidOperation(currentWord, operationsArray)!=-1){
@@ -384,13 +394,21 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
  * @param line - the current line text
  * @param errorInfo - the error struct
  * @param operationsArray - the array of operations
+ * @param labelFlag - a flag to signal if the first word is a label
  */
-void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray){
+void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag){
     char* currentWord;
     int flag = 0;
 
-    currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
-    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    if(labelFlag){
+        currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
+    else{
+        currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
     while (currentWord!= NULL) {
         if (flag){
             printError(errorInfo, "Extraneous text after First label of .extern");

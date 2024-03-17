@@ -347,18 +347,25 @@ int isValidOperation(char* word, operationInfo* operationsArray) {
 }
 
 /**
- * This function checks the syntax of the .entry directive, as well as if it's been defined as .extern.
+ * This function checks the syntax of the .entry directive, as well as if it's been already been defined as .extern.
  * @param head The symbol list.
  * @param line The line to be checked.
  * @param errorInfo The error struct.
  * @param operationsArray The operations array.
  */
-void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray) {
+void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag) {
     char* currentWord;
     int flag = 0;
 
+    if(labelFlag){
     currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
     currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
+    else{
+        currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
     while (currentWord!= NULL) {
         if(flag){
             printError(errorInfo, "Extraneous text after Label definition for .entry");

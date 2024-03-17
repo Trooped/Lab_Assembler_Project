@@ -27,7 +27,7 @@ int isString(char* word);
 
 int isExtern(char* word);
 
-void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray);
+void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag);
 
 int isEntry(char* word);
 

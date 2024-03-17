@@ -37,9 +37,11 @@ FILE* createNewFileAndWriteMacros(FILE* source, const char* oldFileName);
 /**
  * This function will allocate memory for the macros array.
  * @param size the size of the array
+ * @param macros the macros array
+ * @param resultFile the new file
  * @return the macros array
  */
-macro** allocateMemoryToMacros(int size);
+macro** allocateMemoryToMacros(int macroArrSize, macro **macrosArr, FILE* resultFile);
 
 /**
  * This function will process the lines of the old file and write the macros into the new file.
@@ -106,6 +108,13 @@ void removeSubstring(char* string, const char* sub);
 */
 int checkIfMacroNameIsValid(char* word);
 
+/**
+ * This function will free the memory allocated for the macros array and close the file.
+ * @param file the file to close
+ * @param macros the macros array
+ * @param macroCount the number of macros
+ */
+void freeMemoryAndCloseFile(FILE* file, macro **macros, int macroCount);
 
 
 #endif

@@ -38,9 +38,15 @@ void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     entryLabelName = strtok(NULL, " \n\r\t"); /* Get the next word.*/
     /* Search for the name in the list*/
     while (current != NULL) {
-        if (strcmp(current->name, entryLabelName) == 0) {
-            current->isEntry = 1;
-            return;
+        if (strcmp(current->name, entryLabelName) == 0){
+            if (strcmp(current->type, "code") == 0 || strcmp(current->type, "data") == 0){
+                current->isEntry = 1;
+                return;
+            }
+            else{
+                printError(errorInfo, ".entry label is not of type code or data");
+                return;
+            }
         }
         current = current->next;
     }

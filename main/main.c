@@ -6,11 +6,6 @@
 #include <stdio.h>
 #include "main.h"
 
-/*TODO why is this here?*/
-/*int lineCount=0; /* for error reporting */
-/*int error; /* to indicate an error has been encountered */
-
-
 /*----------------------------------------TESTING------------------------------*/
 #include <assert.h>
 
@@ -65,7 +60,7 @@ void testCopyMacrosIntoNewFile() {
 
 void testAssembler() {
 
-    const char* testFileName = "testFileErrors";
+    const char* testFileName = "testFile";
     FILE* testFile = fopen(testFileName, "r");
     if (testFile != NULL) {
         assembler(testFile, testFileName);

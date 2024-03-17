@@ -18,7 +18,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int operati
 
 void handleData(char* type, char* line, symbolList ** head, int *DC, binaryWord* dataArray, error** errorInfo);
 
-void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray);
+void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag);
 
 void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo);
 
