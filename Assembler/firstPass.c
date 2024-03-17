@@ -68,7 +68,6 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                  */
                 L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 0);
                 if (L == -1){
-                    printError(errorInfo, "Invalid operation"); /*TODO do I even need this?*/
                     break;
                 }
                 else{
@@ -110,12 +109,14 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     while (isspace((unsigned char)*line)) line++;
 
     /* Now 'line' should be positioned at the start of the operands*/
-    parseOperandsFirstPass(line, operands);
+    if (!parseOperandsFirstPass(line, operands, errorInfo)) {
+        return -1;
+    }
 
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
-            printError(errorInfo, "Too many operands for a 0 operand operationInfo");
+            printError(errorInfo, "Too many operands for a 0 operand operation");
         }
         else{
             firstOperand = 0;
@@ -124,30 +125,34 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     }
     else if (operationsArray[opcode].numOfOperands == 1) {
         if (operands[1][0] != '\0') {
-            printError(errorInfo, "Too many operands for a 1 operand operationInfo");
+            printError(errorInfo, "Too many operands for a 1 operand operation");
         }
         else{
             firstOperand = 0;
             secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
+            if (secondOperand == -999){
+                return -1;
+            }
         }
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
         if (operands[2][0] != '\0') {
-            printError(errorInfo, "Too many operands for a 2 operand operationInfo");
+            printError(errorInfo, "Too many operands for a 2 operand operation");
         }
         else{
             firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
-            secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo);
+            if (firstOperand != -999){
+                secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo);
+            }
         }
     }
-    /*TODO do i need another condition? MAYBE I NEED SOMETHING ELSE?? LIKE TOO LITTLE OPERANDS?*/
+    /*TODO ADD ERROR FOR TOO LITTLE OPERANDS!*/
 
 
     /*TODO important!! everything stops here potentially!*/
     /*TODO it seems like I've already taken care of this part in the operandCode function, but welp*/
     if (firstOperand == -999 || secondOperand == -999) {
-        /*TODO add an error, wrong operand code*/
-        /*TODO exit.*/
+        return -1;
     }
 
 
@@ -387,6 +392,7 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
     /* Move 'ptr' past '=' and optional whitespace */
     ptr = equalPos + 1;
     while (*ptr == ' ' || *ptr == '\t') ptr++; /* Skip spaces or tabs after '=' */
+    trimWhitespace(ptr); /* Remove leading and trailing whitespace*/
 
     /* 'ptr' should now be at the start of the value */
     if (!isValidInteger(ptr)) {

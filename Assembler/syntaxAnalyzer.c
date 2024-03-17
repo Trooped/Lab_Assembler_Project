@@ -30,6 +30,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         return 3;
     }
     else{ /*case of Label or Label offset*/
+        trimWhitespace(operand);
         while (operand[i] != '[' && operand[i] != '\0') {
             tempOperand[i] = operand[i];
             i++;
@@ -54,7 +55,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     j++;
                 }
                 tempVal[j] = '\0'; /*Null terminating the temp String*/
-                if (operand[i]==']'){
+                if (operand[i]==']' && operand[i+1] == '\0'){
                     if (!isValidInteger(tempVal)){
                         int symbolValue;
                         if (!findSymbolValue(head, tempVal, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
@@ -84,19 +85,40 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
 }
 
 
-void parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
-    /* Assuming line is positioned at the start of operands*/
+int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH], error** errorInfo) {
     char* token;
     int operandIndex = 0;
+    char* nextToken;
 
-    /* Tokenize the line by commas to extract operands*/
-    token = strtok(line, ",");
-    while(token != NULL && operandIndex < MAXOPERANDS) {
-        trimWhitespace(token); /* Remove leading and trailing whitespace*/
-        strncpy(operands[operandIndex++], token, MAXOPERANDLENGTH - 1);
-        operands[operandIndex - 1][MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null termination*/
-        token = strtok(NULL, ",");
+    if (line[0] == ',' || strstr(line, ",,") != NULL || line[strlen(line) - 1] == ',') {
+        printError(errorInfo, "Invalid syntax: comma before or after operands, or two consecutive commas found.");
+        return 0;
     }
+
+    token = strtok(line, ",");
+    while (token != NULL && operandIndex < MAXOPERANDS) {
+        trimWhitespace(token); /* Remove leading and trailing whitespace */
+
+        /* Check for an empty token, indicating " , ," pattern */
+        if (token[0] == '\0') {
+            printError(errorInfo, "Invalid syntax: extraneous text after operands");
+            return 0; /* Early return on finding an empty operand */
+        }
+
+        nextToken = strtok(NULL, ",");
+        if (operandIndex == MAXOPERANDS - 1 && nextToken != NULL) {
+            printError(errorInfo, "Invalid syntax: too many operands provided.");
+            printf("Invalid syntax: too many operands provided.\n");
+            return 0; /* Early return if there's content after the second operand */
+        }
+
+        strncpy(operands[operandIndex], token, MAXOPERANDLENGTH - 1);
+        operands[operandIndex][MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null termination */
+
+        operandIndex++;
+        token = nextToken; /* Proceed to the next token */
+    }
+    return 1;
 }
 
 void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine) {

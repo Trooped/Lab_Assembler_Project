@@ -12,7 +12,7 @@
 
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo);
 
-void parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
+int parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH], error** errorInfo);
 
 void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine);
 int isSymbolExtern(symbolList** head, char* symbolName);
