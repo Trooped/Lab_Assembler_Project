@@ -1,12 +1,20 @@
 #include "syntaxAnalyzer.h"
 
 
-
+/**
+ * This function gets the operand code for the instruction.
+ * * 0 = instant, constant (#number or #define)
+ * 1 = direct, Label
+ * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
+ * 3 = register, one of the registers.
+ *
+ * @param operand The operand to be checked.
+ * @param head The symbol list.
+ * @param operationsArray The operations array.
+ * @param errorInfo The error struct.
+ * @return The operand code.
+ */
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo){
-    /* 0 = instant, constant (#number or #define)
-     * 1 = direct, Label
-     * 2 = constant index (meaning an offset number in an array (it must be of a label, and the offset must be a number / define THAT WAS DEFINED)
-     * 3 = register, one of the registers.*/
     int i = 0, j=0;
     char tempVal[MAXOPERANDLENGTH];
     int val;
@@ -20,7 +28,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
                 printError(errorInfo, "Invalid Integer or undefined symbol for immediate operand");
-                return -999; /*TODO do I even need to retunr this??*/
+                return INSTRUCTIONFAILCODE;
             }
             val = symbolValue; /* Use the value from the symbol list*/
         }
@@ -43,7 +51,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
             }
             else {
                 printError(errorInfo, "Undefined Label name");
-                return -999; /*TODO add constant for failed function*/
+                return INSTRUCTIONFAILCODE;
             }
         }
         else if (operand[i] == '[') {
@@ -59,32 +67,38 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     if (!isValidInteger(tempVal)){
                         int symbolValue;
                         if (!findSymbolValue(head, tempVal, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printError(errorInfo, "Unvalid Integer or undefined symbol for offset operand");
-                            return -999; /*TODO add constant for failed function*/
+                            printError(errorInfo, "Invalid Integer or undefined symbol for offset operand");
+                            return INSTRUCTIONFAILCODE;
                         }
                         val = symbolValue; /* Use the value from the symbol list*/
                     }
                     return 2;
                 }
                 else {
-                    printError(errorInfo, "Unvalid offset declaration, doesn't end with ']'");
-                    return -999; /*TODO add constant for failed function*/
+                    printError(errorInfo, "Invalid offset declaration, doesn't end with ']'");
+                    return INSTRUCTIONFAILCODE;
                 }
             }
             else {
                 printError(errorInfo, "Undefined Label");
-                return -999; /*TODO add constant for failed function*/
+                return INSTRUCTIONFAILCODE;
             }
         }
         else {
-            printError(errorInfo, "Unvalid operand"); /*TODO what the hell is this case? need to test this*/
+            printError(errorInfo, "Invalid operand"); /*TODO what the hell is this case? need to test this*/
         }
     }
-    printError(errorInfo, "Unvalid operand");
-    return -999; /*TODO add constant for failed function*/
+    printError(errorInfo, "Invalid operand");
+    return INSTRUCTIONFAILCODE;
 }
 
-
+/**
+ * This function parses the operands in the first pass of the assembler.
+ * @param line The line to be parsed.
+ * @param operands The array to store the operands.
+ * @param errorInfo The error struct.
+ * @return 1 if the parsing was successful, 0 otherwise.
+ */
 int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH], error** errorInfo) {
     char* token;
     int operandIndex = 0;
@@ -121,6 +135,13 @@ int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENG
     return 1;
 }
 
+
+/**
+ * This function parses the operands in the second pass of the assembler.
+ * @param operand The operand to be parsed.
+ * @param outOperand The output operand.
+ * @param outLabelOrDefine The output label or define.
+ */
 void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine) {
     char* bracketPos;
 
@@ -158,6 +179,12 @@ void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLab
     }
 }
 
+/**
+ * This function checks if a symbol is external.
+ * @param head The symbol list.
+ * @param symbolName The symbol name.
+ * @return 1 if the symbol is external, 0 otherwise.
+ */
 int isSymbolExtern(symbolList** head, char* symbolName){
     if (searchSymbolList(head, symbolName, "external") == 0){
         return 1;
@@ -165,6 +192,10 @@ int isSymbolExtern(symbolList** head, char* symbolName){
     return 0;
 }
 
+/**
+ * This function trims the whitespace before and after the string.
+ * @param str The string to be trimmed.
+ */
 void trimWhitespace(char* str) {
     int start = 0, end = 0;
     int i, length;
@@ -187,7 +218,11 @@ void trimWhitespace(char* str) {
     str[i] = '\0';  /* Null-terminate the modified string*/
 }
 
-
+/**
+ * This function checks if the word is a .define directive.
+ * @param word The word to be checked.
+ * @return 1 if the word is a .define directive, 0 otherwise.
+ */
 int isDefine(char* word) {
     if (strcmp(word, ".define") == 0) {
         return 1;
@@ -195,7 +230,11 @@ int isDefine(char* word) {
     return 0;
 }
 
-
+/**
+ * This function checks if the word is a .data directive.
+ * @param word The word to be checked.
+ * @return 1 if the word is a .data directive, 0 otherwise.
+ */
 int isData(char* word) {
     if (strcmp(word, ".data") == 0) {
         return 1;
@@ -203,6 +242,11 @@ int isData(char* word) {
     return 0;
 }
 
+/**
+ * This function checks if the word is a .string directive.
+ * @param word The word to be checked.
+ * @return 1 if the word is a .string directive, 0 otherwise.
+ */
 int isString(char* word) {
     if (strcmp(word, ".string") == 0) {
         return 1;
@@ -210,6 +254,11 @@ int isString(char* word) {
     return 0;
 }
 
+/**
+ * This function checks if the word is a .extern directive.
+ * @param word The word to be checked.
+ * @return 1 if the word is a .extern directive, 0 otherwise.
+ */
 int isExtern(char* word) {
     if (strcmp(word, ".extern") == 0) {
         return 1;
@@ -217,6 +266,11 @@ int isExtern(char* word) {
     return 0;
 }
 
+/**
+ * This function checks if the word is a .entry directive.
+ * @param word The word to be checked.
+ * @return 1 if the word is a .entry directive, 0 otherwise.
+ */
 int isEntry(char* word) {
     if (strcmp(word, ".entry") == 0) {
         return 1;
@@ -224,7 +278,19 @@ int isEntry(char* word) {
     return 0;
 }
 
-/*TODO add errors!*/
+/**
+ * This function checks if the label name is valid.
+ * The rules are:
+ * Not a reserved word, not a register, not a number, not a defined symbol, not a label that already exists.
+ * As well as the first character being an alphabetical character, and the rest of the characters being either uppercase or digits.
+ * And the name being less than 31 characters.
+ *
+ * @param name The label name to be checked.
+ * @param operationsArray The operations array.
+ * @param head The symbol list.
+ * @param colonFlag A flag indicating if the label has a colon.
+ * @return 1 if the label name is valid, 0 otherwise.
+ */
 int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** head, int colonFlag){
     int i;
     char lastChar = name[strlen(name) - 1];
@@ -264,8 +330,12 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
     return 1;
 }
 
-
-
+/**
+ * This function checks if the word is a valid operation.
+ * @param word The word to be checked.
+ * @param operationsArray The operations array.
+ * @return The index of the operation in the operations array if the word is a valid operation, -1 otherwise.
+ */
 int isValidOperation(char* word, operationInfo* operationsArray) {
     int i;
     for (i = 0; i < NUMOFOPERATIONS; i++) {
@@ -276,6 +346,13 @@ int isValidOperation(char* word, operationInfo* operationsArray) {
     return -1;
 }
 
+/**
+ * This function checks the syntax of the .entry directive, as well as if it's been defined as .extern.
+ * @param head The symbol list.
+ * @param line The line to be checked.
+ * @param errorInfo The error struct.
+ * @param operationsArray The operations array.
+ */
 void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray) {
     char* currentWord;
     int flag = 0;
@@ -303,7 +380,11 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
 }
 
 
-/*TODO add a relevant error message*/
+/**
+ * This function checks if the string is a valid integer.
+ * @param str The string to be checked.
+ * @return 1 if the string is a valid integer, 0 otherwise.
+ */
 int isValidInteger(char* str) {
     int i;
     int len = strlen(str);
@@ -338,6 +419,11 @@ int isValidInteger(char* str) {
     return 1;
 }
 
+/**
+ * This function checks if the word is a register.
+ * @param word The word to be checked.
+ * @return 1 if the word is a register, 0 otherwise.
+ */
 int isRegister(char* word){
     if (strcmp(word, "r0") == 0 || strcmp(word, "r1") == 0 || strcmp(word, "r2") == 0 || strcmp(word, "r3") == 0 || strcmp(word, "r4") == 0 || strcmp(word, "r5") == 0 || strcmp(word, "r6") == 0 || strcmp(word, "r7") == 0 ){
         return 1;

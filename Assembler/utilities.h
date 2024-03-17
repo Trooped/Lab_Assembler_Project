@@ -12,15 +12,17 @@
 
 int findSymbolValue(symbolList **head, const char* name,char* type, int* value);
 
+void markLabelAsEntry(symbolList** head, char* line, error** errorInfo);
+
 char* removeColon(char* label);
 
 int searchSymbolList(symbolList** head, char* name, char* type);
 
-void markLabelAsEntry(symbolList** head, char* line, error** errorInfo);
-
 void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo);
 
 void addExternAddress(symbolList** head, char* name, int address);
+
+void initializeOperationsArray(operationInfo* operationsArray);
 
 void closeFileAndExit(error** errorInfo, symbolList** symbolTable);
 
@@ -41,8 +43,6 @@ void incrementDataSymbolValues(symbolList** head, int byValue);
 void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
 
 void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileName, FILE* file);
-
-void initializeOperationsArray(operationInfo* operationsArray);
 
 void printSymbolList(const symbolList* head);
 void printBits(int value);

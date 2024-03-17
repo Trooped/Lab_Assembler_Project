@@ -1,6 +1,14 @@
 #include "utilities.h"
 
-
+/**
+ * This function searches the symbol table for a specific label and returns its value.
+ *
+ * @param head The head of the symbol table.
+ * @param name The name of the label to search for.
+ * @param type The type of the label to search for.
+ * @param value A pointer to an integer to store the value of the label.
+ * @return int 1 if the label was found, 0 if it wasn't.
+ */
 int findSymbolValue(symbolList **head, const char* name,char* type, int* value) {
     symbolList* current = *head;
         while (current != NULL) {
@@ -15,7 +23,13 @@ int findSymbolValue(symbolList **head, const char* name,char* type, int* value) 
     return 0;
 }
 
-/*TODO check if it works correctly!!*/
+/**
+ * This function marks a label as an entry in the symbol table.
+ *
+ * @param head The head of the symbol table.
+ * @param line The line to parse.
+ * @param errorInfo A pointer to the errorInfo struct.
+ */
 void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     char* entryLabelName;
     symbolList* current = *head;
@@ -33,6 +47,12 @@ void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     printError(errorInfo, ".entry Label not found in the symbol table");
 }
 
+/**
+ * This function removes the colon from a label.
+ *
+ * @param label The label to remove the colon from.
+ * @return char* The label without the colon.
+ */
 char* removeColon(char* label) {
     char* newLabel = label;
     if (label[strlen(label) - 1] == ':') {
@@ -41,7 +61,14 @@ char* removeColon(char* label) {
     return newLabel;
 }
 
-
+/**
+ * This function searches the symbol table for a specific label.
+ *
+ * @param head The head of the symbol table.
+ * @param name The name of the label to search for.
+ * @param type The type of the label to search for.
+ * @return int 1 if the label wasn't found, 0 if it was found in the table.
+ */
 int searchSymbolList(symbolList** head, char* name, char* type) {
     symbolList* current = *head;
     trimWhitespace(name);
@@ -66,7 +93,15 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
 }
 
 
-/* Function to add a new node at the end of the list */
+/**
+ * This function adds a label to the symbol table.
+ *
+ * @param head The head of the symbol table.
+ * @param name The name of the label to add.
+ * @param type The type of the label to add.
+ * @param value The value of the label to add.
+ * @param errorInfo A pointer to the errorInfo struct.
+ */
 void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo) {
     int i;
     symbolList* newNode = NULL;
@@ -105,6 +140,11 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
     }
 }
 
+/**
+ * This function initializes the operations array with the names, codes, and number of operands for each of the 16 operations.
+ *
+ * @param operationsArray The operations array to initialize.
+ */
 void initializeOperationsArray(operationInfo* operationsArray) {
     /* Initialize operation 0 */
     operationsArray[0].name = "mov";
@@ -187,9 +227,11 @@ void initializeOperationsArray(operationInfo* operationsArray) {
     operationsArray[15].numOfOperands = 0;
 }
 
-
-/*TODO call this one in the end of the main function??*/
-/* Function to delete the entire list */
+/**
+ * This function deletes the symbol table and frees the memory.
+ *
+ * @param head The head of the symbol table.
+ */
 void deleteSymbolList(symbolList** head) {
     symbolList* current = *head;
     symbolList* nextNode = NULL;
@@ -201,19 +243,33 @@ void deleteSymbolList(symbolList** head) {
     *head = NULL; /* Ensure the caller's head pointer is set to NULL*/
 }
 
+/**
+ * This function inserts the first instruction into the instruction array.
+ * meaning - the first word of each instruction.
+ *
+ * @param instructionArray The instruction array to insert the instruction into.
+ * @param IC The instruction counter.
+ * @param opcode The opcode of the instruction.
+ * @param firstOperand The first operand of the instruction.
+ * @param secondOperand The second operand of the instruction.
+ */
 void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
     binaryWord newWord;
-    /*TODO remove all of that
-    Start with the first 4 bits as 0000, which we can ignore as the bits are 0 by default.
-    Then shift the opcode to its correct position (6 bits to the left)
-    Then shift the firstOperand 4 bits to the left
-    Then shift the secondOperand 2 bits to the left
-    The last 2 bits are 00 and don't need to be explicitly set
-    */
     newWord.wordBits = (opcode << 6) | (firstOperand << 4) | (secondOperand << 2);
     instructionArray[IC] = newWord;
 }
 
+/**
+ * This function converts an operand to binary and inserts it into the instruction array.
+ *
+ * @param instructionArray The instruction array to insert the operand into.
+ * @param IC The instruction counter.
+ * @param operand The operand to convert and insert.
+ * @param head The head of the symbol table.
+ * @param errorInfo A pointer to the errorInfo struct.
+ * @param source A flag to indicate if the operand is a source operand (1) or a destination operand (0).
+ * @param offset A flag to indicate if the operand is an offset operand.
+ */
 void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset) {
     int val;
     binaryWord newWord;
@@ -262,6 +318,7 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
     instructionArray[IC] = newWord;
 }
 
+
 void addExternAddress(symbolList** head, char* name, int address){
     int i=0;
     symbolList* current = *head;
@@ -277,6 +334,17 @@ void addExternAddress(symbolList** head, char* name, int address){
     }
 }
 
+
+/**
+ * This function inserts the operands into the instruction array, calling the convertOperandToBinaryAndInsertIntoArray function for each operand.
+ *
+ * @param instructionArray The instruction array to insert the operands into.
+ * @param numOfLines The number of lines in the file.
+ * @param IC The instruction counter.
+ * @param operands The operands to insert into the instruction array.
+ * @param head The head of the symbol table.
+ * @param errorInfo A pointer to the errorInfo struct.
+ */
 void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo){
     binaryWord newWord;
     int regNumSource, regNumDest;
@@ -298,6 +366,7 @@ void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfL
         parseOperandsSecondPass(operands[1], &secondOperand, &labelOrDefineSecond);
     }
 
+    /*If the first operand is a register and the second is a register, special case where one word is being used*/
     if(isRegister(operands[0]) && isRegister(operands[1])){
         regNumSource = atoi(operands[0] + 1);
         regNumDest = atoi(operands[1] + 1);
@@ -326,12 +395,25 @@ void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfL
 }
 
 
+/**
+ * This function adds a value in binary to the data array.
+ *
+ * @param dataArray The data array to add the value to.
+ * @param DC The data counter.
+ * @param value The value to add to the data array.
+ */
 void addValueToDataArray(binaryWord* dataArray, int DC, int value) {
     binaryWord newWord;
     newWord.wordBits = value;
     dataArray[DC] = newWord;
 }
 
+/**
+ * This function prints an error message and updates the errorInfo struct accordingly.
+ *
+ * @param errorInfo A pointer to the errorInfo struct.
+ * @param errorDescription The description of the error.
+ */
 void printError(error** errorInfo, char* errorDescription){
     (*errorInfo)->counter++;
     (*errorInfo)->errorFlag = 1;
@@ -341,6 +423,13 @@ void printError(error** errorInfo, char* errorDescription){
     printf("Error %d found in file '%s'\nline content: '%s'\nerror description: %s\n\n",(*errorInfo)->counter, (*errorInfo)->fileName, (*errorInfo)->lineText, errorDescription);
 }
 
+/**
+ * This function increments the values of the data symbols in the symbol table by a specific value.
+ * This is used to update the data symbols after the first pass.
+ *
+ * @param head The head of the symbol table.
+ * @param byValue The value to increment the data symbols by.
+ */
 void incrementDataSymbolValues(symbolList** head, int byValue) {
     symbolList* current = (*head);
     while (current != NULL) {
@@ -351,6 +440,11 @@ void incrementDataSymbolValues(symbolList** head, int byValue) {
     }
 }
 
+/**
+ * This function initializes the operands array with null characters.
+ *
+ * @param operands The operands array to initialize.
+ */
 void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
     int i, j;
     for (i = 0; i < MAXOPERANDS; i++) {
@@ -360,6 +454,14 @@ void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
     }
 }
 
+/**
+ * This function initializes the errorInfo struct to NULL, with the file name and file pointer.
+ *
+ * @param errorInfo A pointer to the errorInfo struct.
+ * @param symbolTable A pointer to the symbol table.
+ * @param fileName The name of the file.
+ * @param file The file pointer.
+ */
 void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileName, FILE* file) {
     *errorInfo = malloc(sizeof(error));
     if (*errorInfo == NULL) {
@@ -374,7 +476,12 @@ void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileN
     (*errorInfo)->lineText[0] = '\0';
 }
 
-
+/**
+ * This function closes the file and frees the memory before exiting the program.
+ *
+ * @param errorInfo A pointer to the errorInfo struct.
+ * @param symbolTable A pointer to the symbol table.
+ */
 void closeFileAndExit(error** errorInfo, symbolList** symbolTable) {
     if ((*errorInfo)->file != NULL) {
         fclose((*errorInfo)->file);

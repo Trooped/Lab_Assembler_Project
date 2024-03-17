@@ -1,5 +1,11 @@
 #include "assembler.h"
 
+/**
+ * This function is the main function of the assembler. It reads the source file and creates the memory image.
+ * it also calls the firstPass and secondPass functions.
+ * @param source The source file to be read.
+ * @param fileName The name of the file.
+ */
 void assembler(FILE* source, const char* fileName){
     binaryWord dataArray[MAXDATA]; /* array for data to be put in the memory image */
     binaryWord instructionArray[MAXINSTRUCTIONS]; /* array for the instructions to be put in the memory image.*/
@@ -68,7 +74,11 @@ void assembler(FILE* source, const char* fileName){
     free(errorInfo);
 }
 
-
+/**
+ * This function initializes the data array with a given value.
+ * @param dataArray The array to be initialized.
+ * @param initialValue The value to initialize the array with.
+ */
 void initializeDataArray(binaryWord* dataArray, int initialValue) {
     int i;
 
@@ -78,6 +88,11 @@ void initializeDataArray(binaryWord* dataArray, int initialValue) {
     }
 }
 
+/**
+ * This function initializes the instruction array with a given value.
+ * @param instructionArray The array to be initialized.
+ * @param initialValue The value to initialize the array with.
+ */
 void initializeInstructionArray(binaryWord* instructionArray, int initialValue) {
     int i;
 

@@ -1,6 +1,16 @@
 #include "firstPass.h"
 
-
+/**
+ * This function is the first pass of the assembler. It goes through the source file and creates the symbol table, and the data and initial instruction arrays.
+ * @param sourceFile The source file to be read.
+ * @param dataArray The array to store the data.
+ * @param instructionArray The array to store the instructions.
+ * @param operationsArray The array to store the operations.
+ * @param symbolTable The symbol table.
+ * @param IC The instruction counter.
+ * @param DC The data counter.
+ * @param errorInfo The error struct.
+ */
 void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
     int labelFlag = 0;
     int operation = 0;
@@ -61,13 +71,8 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
                 operation = isValidOperation(currentWord, operationsArray);
 
-                /* TODO do i need it?
-                if (operation == -1){
-                    printError(errorInfo, "Invalid operation");
-                }
-                 */
                 L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 0);
-                if (L == -1){
+                if (L == INSTRUCTIONFAILCODE){
                     break;
                 }
                 else{
@@ -85,15 +90,27 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     }
 }
 
+/**
+ * This function handles the operations, and does different actions depending on if it's the first or second pass.
+ * first pass - only checks for syntax errors, adds the first word only and updates the IC
+ * second pass - adds the operands to the instruction array (to the reserved spaces after the first word)
+ * @param head - the symbol table
+ * @param instructionArray - the array of instructions
+ * @param opcode - the operation code of our operation
+ * @param line - the current line text
+ * @param IC - the instruction counter
+ * @param operationsArray - the array of operations
+ * @param errorInfo - the error struct
+ * @param isSecondPass - a flag to signal if it's the second pass, and use different actions accordingly
+ * @return the length of the operation or INSTRUCTIONFAILCODE if the operation failed
+ */
 int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo, int isSecondPass) {
     int L = 0;
-    int i;
     char* colon;
     int firstOperand;
     int secondOperand;
     char operands[MAXOPERANDS][MAXOPERANDLENGTH];
     initializeOperandsArray(operands);
-
 
     /* Skip label if present*/
     colon = strchr(line, ':');
@@ -110,13 +127,13 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
 
     /* Now 'line' should be positioned at the start of the operands*/
     if (!parseOperandsFirstPass(line, operands, errorInfo)) {
-        return -1;
+        return INSTRUCTIONFAILCODE;
     }
-
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
             printError(errorInfo, "Too many operands for a 0 operand operation");
+            return INSTRUCTIONFAILCODE;
         }
         else{
             firstOperand = 0;
@@ -126,33 +143,45 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     else if (operationsArray[opcode].numOfOperands == 1) {
         if (operands[1][0] != '\0') {
             printError(errorInfo, "Too many operands for a 1 operand operation");
+            return INSTRUCTIONFAILCODE;
+        }
+        else if(operands[0][0] == '\0'){
+            printError(errorInfo, "Too few operands for a 1 operand operation");
+            return INSTRUCTIONFAILCODE;
         }
         else{
             firstOperand = 0;
             secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
-            if (secondOperand == -999){
-                return -1;
+            if (secondOperand == INSTRUCTIONFAILCODE){
+                return INSTRUCTIONFAILCODE;
             }
         }
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
         if (operands[2][0] != '\0') {
             printError(errorInfo, "Too many operands for a 2 operand operation");
+            return INSTRUCTIONFAILCODE;
+        }
+        else if (operands[1][0] == '\0'){
+            printError(errorInfo, "Too few operands for a 2 operand operation");
+            return INSTRUCTIONFAILCODE;
+        }
+        else if (operands[0][0] == '\0'){
+            printError(errorInfo, "Too few operands for a 2 operand operation");
+            return INSTRUCTIONFAILCODE;
         }
         else{
             firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
-            if (firstOperand != -999){
+            if (firstOperand != INSTRUCTIONFAILCODE){
                 secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo);
             }
         }
     }
     /*TODO ADD ERROR FOR TOO LITTLE OPERANDS!*/
 
-
-    /*TODO important!! everything stops here potentially!*/
-    /*TODO it seems like I've already taken care of this part in the operandCode function, but welp*/
-    if (firstOperand == -999 || secondOperand == -999) {
-        return -1;
+    /*Another test if anything failed*/
+    if (firstOperand == INSTRUCTIONFAILCODE || secondOperand == INSTRUCTIONFAILCODE) {
+        return INSTRUCTIONFAILCODE;
     }
 
 
@@ -167,6 +196,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 0: /*mov*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot move to an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 1: /*cmp*/
@@ -174,51 +204,61 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 2: /*add*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot add into an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 3: /*sub*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot subtract from an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 4: /*lea*/
             if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
                 printError(errorInfo, "Illegal operands for lea operation");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 5: /*not*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot negate an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 6: /*clr*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot clear an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 7: /*inc*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot increment an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 8: /*dec*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot decrement an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 9: /*jmp*/
             if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Illegal operands for jmp");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 10: /*bne*/
             if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Illegal operands for bne");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 11: /*red*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot read into an immediate operand");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 12: /*prn*/
@@ -226,6 +266,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 13: /*jsr*/
             if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Illegal operands for jsr");
+                return INSTRUCTIONFAILCODE;
             }
             break;
         case 14: /*rts*/
@@ -233,7 +274,8 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 15: /*hlt*/
             break;
         default:
-            printError(errorInfo, "Invalid operationInfo");
+            printError(errorInfo, "Invalid operation");
+            return INSTRUCTIONFAILCODE;
             break;
     }
 
@@ -253,7 +295,15 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     return L;
 }
 
-
+/**
+ * This function handles the .data and .string directives, and adds the data to the data array
+ * @param type - the type of directive (data or string)
+ * @param line - the current line text
+ * @param head - the symbol table
+ * @param DC - the data counter
+ * @param dataArray - the array of data
+ * @param errorInfo - the error struct
+ */
 void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
     char* numbers;
     char* token;
@@ -328,7 +378,13 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
 }
 
 
-
+/**
+ * This function handles the .extern directive, and adds the label to the symbol table if it's valid
+ * @param head - the symbol table
+ * @param line - the current line text
+ * @param errorInfo - the error struct
+ * @param operationsArray - the array of operations
+ */
 void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray){
     char* currentWord;
     int flag = 0;
@@ -352,7 +408,13 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
     }
 }
 
-
+/**
+ * This function handles the .define directive, and adds the label to the symbol table if it's valid
+ * @param head - the symbol table
+ * @param operationsArray - the array of operations
+ * @param line - the current line text
+ * @param errorInfo - the error struct
+ */
 void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
     char name[MAXLABELNAME] = {0};
     int value = 0;
