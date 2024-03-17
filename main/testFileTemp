@@ -1,0 +1,27 @@
+
+MAIN:	mov r3, LIST[sz]
+
+MAIN: .string"abcdef"
+
+LIST: .data 6. -9, len
+
+LIST1: d .data 6, -9,. len
+
+LIST2: .data 6, --9, len
+
+LIST3: .data 6, ++9, len
+
+LIST4: .data 6, MAIN, len
+
+LIST5: .data 6, -9 len
+
+LIST6: .data 2048, -9, len
+
+LIST7: .data -2049, -9, len
+
+STR: .string h "abcdef"
+STR1: .string ,"abcdef"
+
+STR2: .string " "
+
+.define len == 4

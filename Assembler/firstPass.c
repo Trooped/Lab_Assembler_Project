@@ -276,7 +276,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
             if (!isValidInteger(token)){
                 int symbolValue;
                 if (!findSymbolValue(head, token, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                    printError(errorInfo, ("Unvalid Integer or Undefined symbol '%s'", token));
+                    printError(errorInfo, ("Invalid Integer or Undefined symbol"));
                     return; /*TODO should i not return?*/
                 }
                 val = symbolValue; /* Use the value from the symbol list*/
@@ -307,8 +307,10 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
         trimWhitespace(copiedLine); /* Remove leading and trailing whitespace*/
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
             for (i = 1; i < strlen(copiedLine)-1; i++) {
-                addValueToDataArray(dataArray, *DC, copiedLine[i]);
-                (*DC)++;
+                if (isprint(copiedLine[i]) || isspace(copiedLine[i]) || copiedLine[i] == '\0' || copiedLine[i] == '\n' || copiedLine[i] == '\r') { /*TODO do i need the other tests here?*/
+                    addValueToDataArray(dataArray, *DC, copiedLine[i]);
+                    (*DC)++;
+                }
             }
             addValueToDataArray(dataArray, *DC, '\0');
             (*DC)++;
@@ -346,69 +348,60 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
 }
 
 
-int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
+void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
     char name[MAXLABELNAME] = {0};
     int value = 0;
     char* ptr = line;
     char* startName;
     int nameLength;
-    char* valueStr;
-    char* endValue;
+    char* equalPos;
 
-    /* Skip past ".define", assuming 'line' starts with this directive*/
+    /* Skip past ".define" and any whitespace that immediately follows */
     ptr += strlen(".define");
-
-    /* Skip whitespace after ".define"*/
     while (*ptr == ' ' || *ptr == '\t') ptr++;
 
-    /* Copy the name until we hit a space, tab, or '='*/
+    /* Now, 'ptr' should be at the start of the name */
     startName = ptr;
-    while (*ptr && *ptr != ' ' && *ptr != '\t' && *ptr != '=') ptr++;
-    nameLength = ptr - startName;
+    equalPos = strchr(ptr, '='); /* Find the position of '=' */
+    if (!equalPos) {
+        printError(errorInfo, "Missing '=' in .define statement");
+        return;
+    }
+
+    /* Calculate name length, ensuring name doesn't include spaces leading up to '=' */
+    nameLength = equalPos - startName;
+    while (nameLength > 0 && (startName[nameLength - 1] == ' ' || startName[nameLength - 1] == '\t')) {
+        nameLength--; /* Exclude trailing spaces or tabs from the name */
+    }
+
     if (nameLength >= MAXLABELNAME) nameLength = MAXLABELNAME - 1;
     strncpy(name, startName, nameLength);
-    name[nameLength] = '\0';
+    name[nameLength] = '\0'; /* Ensure null-termination */
 
+    /* Check validity of the name */
     if (!isValidLabelName(name, operationsArray, head, 0)) {
         printError(errorInfo, "Not a valid .define symbol name");
-        return 0;
+        return;
     }
 
+    /* Move 'ptr' past '=' and optional whitespace */
+    ptr = equalPos + 1;
+    while (*ptr == ' ' || *ptr == '\t') ptr++; /* Skip spaces or tabs after '=' */
+
+    /* 'ptr' should now be at the start of the value */
+    if (!isValidInteger(ptr)) {
+        printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
+        return;
+    }
+    value = atoi(ptr);
+
+    /* Check for duplicate label name */
     if (!searchSymbolList(head, name, "define")) {
         printError(errorInfo, ".define symbol already exists");
-        return 0;
+        return;
     }
 
-    /* Skip to '='*/
-    while (*ptr && *ptr != '=') ptr++;
-    if (!*ptr) {
-        printError(errorInfo, "Missing '=' in .define statement");
-        return 0;
-    }
-    ptr++; /* Move past '='*/
-
-    /* Skip whitespace after '='*/
-    while (*ptr == ' ' || *ptr == '\t') ptr++;
-
-    /* ptr should now point at the start of the value*/
-    valueStr = ptr;
-    endValue = ptr;
-    while (*endValue && *endValue != ' ' && *endValue != '\t' && *endValue != '\n' && *endValue != '\r') endValue++;
-    *endValue = '\0'; /* Temporarily terminate the string for value conversion*/
-
-    if (!isValidInteger(valueStr)) {
-        int symbolValue;
-        if (!findSymbolValue(head, valueStr,"define", &symbolValue)) {
-            printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
-            return 0;
-        }
-        value = symbolValue; /* Use the value from the symbol list*/
-    } else {
-        value = atoi(valueStr);
-    }
-
-    /* Passed all tests, call addLabel with head, name, type, and value*/
+    /* If all checks pass, add the label */
     addLabel(head, name, "define", value, errorInfo);
-    return 1;
 }
 

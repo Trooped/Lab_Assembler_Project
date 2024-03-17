@@ -233,6 +233,9 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
         if (!isalpha(name[i]) && !isdigit(name[i])) {
             return 0;
         }
+        if (isspace(name[i])){
+            return 0;
+        }
     }
 
     /* If all checks pass, the string is valid */

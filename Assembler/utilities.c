@@ -338,7 +338,7 @@ void printError(error** errorInfo, char* errorDescription){
     if ((*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] == '\n') {
         (*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] = '\0'; /* Remove the newline character*/
     }
-    printf("Error %d found in file '%s'\nline content: '%s'\nerror description: %s\n",(*errorInfo)->counter, (*errorInfo)->fileName, (*errorInfo)->lineText, errorDescription);
+    printf("Error %d found in file '%s'\nline content: '%s'\nerror description: %s\n\n",(*errorInfo)->counter, (*errorInfo)->fileName, (*errorInfo)->lineText, errorDescription);
 }
 
 void incrementDataSymbolValues(symbolList** head, int byValue) {

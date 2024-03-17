@@ -20,7 +20,7 @@ void handleData(char* type, char* line, symbolList ** head, int *DC, binaryWord*
 
 void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray);
 
-int handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo);
+void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo);
 
 
 

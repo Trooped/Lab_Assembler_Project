@@ -65,7 +65,7 @@ void testCopyMacrosIntoNewFile() {
 
 void testAssembler() {
 
-    const char* testFileName = "testFileDefine";
+    const char* testFileName = "testFileErrors";
     FILE* testFile = fopen(testFileName, "r");
     if (testFile != NULL) {
         assembler(testFile, testFileName);
