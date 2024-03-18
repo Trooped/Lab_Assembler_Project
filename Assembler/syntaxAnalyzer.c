@@ -366,6 +366,12 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
+
+    if (!currentWord){
+        printError(errorInfo, "No symbols found after .entry");
+        return;
+    }
+
     while (currentWord!= NULL) {
         if(flag){
             printError(errorInfo, "Extraneous text after Label definition for .entry");

@@ -43,6 +43,9 @@ mov r3
 mov
 mov ,
 
+: hlt
+he llo: hlt
+
 not r3, ARR[2]
 not r3,
 not
@@ -54,4 +57,3 @@ hlt ,
 hlt r2
 hlt r2, r3
 hlt r2, r3, r4
-

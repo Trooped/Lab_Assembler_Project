@@ -105,14 +105,21 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 }
                 else{
                     (*IC) += L;
+                    break;
                 }
             }
             else{
                 printError(errorInfo, "Invalid label, operation or directive");
                 break;
             }
-
             currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+
+            /*Checking if there was an empty label declaration*/
+            if (labelFlag && currentWord == NULL){
+                printError(errorInfo, "Empty label declaration");
+                break;
+            }
+
         }
     }
 }
@@ -340,11 +347,18 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
     if (strcmp(type, "data") == 0) {
         /* Skip the ".data" part to get to the numbers*/
         numbers = strstr(line, ".data");
-        if (!numbers) {
+        if (!numbers) { /*TODO is this test even needed??*/
             printError(errorInfo, "No values found after .data");
             return;
         }
+
         numbers += strlen(".data"); /* Move past ".data"*/
+        while(isspace((unsigned char)*numbers)) numbers++; /* Move past any whitespace after ".data"*/
+
+        if (numbers[0] == '\n' || numbers[0] == '\0') {
+            printError(errorInfo, "No values found after .data");
+            return;
+        }
 
         token = strtok(numbers, ",");
         while (token) {
@@ -370,7 +384,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
             /* Store the integer and increment DC*/
             addValueToDataArray(dataArray, *DC, val);
             (*DC)++;
-            dataCounter++; /*how many data values is stored in the current array?*/
+            dataCounter++; /*counter for data values thar are stored in the current array*/
 
             /* Get the next token*/
             token = strtok(NULL, ",");
@@ -430,6 +444,12 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
+
+    if (!currentWord){
+        printError(errorInfo, "No symbols found after .extern");
+        return;
+    }
+
     while (currentWord!= NULL) {
         if (flag){
             printError(errorInfo, "Extraneous text after First label of .extern");

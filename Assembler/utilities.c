@@ -115,6 +115,10 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
         printError(errorInfo, "Empty label isn't allowed");
         return; /* Early return to avoid processing further*/
     }
+    if (searchSymbolList(head, name, "general") == 0) {
+        printError(errorInfo, "Label already exists in the symbol table");
+        return; /* Early return to avoid processing further*/
+    }
 
     newNode = (symbolList*)malloc(sizeof(symbolList));
     if (newNode == NULL) {
