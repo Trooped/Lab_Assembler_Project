@@ -1,7 +1,9 @@
+.data 1 ,2,3
+
 .entry LIST
 .extern W
 .define sz = 2
-.data 1,2,3,
+
 
 MAIN:	mov r3, LIST[sz]
 LOOP: 	jmp W

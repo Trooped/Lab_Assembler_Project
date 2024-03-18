@@ -340,53 +340,67 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
  */
 void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
     char* numbers;
+    char* ptr;
     char* token;
+    char* lastNonWhitespaceChar;
     long val;
     int dataCounter = 0;
     char copiedLine[MAXCHARSPERLINE];
     if (strcmp(type, "data") == 0) {
-        /* Skip the ".data" part to get to the numbers*/
         numbers = strstr(line, ".data");
-        if (!numbers) { /*TODO is this test even needed??*/
-            printError(errorInfo, "No values found after .data");
+        numbers += strlen(".data"); /* Move past ".data" */
+        while (isspace((unsigned char)*numbers)) numbers++; /* Skip whitespace */
+
+        if (*numbers == '\n' || *numbers == '\0') {
+            printError(errorInfo, "No values found after .data.");
             return;
         }
 
-        numbers += strlen(".data"); /* Move past ".data"*/
-        while(isspace((unsigned char)*numbers)) numbers++; /* Move past any whitespace after ".data"*/
+        /* Initially check for a trailing comma and consecutive commas */
+        ptr = numbers;
+        lastNonWhitespaceChar = NULL;
+        while (*ptr) {
+            if (*ptr == ',' && (!lastNonWhitespaceChar || *lastNonWhitespaceChar == ',')) {
+                printError(errorInfo, "Consecutive commas or trailing comma detected.");
+                return;
+            }
+            if (!isspace((unsigned char)*ptr)) {
+                lastNonWhitespaceChar = ptr;
+            }
+            ptr++;
+        }
 
-        if (numbers[0] == '\n' || numbers[0] == '\0') {
-            printError(errorInfo, "No values found after .data");
+        /* If the last character before any trailing whitespace was a comma, it's a trailing comma */
+        if (lastNonWhitespaceChar && *lastNonWhitespaceChar == ',') {
+            printError(errorInfo, "Trailing comma detected.");
             return;
         }
 
+        /* Tokenization and value processing */
         token = strtok(numbers, ",");
         while (token) {
-            if (dataCounter>= MAXDATAVALUESINARRAY){
-                printError(errorInfo, "Too many data values inserted");
+            if (dataCounter >= MAXDATAVALUESINARRAY) {
+                printError(errorInfo, "Too many data values inserted.");
                 return;
             }
 
-            trimWhitespace(token); /* Remove leading and trailing whitespace*/
+            trimWhitespace(token); /* Clean up token*/
 
-            if (!isValidInteger(token)){
+            if (!isValidInteger(token)) {
                 int symbolValue;
-                if (!findSymbolValue(head, token, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                    printError(errorInfo, ("Invalid Integer or Undefined symbol"));
-                    return; /*TODO should i not return?*/
+                if (!findSymbolValue(head, token, "define", &symbolValue)) {
+                    printError(errorInfo, "Invalid integer or undefined symbol.");
+                    return;
                 }
                 val = symbolValue; /* Use the value from the symbol list*/
-            }
-            else{
+            } else {
                 val = atoi(token);
             }
 
-            /* Store the integer and increment DC*/
             addValueToDataArray(dataArray, *DC, val);
             (*DC)++;
-            dataCounter++; /*counter for data values thar are stored in the current array*/
+            dataCounter++;
 
-            /* Get the next token*/
             token = strtok(NULL, ",");
         }
     }
