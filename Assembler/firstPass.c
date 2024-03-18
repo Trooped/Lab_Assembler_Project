@@ -372,9 +372,13 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
         trimWhitespace(copiedLine); /* Remove leading and trailing whitespace*/
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
             for (i = 1; i < strlen(copiedLine)-1; i++) {
-                if (isprint(copiedLine[i]) || isspace(copiedLine[i]) || copiedLine[i] == '\0' || copiedLine[i] == '\n' || copiedLine[i] == '\r') { /*TODO do i need the other tests here?*/
+                if (isprint(copiedLine[i])){
                     addValueToDataArray(dataArray, *DC, copiedLine[i]);
                     (*DC)++;
+                }
+                else{
+                    printError(errorInfo, "Invalid ASCII character in string");
+                    return;
                 }
             }
             addValueToDataArray(dataArray, *DC, '\0');

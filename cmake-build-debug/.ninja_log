@@ -82,3 +82,7 @@
 11	89	7324117695685408	CMakeFiles/main.dir/Assembler/utilities.c.obj	e023c9409dbb710
 24	95	7324117695760493	CMakeFiles/main.dir/Assembler/syntaxAnalyzer.c.obj	111f56850e9e18fb
 95	159	7324117696367285	main.exe	ce0b7ee50e96f94b
+2	169	7324516717759674	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
+169	310	7324516719149687	main.exe	ce0b7ee50e96f94b
+2	71	7324516884594190	CMakeFiles/main.dir/Assembler/firstPass.c.obj	2507a7ac38ae7acd
+71	130	7324516885169027	main.exe	ce0b7ee50e96f94b
