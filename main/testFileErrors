@@ -2,6 +2,8 @@
 MAIN:	mov r3, LIST[sz]
 MAIN: .string"abcdef"
 
+abcdefghijklmnopqrstuvwxyza1234: .data -2048, -2048, -2048, -2048, -2048, -2048, 234
+
 LIST: .data 6. -9, len
 LIST1: d .data 6, -9,. len
 LIST2: .data 6, --9, len

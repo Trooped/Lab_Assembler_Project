@@ -1,3 +1,11 @@
+/**
+ * This file contains the implementation of the PreAsmblr module.
+ * This module is responsible for copying the macros from the old file into the new file.
+ * The module works with a macros array, which is an array of macro pointers- which is dynamically allocated using a pointer to a pointer.
+ * The macros array is a struct, which contains the macro's name, the lines of the macro and a lines counter for each macro.
+ * The module contains functions to allocate memory for the macros array, process the lines of the old file and write the macros into the new file.
+ * The module also contains functions to add a new macro to the macros array (if the macro's name is valid), free the memory allocated for the macros array and close the file.
+ */
 
 #include "PreAsmblr.h"
 
@@ -15,8 +23,9 @@ FILE* createNewFileAndWriteMacros(FILE* source, const char* oldFileName) {
     int macroArrSize = MAXMACROS; /* Maximum number of macros*/
     int tmpSize = 0;
     int macroCount = 0;
-    macro **macros = allocateMemoryToMacros(macroArrSize, macros, resultFile); /*TODO did i handle macros memory fail??*/
+    macro **macros = allocateMemoryToMacros(macroArrSize); /*initialize a pointer to a pointer macros array, and allocate memory for it.*/
 
+    /*TODO add more comments here.*/
     strcpy(oldFileNameCopy, oldFileName);
 
     removeSubstring(oldFileNameCopy, oldFileFormat);/*TODO IS IT EVEN NEEDED? REMOVE.AS*/
@@ -42,16 +51,18 @@ FILE* createNewFileAndWriteMacros(FILE* source, const char* oldFileName) {
  * @param macros the macros array
  * @return the macros array
  */
-macro** allocateMemoryToMacros(int macroArrSize, macro **macrosArr, FILE* resultFile){
+macro** allocateMemoryToMacros(int macroArrSize){
     macro **macros = (macro**)malloc(macroArrSize * sizeof(macro*));
     if (macros == NULL) {
-        freeMemoryAndCloseFile(resultFile, macros, macroArrSize);
+        fprintf(stderr, "Error allocating memory for macros array: %s\n", strerror(errno));
+        exit(1); /*exiting without the freeMemoryAndCloseFile, because it's inital allocation*/
     }
     return macros;
 }
 
 /**
  * This function will process the lines of the old file and write the macros into the new file.
+ * only 81 characters per line will be read from the file, the rest will be ignored (if the line is longer than 81 characters).
  * @param source the old file
  * @param resultFile the new file
  * @param macros the macros array
@@ -137,14 +148,14 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
             word = strtok(NULL, " \n\r\t"); /* Get the binaryWord following the macro's name */
             if (word != NULL) {
                 /*another binaryWord after macro name, exit the program!*/
-                printf("\nError: macro name cannot be followed by another binaryWord\n");
-                fclose(resultFile); /*TODO should I exit the program here too?*/
+                printf("\nError: macro name cannot be followed by another word\n");
+                freeMemoryAndCloseFile(resultFile, *macros, *macroCount);
                 return;
             }
 
             /*Write the macro's lines into the macros array's relevant macro element. (so we can copy it later into the new file)*/
             while (fgets(lineBuffer, MAXCHARSPERLINE, source) != NULL) {
-                strcpy(currentLine, lineBuffer);/*TODO maybe not use strstr, and just check the first binaryWord?*/
+                strcpy(currentLine, lineBuffer);
                 if (strstr(currentLine, "endmcr") != NULL) {/*If we find endmcr in our line, then we terminate the process of copying.*/
                     break;
                 }
@@ -255,7 +266,7 @@ int checkIfMacroNameIsValid(char* word){
         return 0; /* Return 0 (false) if the binaryWord is a number*/
     }
 
-    char* savedWords[] = {".data", ".string", ".entry", ".extern", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt"};
+    char* savedWords[] = {".data", ".string", ".entry", ".extern", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
     int numSavedWords = sizeof(savedWords) / sizeof(savedWords[0]);
     for (i = 0; i < numSavedWords; i++) {
         if (strcmp(word, savedWords[i]) == 0) {

@@ -295,7 +295,7 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
     int i;
     char lastChar = name[strlen(name) - 1];
 
-    if (colonFlag == 1 && lastChar != ':') {
+    if (colonFlag && lastChar != ':') {
         return 0;
         /*TODO add error*/
     }

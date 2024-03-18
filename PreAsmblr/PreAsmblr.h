@@ -1,3 +1,9 @@
+/**
+ * This header file contains the functions and structs for the pre-assembly process.
+ * The pre-assembly process will copy the macros from the old file into the new file.
+ */
+
+
 #ifndef PREASM_H
 #define PREASM_H
 
@@ -41,7 +47,7 @@ FILE* createNewFileAndWriteMacros(FILE* source, const char* oldFileName);
  * @param resultFile the new file
  * @return the macros array
  */
-macro** allocateMemoryToMacros(int macroArrSize, macro **macrosArr, FILE* resultFile);
+macro** allocateMemoryToMacros(int macroArrSize);
 
 /**
  * This function will process the lines of the old file and write the macros into the new file.

@@ -21,10 +21,28 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     char* currentWord;
 
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
+        size_t lineLen = strlen(lineBuffer);
+        int ch;
+
+        /* Copy the current line into a fullLine (for further parsing) and to the errorInfo struct*/
         fullLine[0] = '\0';
         strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);
         fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
+
+        /* Check if we've read a complete line, if it's longer - then it exceeds the limit of 80 chars.
+         * Throw an error, skip the line and check for other errors, if they exist.*/
+        if (lineBuffer[lineLen - 1] != '\n') {
+            /* We didn't find a newline, which means the line is longer than our buffer */
+            printError(errorInfo, "Line exceeds the maximum allowed length.");
+
+            /* Consume the rest of the line to get back in sync for the next iteration */
+            while ((ch = fgetc(sourceFile)) != '\n' && ch != EOF);
+
+            /* Skip processing this line since it's too long */
+            continue;
+        }
+
 
         /*TODO TESTING PURPOSES*/
         /*printf("lineBuffer: %s\n", lineBuffer);*/
@@ -88,10 +106,9 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 else{
                     (*IC) += L;
                 }
-
             }
             else{
-                printError(errorInfo, "Invalid operation, label, or directive");
+                printError(errorInfo, "Invalid label, operation or directive");
                 break;
             }
 
