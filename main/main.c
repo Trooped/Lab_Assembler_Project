@@ -9,6 +9,31 @@
 /*----------------------------------------TESTING------------------------------*/
 #include <assert.h>
 
+void printFileContent1(const char* filePath) {
+    int c;
+    FILE* file = fopen(filePath, "r"); /* Open the file for reading.*/
+    if (file == NULL) {
+        perror("Error opening file");
+        return;
+    }
+
+
+    while ((c = fgetc(file)) != EOF) { /* Read and print each character.*/
+        putchar(c);
+    }
+
+    fclose(file); /* Close the file.*/
+}
+
+void deleteFile(const char* filePath) {
+    if (remove(filePath) == 0) {
+        printf("File %s deleted successfully.\n", filePath);
+    } else {
+        perror("Error deleting file");
+    }
+}
+
+
 void printFileContent(const char* fileName) {
     FILE* file = fopen(fileName, "r");
     char line[MAXCHARSPERLINE];
@@ -79,6 +104,12 @@ void testAssembler() {
 int main(int argc, char** argv) {
     /*testCopyMacrosIntoNewFile();*/
     testAssembler();
+    printFileContent1("testFile.ob");
+    printFileContent1("testFile.ent");
+    printFileContent1("testFile.ext");
+    deleteFile("testFile.ob");
+    deleteFile("testFile.ent");
+    deleteFile("testFile.ext");
 
     return 0;
 /*----------------------------------------TESTING------------------------------*/

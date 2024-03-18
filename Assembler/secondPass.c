@@ -26,7 +26,7 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
 
         /*TODO TESTING PURPOSES*/
-        printf("lineBuffer: %s\n", lineBuffer);
+        /*printf("lineBuffer: %s\n", lineBuffer);*/
         /* TODO TSTINGGGGGGG*/
 
 
