@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: .
+# Project: LAB_PROJECT_C
 # Configurations: Debug
 # =============================================================================
 
@@ -41,80 +41,115 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/cmake-build-debug/
 # =============================================================================
-# Object build statements for EXECUTABLE target main
+# Object build statements for EXECUTABLE target assembler
 
 
 #############################################
-# Order-only phony target for main
+# Order-only phony target for assembler
 
-build cmake_object_order_depends_target_main: phony || CMakeFiles/main.dir
+build cmake_object_order_depends_target_assembler: phony || CMakeFiles/assembler.dir
 
-build CMakeFiles/main.dir/main/main.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/main/main.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\main\main.c.obj.d
+build CMakeFiles/assembler.dir/src/assembler.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/assembler.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\assembler.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\main
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/PreAsmblr/PreAsmblr.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\PreAsmblr\PreAsmblr.c.obj.d
+build CMakeFiles/assembler.dir/src/PreAsmblr.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/PreAsmblr.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\PreAsmblr.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\PreAsmblr
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/main.dir/Assembler/firstPass.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/Assembler/firstPass.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\Assembler\firstPass.c.obj.d
+build CMakeFiles/assembler.dir/src/firstPass.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/firstPass.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\firstPass.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\Assembler
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/main.dir/Assembler/assembler.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/Assembler/assembler.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\Assembler\assembler.c.obj.d
+build CMakeFiles/assembler.dir/src/utilities.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/utilities.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\utilities.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\Assembler
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/main.dir/Assembler/utilities.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/Assembler/utilities.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\Assembler\utilities.c.obj.d
+build CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/syntaxAnalyzer.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\syntaxAnalyzer.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\Assembler
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/main.dir/Assembler/syntaxAnalyzer.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/Assembler/syntaxAnalyzer.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\Assembler\syntaxAnalyzer.c.obj.d
+build CMakeFiles/assembler.dir/src/secondPass.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/secondPass.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\secondPass.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\Assembler
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/main.dir/Assembler/secondPass.c.obj: C_COMPILER__main_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/Assembler/secondPass.c || cmake_object_order_depends_target_main
-  DEP_FILE = CMakeFiles\main.dir\Assembler\secondPass.c.obj.d
+build CMakeFiles/assembler.dir/src/error.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/error.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\error.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
-  OBJECT_DIR = CMakeFiles\main.dir
-  OBJECT_FILE_DIR = CMakeFiles\main.dir\Assembler
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
+
+build CMakeFiles/assembler.dir/src/dataConversion.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/dataConversion.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\dataConversion.c.obj.d
+  FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
+  INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
+
+build CMakeFiles/assembler.dir/src/dataStrcuturesInitialization.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/dataStrcuturesInitialization.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\dataStrcuturesInitialization.c.obj.d
+  FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
+  INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
+
+build CMakeFiles/assembler.dir/src/listFunctions.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/listFunctions.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\listFunctions.c.obj.d
+  FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
+  INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
+
+build CMakeFiles/assembler.dir/src/fileFunctions.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/fileFunctions.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\fileFunctions.c.obj.d
+  FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
+  INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
+
+build CMakeFiles/assembler.dir/tests/testFunctions.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/tests/testFunctions.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\tests\testFunctions.c.obj.d
+  FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
+  INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
+  OBJECT_DIR = CMakeFiles\assembler.dir
+  OBJECT_FILE_DIR = CMakeFiles\assembler.dir\tests
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target main
+# Link build statements for EXECUTABLE target assembler
 
 
 #############################################
-# Link the executable main.exe
+# Link the executable assembler.exe
 
-build main.exe: C_EXECUTABLE_LINKER__main_Debug CMakeFiles/main.dir/main/main.c.obj CMakeFiles/main.dir/PreAsmblr/PreAsmblr.c.obj CMakeFiles/main.dir/Assembler/firstPass.c.obj CMakeFiles/main.dir/Assembler/assembler.c.obj CMakeFiles/main.dir/Assembler/utilities.c.obj CMakeFiles/main.dir/Assembler/syntaxAnalyzer.c.obj CMakeFiles/main.dir/Assembler/secondPass.c.obj
+build assembler.exe: C_EXECUTABLE_LINKER__assembler_Debug CMakeFiles/assembler.dir/src/assembler.c.obj CMakeFiles/assembler.dir/src/PreAsmblr.c.obj CMakeFiles/assembler.dir/src/firstPass.c.obj CMakeFiles/assembler.dir/src/utilities.c.obj CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj CMakeFiles/assembler.dir/src/secondPass.c.obj CMakeFiles/assembler.dir/src/error.c.obj CMakeFiles/assembler.dir/src/dataConversion.c.obj CMakeFiles/assembler.dir/src/dataStrcuturesInitialization.c.obj CMakeFiles/assembler.dir/src/listFunctions.c.obj CMakeFiles/assembler.dir/src/fileFunctions.c.obj CMakeFiles/assembler.dir/tests/testFunctions.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
-  OBJECT_DIR = CMakeFiles\main.dir
+  OBJECT_DIR = CMakeFiles\assembler.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  TARGET_FILE = main.exe
-  TARGET_IMPLIB = libmain.dll.a
-  TARGET_PDB = main.exe.dbg
+  TARGET_FILE = assembler.exe
+  TARGET_IMPLIB = libassembler.dll.a
+  TARGET_PDB = assembler.exe.dbg
 
 
 #############################################
@@ -142,7 +177,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build main: phony main.exe
+build assembler: phony assembler.exe
 
 # =============================================================================
 # Folder targets.
@@ -152,7 +187,7 @@ build main: phony main.exe
 #############################################
 # Folder: C:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/cmake-build-debug
 
-build all: phony main.exe
+build all: phony assembler.exe
 
 # =============================================================================
 # Built-in targets
@@ -161,14 +196,14 @@ build all: phony main.exe
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/WindowsPaths.cmake C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/CMakeLists.txt CMakeCache.txt CMakeFiles/3.27.8/CMakeCCompiler.cmake CMakeFiles/3.27.8/CMakeRCCompiler.cmake CMakeFiles/3.27.8/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/WindowsPaths.cmake C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/CMakeLists.txt CMakeCache.txt CMakeFiles/3.27.8/CMakeCCompiler.cmake CMakeFiles/3.27.8/CMakeCXXCompiler.cmake CMakeFiles/3.27.8/CMakeRCCompiler.cmake CMakeFiles/3.27.8/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/WindowsPaths.cmake C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/CMakeLists.txt CMakeCache.txt CMakeFiles/3.27.8/CMakeCCompiler.cmake CMakeFiles/3.27.8/CMakeRCCompiler.cmake CMakeFiles/3.27.8/CMakeSystem.cmake: phony
+build C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeRCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/Windows.cmake C$:/Program$ Files/JetBrains/CLion$ 2023.3.2/bin/cmake/win/x64/share/cmake-3.27/Modules/Platform/WindowsPaths.cmake C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/CMakeLists.txt CMakeCache.txt CMakeFiles/3.27.8/CMakeCCompiler.cmake CMakeFiles/3.27.8/CMakeCXXCompiler.cmake CMakeFiles/3.27.8/CMakeRCCompiler.cmake CMakeFiles/3.27.8/CMakeSystem.cmake: phony
 
 
 #############################################

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(. C)
+project(LAB_PROJECT_C)
 
 set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -8,20 +8,30 @@ add_compile_options(-ansi -pedantic -Wall -g)
 
 include_directories(.)
 
-add_executable(main
-        main/main.c
-        PreAsmblr/PreAsmblr.c
-        PreAsmblr/PreAsmblr.h
-        Assembler/firstPass.c
-        Assembler/firstPass.h
-        Assembler/assembler.c
-        Assembler/assembler.h
-        Assembler/utilities.c
-        Assembler/utilities.h
-        Assembler/syntaxAnalyzer.c
-        Assembler/syntaxAnalyzer.h
-        main/main.h
-        Assembler/dataStructuresAndConstants.h
-        Assembler/secondPass.c
-        Assembler/secondPass.h
+add_executable(assembler
+        src/assembler.c
+        include/assembler.h
+        src/PreAsmblr.c
+        include/PreAsmblr.h
+        src/firstPass.c
+        include/firstPass.h
+        src/utilities.c
+        include/utilities.h
+        src/syntaxAnalyzer.c
+        include/syntaxAnalyzer.h
+        include/dataStructuresAndConstants.h
+        src/secondPass.c
+        include/secondPass.h
+        src/error.c
+        include/error.h
+        src/dataConversion.c
+        include/dataConversion.h
+        src/dataStrcuturesInitialization.c
+        include/dataStrcuturesInitialization.h
+        src/listFunctions.c
+        include/listFunctions.h
+        src/fileFunctions.c
+        include/fileFunctions.h
+        tests/testFunctions.c
+        tests/testFunctions.h
 )
