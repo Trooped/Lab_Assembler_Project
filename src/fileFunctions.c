@@ -1,3 +1,18 @@
+/**
+ * @file fileFunctions.c
+ *
+ * This file contains the functions that are used to create the output files, and to create a new file with the macros from the old file.
+ * These functions are used to create the object file, the entry file, and the external file, and to create a new file with the macros from the old file.
+ * The object file contains the binary representation of the instructions and the data.
+ * The entry file contains the names of the entry symbols and their addresses.
+ * The external file contains the names of the external symbols and their addresses
+ *
+ * The functions in this file are:
+ * 1. createFileWithMacros - This function creates a new file to copy macros from the old file into the new file.
+ * 2. createObjectFile - This function creates the object file.
+ * 3. createEntFile - This function creates the entry file.
+ * 4. createExtFile - This function creates the external file.
+ */
 
 #include "include/fileFunctions.h"
 
@@ -13,8 +28,7 @@ FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorI
     char newFileName[MAXFILENAME];
     FILE * resultFile;
 
-    /*TODO add more comments here.*/
-    strcpy(oldFileNameCopy, oldFileName);
+    strcpy(oldFileNameCopy, oldFileName);/*copy the old file name to a new string*/
 
     removeSubstring(oldFileNameCopy, ".as");/*TODO IS IT EVEN NEEDED? REMOVE.AS*/
     sprintf(newFileName, "%s.am", oldFileNameCopy);

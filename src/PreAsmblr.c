@@ -1,10 +1,20 @@
 /**
+ * @file PreAsmblr.c
+ *
  * This file contains the implementation of the PreAsmblr module.
  * This module is responsible for copying the macros from the old file into the new file.
  * The module works with a macros array, which is an array of macro pointers- which is dynamically allocated using a pointer to a pointer.
- * The macros array is a struct, which contains the macro's name, the lines of the macro and a lines errorCounter for each macro.
- * The module contains functions to allocate memory for the macros array, process the lines of the old file and write the macros into the new file.
- * The module also contains functions to add a new macro to the macros array (if the macro's name is valid), free the memory allocated for the macros array and close the file.
+ *
+ * The functions in this file are:
+ * 1. processFileLines - This function will process the lines of the old file and write the macros into the new file.
+ * 2. allocateMemoryToMacros - This function will allocate memory for the macros array.
+ * 3. addNewMacroToMacrosArray - This function will add a new macro to the macros array.
+ * 4. freeMacrosMemory - This function will free the memory allocated for the macros array.
+ * 5. checkIfMacroExists - This function will check if the given binaryWord is an existing macro.
+ * 6. writeCurrentMacroIntoFile - This function will write the macro with the given name to the new file.
+ * 7. removeSubstring - This function will remove the given substring from the given string.
+ * 8. checkIfMacroNameIsValid - This function will check if the given binaryWord is a valid macro name.
+ * 9. freeMemoryAndCloseFile - This function will free the memory allocated for the macros array and close the file.
  */
 
 #include "include/PreAsmblr.h"
@@ -82,7 +92,7 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
             return;
         }
         else if (checkIfMacroNameIsValid(word)==0){
-            printf("\nError: invalid macro name\n");/*TODO maybe add a search for 'endmcr', so that the lines wouldn't be copied after this part, if it fails??*/
+            printf("\nError: invalid macro name\n");
             return;
         }
         else {/*Macro doesn't exist in the macros array, and has a valid name. create a new instance of it.*/
@@ -99,7 +109,7 @@ void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, 
 
             /*allocate memory for the current macro element in the macro array, and it's sub-elements.*/
             (*macros)[*macroCount] = (macro *) malloc(sizeof(macro));
-            (*macros)[*macroCount]->macroName = (char*)malloc(strlen(word) + 1); /*TODO maybe change it to some defined size? does it work correctly now?*/
+            (*macros)[*macroCount]->macroName = (char*)malloc(strlen(word) + 1); /* Allocate memory for the macro's name*/
             (*macros)[*macroCount]->lines = (char**)malloc(LINES * sizeof(char*)); /* Allocate memory for lines*/
             for (i = 0; i < LINES; i++) {
                 (*macros)[*macroCount]->lines[i] = (char*)malloc(MAXCHARSPERLINE * sizeof(char)); /* Allocate memory for each line*/
@@ -219,7 +229,6 @@ void removeSubstring(char* string, const char* sub) {
 
 /**
  * This function will check if the given binaryWord is a valid macro name.
- * TODO do i need to pause the program if the macro name is invalid?
  * @param word the binaryWord to check
  * @return 1 if the binaryWord is a valid macro name, else 0
  */

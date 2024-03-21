@@ -1,3 +1,20 @@
+/**
+ * @file listFunctions.c
+ *
+ * This file contains the functions for the symbol table (which is a linked list).
+ * The symbol table is a linked list of symbolList structs.
+ * Each symbolList struct contains the name, type, value, and a pointer to the next node
+ *
+ * The functions in this file are:
+ * 1. searchSymbolList - This function searches the symbol table for a specific label.
+ * 2. addLabel - This function adds a label to the symbol table.
+ * 3. deleteSymbolList - This function deletes the symbol table and frees the memory.
+ * 4. addExternAddress - This function adds an external address to a symbol in the symbol table.
+ * 5. incrementDataSymbolValues - This function increments the values of the data symbols in the symbol table by a specific value.
+ * 6. findSymbolValue - This function searches the symbol table for a specific label and returns its value.
+ * 7. markLabelAsEntry - This function marks a label as an entry in the symbol table.
+ * 8. isSymbolExtern - This function checks if a symbol is external.
+ */
 
 #include "include/listFunctions.h"
 

@@ -1,3 +1,12 @@
+/**
+ * @file assembler.c
+ * This file contains the main functions of the assembler.
+ *
+ * the functions in this file are:
+ * 1. main - The main function of the assembler, which calls the pre-assembly and assembly functions.
+ * 2. assembler - The second main function of the assembler. It reads the source file and creates the memory image.
+ */
+
 #include "include/assembler.h"
 
 int main(int argc, char** argv) {

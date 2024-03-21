@@ -1,3 +1,8 @@
+/**
+ * @file firstPass.c
+ * This file contains the implementation of the first pass of the assembler.
+ */
+
 #include "include/firstPass.h"
 
 /**
@@ -43,11 +48,6 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             /* Skip processing this line since it's too long */
             continue;
         }
-
-
-        /*TODO TESTING PURPOSES*/
-        /*printf("lineBuffer: %s\n", lineBuffer);*/
-        /* TODO TSTINGGGGGGG*/
 
         L = 0;
         labelFlag = 0;

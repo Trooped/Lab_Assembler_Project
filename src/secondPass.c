@@ -1,3 +1,10 @@
+/**
+ * @file secondPass.c
+ *
+ * This file contains the second pass of the assembler.
+ * The second pass goes through the source file and creates the binary words for the instructions.
+ */
+
 #include "include/secondPass.h"
 
 
@@ -25,10 +32,6 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
         strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);
         fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
-
-        /*TODO TESTING PURPOSES*/
-        /*printf("lineBuffer: %s\n", lineBuffer);*/
-        /* TODO TSTINGGGGGGG*/
 
 
         L = 0;

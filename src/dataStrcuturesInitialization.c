@@ -1,3 +1,14 @@
+/**
+ * @file dataStrcuturesInitialization.c
+ *
+ * This file contains the implementation of the functions that initialize the data structures used in the assembler.
+ *
+ * The functions in this file are:
+ * 1. initializeOperandsArray - This function initializes the operands array with null characters.
+ * 2. initializeOperationsArray - This function initializes the operations array with the names, codes, and number of operands for each of the 16 operations.
+ * 3. initializeDataArray - This function initializes the data array with a given value.
+ * 4. initializeInstructionArray - This function initializes the instruction array with a given value.
+ */
 
 #include "include/dataStrcuturesInitialization.h"
 

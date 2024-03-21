@@ -1,3 +1,15 @@
+/**
+ * @file utilities.c
+ *
+ * This file contains general utility functions that are used in the assembler.
+ * These functions are used to remove the colon from a label, count the number of entry and external labels in the symbol table, and print the symbol table.
+ *
+ * The functions in this file are:
+ * 1. removeColon - This function removes the colon from a label.
+ * 2. entryLabelCounter - This function counts the number of entry labels in the symbol table.
+ * 3. externLabelCounter - This function counts the number of external labels in the symbol table.
+ */
+
 #include "include/utilities.h"
 
 
@@ -15,7 +27,11 @@ char* removeColon(char* label) {
     return newLabel;
 }
 
-
+/**
+ * This function counts the number of entry labels in the symbol table.
+ * @param head The head of the symbol table.
+ * @return int The number of entry labels.
+ */
 int entryLabelCounter(symbolList** head) {
     symbolList* current = *head;
     int counter = 0;
@@ -28,6 +44,11 @@ int entryLabelCounter(symbolList** head) {
     return counter;
 }
 
+/**
+ * This function counts the number of external labels in the symbol table.
+ * @param head The head of the symbol table.
+ * @return int The number of external labels.
+ */
 int externLabelCounter(symbolList** head) {
     symbolList* current = *head;
     int counter = 0;

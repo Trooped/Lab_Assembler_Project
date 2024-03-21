@@ -52,3 +52,16 @@
 1	54	7327388631149625	CMakeFiles/assembler.dir/src/secondPass.c.obj	ec9e72e08a6fd46a
 6	59	7327388631209612	CMakeFiles/assembler.dir/src/listFunctions.c.obj	cde210ea2daa6ea0
 60	120	7327388631783886	assembler.exe	605c740312106fdc
+42	150	7327532219529632	CMakeFiles/assembler.dir/src/fileFunctions.c.obj	399be765689ac96e
+35	150	7327532219529632	CMakeFiles/assembler.dir/src/listFunctions.c.obj	cde210ea2daa6ea0
+23	151	7327532219539632	CMakeFiles/assembler.dir/src/dataStrcuturesInitialization.c.obj	da03a89551409fff
+10	151	7327532219539632	CMakeFiles/assembler.dir/src/firstPass.c.obj	3daf58627df3e8ad
+39	151	7327532219539632	CMakeFiles/assembler.dir/tests/testFunctions.c.obj	5110b73af3f499f8
+6	152	7327532219539632	CMakeFiles/assembler.dir/src/assembler.c.obj	85a4e6d56661c3c9
+27	153	7327532219549650	CMakeFiles/assembler.dir/src/error.c.obj	a41ec198dac27721
+2	154	7327532219549650	CMakeFiles/assembler.dir/src/PreAsmblr.c.obj	3531d18818903a33
+31	154	7327532219559641	CMakeFiles/assembler.dir/src/dataConversion.c.obj	ede39ce07cad9516
+20	154	7327532219559641	CMakeFiles/assembler.dir/src/secondPass.c.obj	ec9e72e08a6fd46a
+13	154	7327532219559641	CMakeFiles/assembler.dir/src/utilities.c.obj	f47afe32f79de560
+16	155	7327532219579643	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+155	284	7327532220868589	assembler.exe	605c740312106fdc

@@ -1,3 +1,13 @@
+/**
+ * @file error.c
+ * This file contains the implementation of the error handling functions.
+ *
+ * The functions in this file are:
+ * 1. printError - This function prints an error message and updates the errorInfo struct accordingly.
+ * 2. initializeErrorInfo - This function initializes the errorInfo struct to NULL, with the file name and file pointer.
+ * 3. closeFileAndExit - This function closes the file and frees the memory before exiting the program.
+ */
+
 #include "include/error.h"
 
 

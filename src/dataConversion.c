@@ -1,3 +1,15 @@
+/**
+ * @file dataConversion.c
+ * This file contains functions that are used to convert data to binary and insert it into the instruction and data arrays.
+ * These functions are used to insert the first instruction into the instruction array, insert operands into the instruction array, and add a value in binary to the data array.
+ *
+ * The functions in this file are:
+ * 1. insertFirstInstructionIntoArray - This function inserts the first instruction into the instruction array.
+ * 2. convertOperandToBinaryAndInsertIntoArray - This function converts an operand to binary and inserts it into the instruction array.
+ * 3. insertOperandsIntoInstructionArray - This function inserts the operands into the instruction array, calling the convertOperandToBinaryAndInsertIntoArray function for each operand.
+ * 4. addValueToDataArray - This function adds a value in binary to the data array.
+ * 5. convertBinaryToBase4Symbols - This function converts a binary number to base 4 symbols.
+ */
 
 #include "include/dataConversion.h"
 
@@ -50,12 +62,12 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
         }
         newWord.wordBits = val << 2 | 0;
     }
-    else if (operand[0] == 'r') { /*TODO handle the case where it's both of the registers!!*/
+    else if (operand[0] == 'r') {
         int regNum = atoi(operand + 1);
-        if(source){ /*IF IT'S THE SOURCE REGISTER*/
+        if(source){ /*if it's the source register*/
             newWord.wordBits = regNum << 5;
         }
-        else{
+        else{ /*if it's the destination register*/
             newWord.wordBits = regNum << 2;
         }
     }

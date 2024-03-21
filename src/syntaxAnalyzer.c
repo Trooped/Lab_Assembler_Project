@@ -1,3 +1,33 @@
+/**
+ * @file syntaxAnalyzer.c
+ *
+ * This file contains the functions for the syntax analyzer.
+ * The different functions in the file, analyze the syntax of the assembly code, and handle the directives and operations.
+ * It also checks if the label names are valid, and if the operands are valid.
+ * The syntax analyzer is used in the first and second pass of the assembler.
+ * It is by far the biggest file, with the most diverse functions.
+ *
+ * The functions in this file are:
+ * 1. getOperandCode - This function gets the operand code for the instruction.
+ * 2. handleOperation - This function handles the operations, and does different actions depending on if it's the first or second pass.
+ * 3. handleData - This function handles the .data and .string directives, and adds the data to the data array.
+ * 4. handleExtern - This function handles the .extern directive, and adds the label to the symbol table if it's valid.
+ * 5. handleDefine - This function handles the .define directive, and adds the label to the symbol table if it's valid.
+ * 6. parseOperandsFirstPass - This function parses the operands in the first pass of the assembler.
+ * 7. parseOperandsSecondPass - This function parses the operands in the second pass of the assembler.
+ * 8. trimWhitespace - This function trims the whitespace from a string.
+ * 9. isDefine - This function checks if a string is a .define directive.
+ * 10. isExtern - This function checks if a string is a .extern directive.
+ * 11. isEntry - This function checks if a string is an .entry directive.
+ * 12. isData - This function checks if a string is a .data directive.
+ * 13. isString - This function checks if a string is a .string directive.
+ * 14. isValidOperation - This function checks if a string is a valid operation.
+ * 15. isValidLabelName - This function checks if a string is a valid label name.
+ * 16. isValidInteger - This function checks if a string is a valid integer.
+ * 17. isRegister - This function checks if a string is a register.
+ * 18. checkEntrySyntax - This function checks the syntax of the .entry directive.
+ */
+
 #include "include/syntaxAnalyzer.h"
 
 
@@ -695,7 +725,7 @@ int isEntry(char* word) {
  * Not a reserved word, not a register, not a number, not a defined symbol, not a label that already exists.
  * As well as the first character being an alphabetical character, and the rest of the characters being either uppercase or digits.
  * And the name being less than 31 characters.
- *
+ * TODO maybe add a specific error for each case? can do this with a table of defines maybe
  * @param name The label name to be checked.
  * @param operationsArray The operations array.
  * @param head The symbol list.
@@ -708,7 +738,6 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
 
     if (colonFlag && lastChar != ':') {
         return 0;
-        /*TODO add error*/
     }
     else if (colonFlag == 1){ /*Remove the colon for testing!*/
         name[strlen(name) - 1] = '\0';
@@ -835,7 +864,7 @@ int isValidInteger(char* str) {
     temp = atoi(str);
 
     /* Check if the number is greater than the constant */
-    if (temp > MAXINTEGER || temp < MININTEGER) {
+    if (temp > MAXINTEGER12BIT || temp < MININTEGER12BIT) {
         return 0;
     }
 
