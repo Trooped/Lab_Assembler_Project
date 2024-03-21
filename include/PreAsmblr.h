@@ -15,7 +15,7 @@
 #include "error.h"
 
 /*TODO move the definitions to a different file?*/
-#define MAXMACRONAMELENGTH 81 /*Maximum number of characters in a macro name*/
+#define MAXMACRONAMELENGTH 31 /*Maximum number of characters in a macro name*/
 #define LINES 32 /*Initial maximum number of lines in a macro, will be adjusted dynamically*/
 #define MAXMACROS 32 /*Starter number for number of macros, dynamically allocated further on*/
 #define MAXFILENAME 64 /*Maximum file name length*/

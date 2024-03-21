@@ -76,7 +76,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 }
             }
             else if (isExtern(currentWord)){
-                if (labelFlag) { /*TODO do i need to add a warning? because this label is ignored*/
+                if (labelFlag) {
                     handleExtern(symbolTable, fullLine, errorInfo, operationsArray, 1);
                 }
                 else{
@@ -85,7 +85,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 break;
             }
             else if (isEntry(currentWord)){
-                if (labelFlag) { /*TODO do i need to add a warning? because this label is ignored*/
+                if (labelFlag) {
                     checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray,1);
                 }
                 else{

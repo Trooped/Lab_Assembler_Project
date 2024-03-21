@@ -418,6 +418,7 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+        printf("WARNING: Label is ignored in .extern directive, in line '%s'\n", (*errorInfo)->lineText);
     }
     else{
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
@@ -771,7 +772,7 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
     currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
     currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-    }
+    printf("WARNING: Label is ignored in .entry directive, in line '%s'\n", (*errorInfo)->lineText);    }
     else{
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/

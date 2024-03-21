@@ -34,19 +34,21 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
         L = 0;
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while(currentWord != NULL){
-            /*TODO check first if it's like a define or something, if it is i can skip this fucker*/
-            /*TODO in general, don't forget about the first command, which is usually not one of the operands or w/e*/
-            if (isDefine(currentWord)){
+            if (isDefine(currentWord)) {
                 break;
             }
-            if (searchSymbolList(symbolTable, removeColon(currentWord), "general") == 0) { /* Label found in the list*/
+            if (searchSymbolList(symbolTable, currentWord, "general") == 0) { /* Label found in the list*/
                 currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+            }
+            else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){
+                currentWord = strtok(NULL, " \n\r\t"); /*If for example, we have a valid Label name before extern or entry that was ignored in the first pass*/
             }
             if (isData(currentWord) || isString(currentWord)  || isExtern(currentWord)) {
                 break;
             }
             else if (isEntry(currentWord)) {
-                markLabelAsEntry(symbolTable, fullLine, errorInfo);
+                currentWord = strtok(NULL, " \n\r\t");
+                markLabelAsEntry(symbolTable, currentWord, errorInfo); /*Calling the function with ONLY the label name, all other tests have been made in the first pass.*/
                 break;
             }
 

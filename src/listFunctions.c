@@ -12,18 +12,27 @@
  * @return int 1 if the label wasn't found, 0 if it was found in the table.
  */
 int searchSymbolList(symbolList** head, char* name, char* type) {
+    char tempLabel[MAXLABELNAME] = {0};
     symbolList* current = *head;
     trimWhitespace(name);
+    if (name[strlen(name) - 1] == ':') {
+        strncpy(tempLabel, name, strlen(name) - 1); /* Remove the colon*/
+        tempLabel[strlen(name) - 1] = '\0'; /* Ensure null termination*/
+    }
+    else {
+        strncpy(tempLabel, name, strlen(name)); /* Keep it as it is*/
+        tempLabel[strlen(name)] = '\0'; /* Ensure null termination*/
+    }
 
     /* Search for the name in the list*/
     while (current != NULL) {
         if (strcmp(type, "general")!=0) { /*Searching for a specific name AND type*/
-            if (strcmp(current->name, name) == 0 && strcmp(current->type, type) == 0) {
+            if (strcmp(current->name, tempLabel) == 0 && strcmp(current->type, type) == 0) {
                 /* Label found in the list*/
                 return 0;
             }
         }
-        else if (strcmp(current->name, name) == 0) {
+        else if (strcmp(current->name, tempLabel) == 0) {
             /* Label found in the list*/
             return 0;
         }
@@ -55,6 +64,7 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
         printError(errorInfo, "Label already exists in the symbol table");
         return; /* Early return to avoid processing further*/
     }
+    trimWhitespace(name);
 
     newNode = (symbolList*)malloc(sizeof(symbolList));
     if (newNode == NULL) {
@@ -170,9 +180,8 @@ int findSymbolValue(symbolList **head, const char* name,char* type, int* value) 
 void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     char* entryLabelName;
     symbolList* current = *head;
+entryLabelName = strtok(line, " \n\r\t"); /* Get the next word.*/
 
-    entryLabelName = strtok(line, " \n\r\t"); /* Get the next word.*/
-    entryLabelName = strtok(NULL, " \n\r\t"); /* Get the next word.*/
     /* Search for the name in the list*/
     while (current != NULL) {
         if (strcmp(current->name, entryLabelName) == 0){
