@@ -46,8 +46,8 @@
  */
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo){
     int i = 0, j=0;
-    char tempVal[MAXOPERANDLENGTH];
-    char tempOperand[MAXOPERANDLENGTH];
+    char tempVal[MAXOPERANDLENGTH] = {0};
+    char tempOperand[MAXOPERANDLENGTH] = {0};
 
     if (operand[0] == '#') {
         strcpy(tempOperand, operand+1);
@@ -64,54 +64,57 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
     else if (isRegister(operand)) {
         return 3;
     }
-    else{ /*case of Label or Label offset*/
+    else { /* case of Label or Label offset */
         trimWhitespace(operand);
+
+        /* Extract the label part before the '['*/
         while (operand[i] != '[' && operand[i] != '\0') {
             tempOperand[i] = operand[i];
             i++;
         }
-        tempOperand[i] = '\0'; /*Null terminating the temp String*/
+        tempOperand[i] = '\0'; /* Null terminating the temp String*/
 
+        /* Check if it's just a label without offset*/
         if (operand[i] == '\0') {
             if (isValidLabelName(tempOperand, operationsArray, head, 0)){
-                return 1;
-            }
-            else {
+                return 1; /* Valid label without offset*/
+            } else {
                 printError(errorInfo, "Undefined Label name");
                 return INSTRUCTIONFAILCODE;
             }
         }
+            /* Handle label with offset*/
         else if (operand[i] == '[') {
-            if (isValidLabelName(tempOperand, operationsArray, head, 0)) {
-                i++;
-                while (operand[i] != ']' || operand[i] == '\0') {
-                    tempVal[j] = operand[i];
-                    i++;
-                    j++;
-                }
-                tempVal[j] = '\0'; /*Null terminating the temp String*/
-                if (operand[i]==']' && operand[i+1] == '\0'){
-                    if (!isValidInteger(tempVal)){
-                        int symbolValue;
-                        if (!findSymbolValue(head, tempVal, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
-                            printError(errorInfo, "Invalid Integer or undefined symbol for offset operand");
-                            return INSTRUCTIONFAILCODE;
-                        }
-                    }
-                    return 2;
-                }
-                else {
-                    printError(errorInfo, "Invalid offset declaration, doesn't end with ']'");
+            i++; /* Move past '['*/
+            /* Extract the integer value inside the brackets*/
+            while (operand[i] != ']' && operand[i] != '\0') {
+                tempVal[j++] = operand[i++];
+            }
+            tempVal[j] = '\0'; /* Null terminating the temp String*/
+
+            /* Validate closing bracket and that it's the end of the string*/
+            if (operand[i] == ']' && operand[i + 1] == '\0') {
+                /* Empty offset value is not valid*/
+                if (strlen(tempVal) == 0) {
+                    printError(errorInfo, "Empty offset value is not valid");
                     return INSTRUCTIONFAILCODE;
                 }
-            }
-            else {
-                printError(errorInfo, "Undefined Label");
+                /* Check if the offset is a valid integer or a defined symbol*/
+                if (!isValidInteger(tempVal)) {
+                    int symbolValue;
+                    if (!findSymbolValue(head, tempVal, "define", &symbolValue)) {
+                        printError(errorInfo, "Invalid Integer or undefined symbol for offset operand");
+                        return INSTRUCTIONFAILCODE;
+                    }
+                }
+                return 2; /* Valid label with offset*/
+            } else {
+                printError(errorInfo, "Invalid offset declaration, doesn't end with ']'");
                 return INSTRUCTIONFAILCODE;
             }
-        }
-        else {
-            printError(errorInfo, "Invalid operand"); /*TODO what the hell is this case? need to test this*/
+        } else {
+            printError(errorInfo, "Invalid operand");
+            return INSTRUCTIONFAILCODE;
         }
     }
     printError(errorInfo, "Invalid operand");

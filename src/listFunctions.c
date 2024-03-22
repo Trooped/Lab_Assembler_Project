@@ -43,13 +43,17 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
 
     /* Search for the name in the list*/
     while (current != NULL) {
-        if (strcmp(type, "general")!=0) { /*Searching for a specific name AND type*/
+        if ((strcmp(type, "entry")==0) && (strcmp(current->name, tempLabel)==0) && (current->isEntry==1)){
+            /* Entry label was already found in the list)*/
+            return 0;
+        }
+        else if (strcmp(type, "general") != 0) { /*Searching for a specific name AND type*/
             if (strcmp(current->name, tempLabel) == 0 && strcmp(current->type, type) == 0) {
                 /* Label found in the list*/
                 return 0;
             }
         }
-        else if (strcmp(current->name, tempLabel) == 0) {
+        else if (strcmp(current->name, tempLabel) == 0) { /*Searching for a specific name only*/
             /* Label found in the list*/
             return 0;
         }
@@ -77,7 +81,12 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
         printError(errorInfo, "Empty label isn't allowed");
         return; /* Early return to avoid processing further*/
     }
-    if (searchSymbolList(head, name, "general") == 0) {
+
+    if (searchSymbolList(head, name, "external") == 0) {
+        printf("WARNING: Double declaration- Label '%s' was already defined as external\n", name);
+        return; /* Early return to avoid processing further*/
+    }
+    else if (searchSymbolList(head, name, "general") == 0) {
         printError(errorInfo, "Label already exists in the symbol table");
         return; /* Early return to avoid processing further*/
     }
@@ -90,10 +99,10 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
     }
 
     /* Initialize the new node*/
-    strncpy(newNode->name, name, MAXNAME - 1);
-    newNode->name[MAXNAME - 1] = '\0'; /* Ensure null termination*/
-    strncpy(newNode->type, type, MAXNAME - 1);
-    newNode->type[MAXNAME - 1] = '\0'; /* Ensure null termination*/
+    strncpy(newNode->name, name, MAXLABELNAME - 1);
+    newNode->name[MAXLABELNAME - 1] = '\0'; /* Ensure null termination*/
+    strncpy(newNode->type, type, MAXLABELNAME - 1);
+    newNode->type[MAXLABELNAME - 1] = '\0'; /* Ensure null termination*/
     newNode->value = value;
     newNode->next = NULL;
     newNode->isEntry = 0;
@@ -197,7 +206,12 @@ int findSymbolValue(symbolList **head, const char* name,char* type, int* value) 
 void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     char* entryLabelName;
     symbolList* current = *head;
-entryLabelName = strtok(line, " \n\r\t"); /* Get the next word.*/
+    entryLabelName = strtok(line, " \n\r\t"); /* Get the next word.*/
+
+    if (searchSymbolList(head, entryLabelName, "entry") == 0){
+        printf("WARNING: Double declaration- label '%s' was already defined as entry\n", entryLabelName);
+        return;
+    }
 
     /* Search for the name in the list*/
     while (current != NULL) {
