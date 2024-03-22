@@ -52,3 +52,13 @@
 60	121	7328243928141178	assembler.exe	605c740312106fdc
 2	60	7328244070155658	CMakeFiles/assembler.dir/src/listFunctions.c.obj	cde210ea2daa6ea0
 61	122	7328244070746452	assembler.exe	605c740312106fdc
+1	77	7328245639538973	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+77	137	7328245640119786	assembler.exe	605c740312106fdc
+2	83	7328248216709330	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+84	146	7328248217312139	assembler.exe	605c740312106fdc
+1	80	7328249024278080	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+80	141	7328249024866031	assembler.exe	605c740312106fdc
+1	85	7328250263862360	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+85	147	7328250264458570	assembler.exe	605c740312106fdc
+2	79	7328250977115310	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+79	141	7328250977714230	assembler.exe	605c740312106fdc

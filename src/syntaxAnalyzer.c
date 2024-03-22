@@ -74,6 +74,12 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         }
         tempOperand[i] = '\0'; /* Null terminating the temp String*/
 
+        /* Check if there's a space between the label and the offset, if there is, send error*/
+        if (isspace((unsigned char)tempOperand[i-1]) && operand[i] == '['){
+            printError(errorInfo, "Label with offset cannot have spaces between the label and the offset value");
+            return INSTRUCTIONFAILCODE;
+        }
+
         /* Check if it's just a label without offset*/
         if (operand[i] == '\0') {
             if (isValidLabelName(tempOperand, operationsArray, head, 0)){
@@ -99,6 +105,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     printError(errorInfo, "Empty offset value is not valid");
                     return INSTRUCTIONFAILCODE;
                 }
+                trimWhitespace(tempVal);
                 /* Check if the offset is a valid integer or a defined symbol*/
                 if (!isValidInteger(tempVal)) {
                     int symbolValue;
@@ -117,8 +124,6 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
             return INSTRUCTIONFAILCODE;
         }
     }
-    printError(errorInfo, "Invalid operand");
-    return INSTRUCTIONFAILCODE;
 }
 
 
