@@ -50,11 +50,17 @@ int entryLabelCounter(symbolList** head) {
  * @return int The number of external labels.
  */
 int externLabelCounter(symbolList** head) {
+    int i = 0;
     symbolList* current = *head;
     int counter = 0;
     while (current != NULL) {
         if (strcmp(current->type, "external") == 0) {
-            counter++;
+            while (current->externalAddresses[i] != -1 && i<=MAXEXTERNALADDRESSES) {
+                i++;
+            }
+            if(i > 0 && current->externalAddresses[i-1] != -1){
+                counter++;
+            }
         }
         current = current->next;
     }

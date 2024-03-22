@@ -78,3 +78,9 @@
 85	148	7328266105305672	assembler.exe	605c740312106fdc
 2	77	7328266605603071	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
 77	138	7328266606174428	assembler.exe	605c740312106fdc
+1	58	7328268604694292	CMakeFiles/assembler.dir/src/utilities.c.obj	f47afe32f79de560
+58	120	7328268605288908	assembler.exe	605c740312106fdc
+1	56	7328269780219643	CMakeFiles/assembler.dir/src/assembler.c.obj	85a4e6d56661c3c9
+59	120	7328269780828651	assembler.exe	605c740312106fdc
+2	58	7328270275640260	CMakeFiles/assembler.dir/src/utilities.c.obj	f47afe32f79de560
+58	120	7328270276228897	assembler.exe	605c740312106fdc

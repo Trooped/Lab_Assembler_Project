@@ -139,7 +139,7 @@ void assembler(FILE* source, const char* fileName){
     if (entryLabelCounter(&symbolTable) > 0) {
         createEntFile(&symbolTable, fileName, &errorInfo);
     }
-    if (externLabelCounter(&symbolTable) > 0) {
+    if (externLabelCounter(&symbolTable) > 0) { /*if there are external labels and they are mentioned in another line, create the external file*/
         createExtFile(&symbolTable, fileName, &errorInfo);
     }
 
