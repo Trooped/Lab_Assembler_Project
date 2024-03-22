@@ -89,7 +89,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                 return INSTRUCTIONFAILCODE;
             }
         }
-            /* Handle label with offset*/
+        /* Handle label with offset*/
         else if (operand[i] == '[') {
             i++; /* Move past '['*/
             /* Extract the integer value inside the brackets*/
@@ -325,7 +325,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     if (!isSecondPass){
         insertFirstInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
     }
-    else if (operationsArray[opcode].numOfOperands != 0){
+    else if (operationsArray[opcode].numOfOperands != 0){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
         insertOperandsIntoInstructionArray(instructionArray, L, IC, operands, head, errorInfo);
     }
 
@@ -347,7 +347,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
     char* token;
     char* lastNonWhitespaceChar;
     long val;
-    int dataCounter = 0;
+    short dataCounter = 0;
     char copiedLine[MAXCHARSPERLINE];
     if (strcmp(type, "data") == 0) {
         numbers = strstr(line, ".data");

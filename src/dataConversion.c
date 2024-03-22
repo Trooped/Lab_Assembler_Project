@@ -60,9 +60,14 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
         else {
             val = atoi(operand);
         }
+
+        if (val < 0){
+            printError(errorInfo, "Offset value can't be negative");
+            return;
+        }
         newWord.wordBits = val << 2 | 0;
     }
-    else if (operand[0] == 'r') {
+    else if (isRegister(operand)) { /*if it's a register*/
         int regNum = atoi(operand + 1);
         if(source){ /*if it's the source register*/
             newWord.wordBits = regNum << 5;
@@ -80,6 +85,9 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
             findSymbolValue(head, operand, "data", &val);
             newWord.wordBits = ( val << 2) | 0x0002;
         }
+    }
+    else if (searchSymbolList(head, operand, "define")==0){
+        printError(errorInfo, ".define label can't be used as an operand");
     }
     else{
         printError(errorInfo, "Label not found in the symbol table");
@@ -105,20 +113,20 @@ void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfL
     int regNumSource, regNumDest;
 
     char firstOperand[MAXOPERANDLENGTH];
-    char labelOrDefineFirst[MAXOPERANDLENGTH];
+    char firstOffset[MAXOPERANDLENGTH];
     char secondOperand[MAXOPERANDLENGTH];
-    char labelOrDefineSecond[MAXOPERANDLENGTH];
+    char secondOffset[MAXOPERANDLENGTH];
     firstOperand[0] = '\0';
-    labelOrDefineFirst[0] = '\0';
+    firstOffset[0] = '\0';
     secondOperand[0] = '\0';
-    labelOrDefineSecond[0] = '\0';
+    secondOffset[0] = '\0';
 
-
+    /*If there are operands, parse them to get the first and second operands and offsets*/
     if (numOfLines>0) {
-        parseOperandsSecondPass(operands[0], firstOperand, labelOrDefineFirst);
+        parseOperandsSecondPass(operands[0], firstOperand, firstOffset);
     }
-    if (numOfLines>2) {
-        parseOperandsSecondPass(operands[1], secondOperand, labelOrDefineSecond);
+    if (numOfLines>2) { /*If there are two operands*/
+        parseOperandsSecondPass(operands[1], secondOperand, secondOffset);
     }
 
     /*If the first operand is a register and the second is a register, special case where one word is being used*/
@@ -130,23 +138,39 @@ void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfL
         return;
     }
 
+    /*This part is quite complicated, so i'll write which case it is near each function call/ condition
+     * In general, it checks how many operands and offsets we have in our operation.
+     * It also converts them into binary accordingly (while maintaining other tests, for syntax accuracy)
+     */
+    /*There is always at least one operand, because we check it in an earlier condition. analyze and convert it*/
     convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+1, firstOperand, head, errorInfo,1, 0);
-    if (labelOrDefineFirst[0] != '\0') {
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, labelOrDefineFirst, head, errorInfo,0, 1);
-        if (secondOperand[0] != '\0') {
+    if (firstOffset[0] != '\0') { /*If there is an offset for the first operand*/
+        if (searchSymbolList(head, firstOperand, "data")!=0 && searchSymbolList(head, firstOperand, "string")!=0){
+            printError(errorInfo, "Offset can only be used with data or string labels");
+            return; /*If the label for which the offset is used is not data or string, error*/
+        }
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, firstOffset, head, errorInfo, 0, 1);
+        if (secondOperand[0] != '\0') { /*If there is a second operand, AFTER a first operand + offset*/
             convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 3, secondOperand, head, errorInfo, 0, 0);
-            if (labelOrDefineSecond[0] != '\0') {
-                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, labelOrDefineSecond, head, errorInfo, 0, 1);
+            if (secondOffset[0] != '\0') {/*If there is an offset for the second operand*/
+                if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
+                    printError(errorInfo, "Offset can only be used with data or string labels");
+                    return;/*If the label for which the offset is used is not data or string, error*/
+                }
+                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, secondOffset, head, errorInfo, 0, 1);
             }
         }
     }
-    else if (secondOperand[0] != '\0'){
+    else if (secondOperand[0] != '\0'){ /*If there is a second operand, but no offset for the first operand*/
         convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, secondOperand, head, errorInfo,0, 0);
-        if (labelOrDefineSecond[0] != '\0') {
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, labelOrDefineSecond, head, errorInfo,0, 1);
+        if (secondOffset[0] != '\0') { /*If there is an offset for the second operand*/
+            if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
+                printError(errorInfo, "Offset can only be used with data or string labels");
+                return; /*If the label for which the offset is used is not data or string, error*/
+            }
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, secondOffset, head, errorInfo, 0, 1);
         }
     }
-
 }
 
 

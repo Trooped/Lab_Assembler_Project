@@ -97,11 +97,6 @@ void assembler(FILE* source, const char* fileName){
     rewind(source); /*reset the file pointer to the beginning of the file*/
     firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
-    if (errorInfo->errorFlag == 1) {
-        printf("%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
-        closeFileAndExit(&errorInfo, &symbolTable);
-    }
-
     incrementDataSymbolValues(&symbolTable, (IC) + INITIAL_IC_VALUE); /*increment the data symbols by the IC value*/
 
     rewind(source); /*reset the file pointer to the beginning of the file*/
@@ -133,6 +128,11 @@ void assembler(FILE* source, const char* fileName){
      */
 
     /*TODO testinggggggggggggggggggggg*/
+
+    if (errorInfo->errorFlag == 1) {
+        printf("%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
+        closeFileAndExit(&errorInfo, &symbolTable);
+    }
 
     fclose(source); /*close the source file*/
 
