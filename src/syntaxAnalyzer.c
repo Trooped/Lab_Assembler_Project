@@ -26,6 +26,7 @@
  * 16. isValidInteger - This function checks if a string is a valid integer.
  * 17. isRegister - This function checks if a string is a register.
  * 18. checkEntrySyntax - This function checks the syntax of the .entry directive.
+ * 19. analyzeOperandsAndInsertIntoArraySecondPass - This function analyzes the operands and inserts them into the instruction array in the second pass.
  */
 
 #include "include/syntaxAnalyzer.h"
@@ -326,7 +327,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         insertFirstInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
     }
     else if (operationsArray[opcode].numOfOperands != 0){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
-        insertOperandsIntoInstructionArray(instructionArray, L, IC, operands, head, errorInfo);
+        analyzeOperandsAndInsertIntoArraySecondPass(instructionArray, L, IC, operands, head, errorInfo);
     }
 
     return L;
@@ -400,7 +401,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
                 val = atoi(token);
             }
 
-            addValueToDataArray(dataArray, *DC, val);
+            convertValueToBinaryAndInsertToDataArray(dataArray, *DC, val);
             (*DC)++;
             dataCounter++;
 
@@ -421,7 +422,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
             for (i = 1; i < strlen(copiedLine)-1; i++) {
                 if (isprint(copiedLine[i])){
-                    addValueToDataArray(dataArray, *DC, copiedLine[i]);
+                    convertValueToBinaryAndInsertToDataArray(dataArray, *DC, copiedLine[i]);
                     (*DC)++;
                 }
                 else{
@@ -429,7 +430,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
                     return;
                 }
             }
-            addValueToDataArray(dataArray, *DC, '\0');
+            convertValueToBinaryAndInsertToDataArray(dataArray, *DC, '\0');
             (*DC)++;
         }
         else {
@@ -588,6 +589,52 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
 }
 
 
+/**
+ * This function checks the syntax of the .entry directive, as well as if it's been already been defined as .extern.
+ * @param head The symbol list.
+ * @param line The line to be checked.
+ * @param errorInfo The error struct.
+ * @param operationsArray The operations array.
+ */
+void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag) {
+    char* currentWord;
+    int flag = 0;
+
+    if(labelFlag){
+        currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+        printf("WARNING: Label is ignored in .entry directive, in line '%s'\n", (*errorInfo)->lineText);    }
+    else{
+        currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
+
+    if (!currentWord){
+        printError(errorInfo, "No symbols found after .entry");
+        return;
+    }
+
+    while (currentWord!= NULL) {
+        if(flag){
+            printError(errorInfo, "Extraneous text after Label definition for .entry");
+            return;
+        }
+        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
+            printError(errorInfo, "Not a valid .entry symbol name");
+            return;
+        }
+        else if (searchSymbolList(head, currentWord, "extern") == 0) {
+            printError(errorInfo, "Invalid .entry symbol name, it's already defined as .extern");
+            return;
+        }
+        else{
+            flag = 1;
+        }
+        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
+    }
+}
+
 
 /**
  * This function parses the operands in the first pass of the assembler.
@@ -631,6 +678,83 @@ int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENG
     }
     return 1;
 }
+
+
+/**
+ * This function inserts the operands into the instruction array, calling the convertOperandToBinaryAndInsertIntoArray function for each operand.
+ *
+ * @param instructionArray The instruction array to insert the operands into.
+ * @param numOfLines The number of lines in the file.
+ * @param IC The instruction errorCounter.
+ * @param operands The operands to insert into the instruction array.
+ * @param head The head of the symbol table.
+ * @param errorInfo A pointer to the errorInfo struct.
+ */
+void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo){
+    binaryWord newWord;
+    int regNumSource, regNumDest;
+
+    char firstOperand[MAXOPERANDLENGTH];
+    char firstOffset[MAXOPERANDLENGTH];
+    char secondOperand[MAXOPERANDLENGTH];
+    char secondOffset[MAXOPERANDLENGTH];
+    firstOperand[0] = '\0';
+    firstOffset[0] = '\0';
+    secondOperand[0] = '\0';
+    secondOffset[0] = '\0';
+
+    /*If there are operands, parse them to get the first and second operands and offsets*/
+    if (numOfLines>0) {
+        parseOperandsSecondPass(operands[0], firstOperand, firstOffset);
+    }
+    if (numOfLines>2) { /*If there are two operands*/
+        parseOperandsSecondPass(operands[1], secondOperand, secondOffset);
+    }
+
+    /*If the first operand is a register and the second is a register, special case where one word is being used*/
+    if(isRegister(operands[0]) && isRegister(operands[1])){
+        regNumSource = atoi(operands[0] + 1);
+        regNumDest = atoi(operands[1] + 1);
+        newWord.wordBits = (regNumSource << 5) | (regNumDest << 2);
+        instructionArray[(*IC)+1] = newWord;
+        return;
+    }
+
+    /*This part is quite complicated, so i'll write which case it is near each function call/ condition
+     * In general, it checks how many operands and offsets we have in our operation.
+     * It also converts them into binary accordingly (while maintaining other tests, for syntax accuracy)
+     */
+    /*There is always at least one operand, because we check it in an earlier condition. analyze and convert it*/
+    convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+1, firstOperand, head, errorInfo,1, 0);
+    if (firstOffset[0] != '\0') { /*If there is an offset for the first operand*/
+        if (searchSymbolList(head, firstOperand, "data")!=0 && searchSymbolList(head, firstOperand, "string")!=0){
+            printError(errorInfo, "Offset can only be used with data or string labels");
+            return; /*If the label for which the offset is used is not data or string, error*/
+        }
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, firstOffset, head, errorInfo, 0, 1);
+        if (secondOperand[0] != '\0') { /*If there is a second operand, AFTER a first operand + offset*/
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 3, secondOperand, head, errorInfo, 0, 0);
+            if (secondOffset[0] != '\0') {/*If there is an offset for the second operand*/
+                if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
+                    printError(errorInfo, "Offset can only be used with data or string labels");
+                    return;/*If the label for which the offset is used is not data or string, error*/
+                }
+                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, secondOffset, head, errorInfo, 0, 1);
+            }
+        }
+    }
+    else if (secondOperand[0] != '\0'){ /*If there is a second operand, but no offset for the first operand*/
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, secondOperand, head, errorInfo,0, 0);
+        if (secondOffset[0] != '\0') { /*If there is an offset for the second operand*/
+            if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
+                printError(errorInfo, "Offset can only be used with data or string labels");
+                return; /*If the label for which the offset is used is not data or string, error*/
+            }
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, secondOffset, head, errorInfo, 0, 1);
+        }
+    }
+}
+
 
 
 /**
@@ -829,52 +953,6 @@ int isValidOperation(char* word, operationInfo* operationsArray) {
         }
     }
     return -1;
-}
-
-/**
- * This function checks the syntax of the .entry directive, as well as if it's been already been defined as .extern.
- * @param head The symbol list.
- * @param line The line to be checked.
- * @param errorInfo The error struct.
- * @param operationsArray The operations array.
- */
-void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag) {
-    char* currentWord;
-    int flag = 0;
-
-    if(labelFlag){
-    currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
-    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-    currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-    printf("WARNING: Label is ignored in .entry directive, in line '%s'\n", (*errorInfo)->lineText);    }
-    else{
-        currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
-        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-    }
-
-    if (!currentWord){
-        printError(errorInfo, "No symbols found after .entry");
-        return;
-    }
-
-    while (currentWord!= NULL) {
-        if(flag){
-            printError(errorInfo, "Extraneous text after Label definition for .entry");
-            return;
-        }
-        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
-            printError(errorInfo, "Not a valid .entry symbol name");
-            return;
-        }
-        else if (searchSymbolList(head, currentWord, "extern") == 0) {
-            printError(errorInfo, "Invalid .entry symbol name, it's already defined as .extern");
-            return;
-        }
-        else{
-            flag = 1;
-        }
-        currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-    }
 }
 
 

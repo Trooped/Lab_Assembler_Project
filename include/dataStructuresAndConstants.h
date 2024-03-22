@@ -9,6 +9,7 @@
 #define NUMOFOPERATIONS 16 /*Number of operations*/
 #define MAXFILENAME 64 /*Maximum file name length*/
 #define WORDSIZE 14 /*Word size*/
+#define ENCRYPTEDWORDSIZE 7 /*Encrypted word size*/
 #define MAXDATA 2048 /*Maximum number of data in the array*/
 #define MAXINSTRUCTIONS 2048 /*Maximum number of instructions in the array*/
 #define MAXWORDS (MAXDATA + MAXINSTRUCTIONS - 100) /*Maximum number of words in the array*/

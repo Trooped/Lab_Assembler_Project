@@ -26,6 +26,8 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
 
 int parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH], error** errorInfo);
 
+void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo);
+
 void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine);
 
 void trimWhitespace(char* str);

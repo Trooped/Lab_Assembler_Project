@@ -75,16 +75,3 @@ void testCopyMacrosIntoNewFile() {
     remove(testFileName);
     remove("testFilenewFileFormat");
 }
-
-void testAssembler() {
-
-    const char* testFileName = "testFile";
-    FILE* testFile = fopen(testFileName, "r");
-    if (testFile != NULL) {
-        assembler(testFile, testFileName);
-        fclose(testFile);
-    } else {
-        printf("Failed to open file %s\n", testFileName);
-    }
-
-}

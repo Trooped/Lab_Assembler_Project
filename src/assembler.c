@@ -70,7 +70,8 @@ int main(int argc, char** argv) {
  * @param source The source file to be read.
  * @param fileName The name of the file.
  */
-void assembler(FILE* source, const char* fileName){
+void assembler(FILE* source, char* fileName){
+    char baseFileName[MAXFILENAME];
     binaryWord dataArray[MAXDATA]; /* array for data to be put in the memory image */
     binaryWord instructionArray[MAXINSTRUCTIONS]; /* array for the instructions to be put in the memory image.*/
     symbolList* symbolTable = NULL; /* linked list for labels */
@@ -83,6 +84,7 @@ void assembler(FILE* source, const char* fileName){
 
     initializeOperationsArray(operationsArray); /*initialize operations array according to the known operations*/
 
+    strncpy(baseFileName, fileName, MAXFILENAME - 1); /* Keep a copy of the original file name, without a suffix*/
 
     /*TODO real start of assembler function!*/
 
@@ -137,13 +139,13 @@ void assembler(FILE* source, const char* fileName){
     fclose(source); /*close the source file*/
 
     if (entryLabelCounter(&symbolTable) > 0) {
-        createEntFile(&symbolTable, fileName, &errorInfo);
+        createEntFile(&symbolTable, baseFileName, &errorInfo);
     }
     if (externLabelCounter(&symbolTable) > 0) { /*if there are external labels and they are mentioned in another line, create the external file*/
-        createExtFile(&symbolTable, fileName, &errorInfo);
+        createExtFile(&symbolTable, baseFileName, &errorInfo);
     }
 
-    createObjectFile(dataArray, instructionArray, IC, DC, fileName, &errorInfo, &symbolTable);
+    createObjectFile(dataArray, instructionArray, IC, DC, baseFileName, &errorInfo, &symbolTable);
 
     deleteSymbolList(&symbolTable);
     free(errorInfo);

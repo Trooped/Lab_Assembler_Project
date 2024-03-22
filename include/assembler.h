@@ -20,7 +20,7 @@
 
 int main(int argc, char** argv);
 
-void assembler(FILE* source, const char* fileName);
+void assembler(FILE* source, char* fileName);
 
 
 #endif /*LAB_PROJECT_ASSEMBLER_H*/

@@ -17,6 +17,5 @@ void printFileContent(const char* filePath);
 
 void testCopyMacrosIntoNewFile();
 
-void testAssembler();
 
 #endif

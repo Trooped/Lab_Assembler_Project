@@ -11,9 +11,7 @@ void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int o
 
 void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset);
 
-void insertOperandsIntoInstructionArray(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo);
-
-void addValueToDataArray(binaryWord* dataArray, int DC, int value);
+void convertValueToBinaryAndInsertToDataArray(binaryWord* dataArray, int DC, int value);
 
 char* convertBinaryToBase4Symbols(int binary);
 
