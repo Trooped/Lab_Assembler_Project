@@ -495,12 +495,16 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
 void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
     char name[MAXLABELNAME] = {0};
     int value = 0;
+    int tempValue = 0;
     char* ptr = line;
     char* startName;
     int nameLength;
     char* equalPos;
+    char* tempPtr;
+    int equalCounter = 0;
 
     /* Skip past ".define" and any whitespace that immediately follows */
+    while (isspace((unsigned char)*ptr)) ptr++;
     ptr += strlen(".define");
     while (*ptr == ' ' || *ptr == '\t') ptr++;
 
@@ -509,6 +513,19 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
     equalPos = strchr(ptr, '='); /* Find the position of '=' */
     if (!equalPos) {
         printError(errorInfo, "Missing '=' in .define statement");
+        return;
+    }
+
+    /* Check for multiple '=' */
+    tempPtr = equalPos + 1;
+    while (*tempPtr) {
+        if (*tempPtr == '=') {
+            equalCounter++;
+        }
+        tempPtr++;
+    }
+    if (equalCounter > 0) { /*Meaning we've found another '=' after the first one*/
+        printError(errorInfo, "Multiple '=' found in .define statement");
         return;
     }
 
@@ -522,28 +539,48 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
     strncpy(name, startName, nameLength);
     name[nameLength] = '\0'; /* Ensure null-termination */
 
-    /* Check validity of the name */
-    if (!isValidLabelName(name, operationsArray, head, 0)) {
-        printError(errorInfo, "Not a valid .define symbol name");
-        return;
+
+    findSymbolValue(head, name, "define", &tempValue);
+    if (tempValue != 0){
+        /* Move 'ptr' past '=' and optional whitespace */
+        ptr = equalPos + 1;
+        while (*ptr == ' ' || *ptr == '\t') ptr++; /* Skip spaces or tabs after '=' */
+        trimWhitespace(ptr); /* Remove leading and trailing whitespace*/
+
+        /* 'ptr' should now be at the start of the value */
+        if (!isValidInteger(ptr)) {
+            printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
+            return;
+        }
+        value = atoi(ptr);
+
+        if (value == tempValue) {
+            printf("WARNING: Double declaration- Label '%s' was already defined as .define with the same value\n", name);
+            return;
+        }
+        else{
+            printError(errorInfo, "Double declaration- Label was already defined as .define with a different value");
+            return;
+        }
     }
+    else { /* If the define label wasn't found in the symbol table*/
+        /* Check validity of the name */
+        if (!isValidLabelName(name, operationsArray, head, 0)) {
+            printError(errorInfo, "Not a valid .define symbol name");
+            return;
+        }
 
-    /* Move 'ptr' past '=' and optional whitespace */
-    ptr = equalPos + 1;
-    while (*ptr == ' ' || *ptr == '\t') ptr++; /* Skip spaces or tabs after '=' */
-    trimWhitespace(ptr); /* Remove leading and trailing whitespace*/
+        /* Move 'ptr' past '=' and optional whitespace */
+        ptr = equalPos + 1;
+        while (*ptr == ' ' || *ptr == '\t') ptr++; /* Skip spaces or tabs after '=' */
+        trimWhitespace(ptr); /* Remove leading and trailing whitespace*/
 
-    /* 'ptr' should now be at the start of the value */
-    if (!isValidInteger(ptr)) {
-        printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
-        return;
-    }
-    value = atoi(ptr);
-
-    /* Check for duplicate label name */
-    if (!searchSymbolList(head, name, "define")) {
-        printError(errorInfo, ".define symbol already exists");
-        return;
+        /* 'ptr' should now be at the start of the value */
+        if (!isValidInteger(ptr)) {
+            printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
+            return;
+        }
+        value = atoi(ptr);
     }
 
     /* If all checks pass, add the label */

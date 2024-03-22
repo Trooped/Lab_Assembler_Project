@@ -115,9 +115,9 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             }
             currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
 
-            /*Checking if there was an empty label declaration*/
+            /*Checking if there was an empty label declaration, if there is- throw an error*/
             if (labelFlag && currentWord == NULL){
-                printError(errorInfo, "Empty label declaration");
+                printError(errorInfo, "Empty label declaration isn't allowed");
                 break;
             }
 
