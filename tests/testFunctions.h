@@ -9,13 +9,14 @@
 #include <ctype.h>
 #include "../include/assembler.h"
 
+void testPrintAndDeleteFile(char* baseFileName);
+
 void printFileContentFromPointer(FILE* file);
 
-void deleteFile(const char* filePath);
+void deleteFile(const char* filePath, char* suffix);
 
-void printFileContent(const char* filePath);
+void printFileContent(const char* filePath, char* suffix);
 
-void testCopyMacrosIntoNewFile();
 
 
 #endif

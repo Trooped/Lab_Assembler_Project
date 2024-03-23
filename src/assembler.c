@@ -18,14 +18,14 @@ int main(int argc, char** argv) {
 
     if (argc >= 2) {
         for (fileCount=1; fileCount < argc; fileCount++) {
-            sprintf(fileName, "%s.as", argv[fileCount]);
+            sprintf(fileName, "%s.as", argv[fileCount]); /*TODO do i even need to add the .as??*/
             sprintf(baseFileName, "%s", argv[fileCount]); /*Keep a copy of the original file name, without a suffix*/
-            initializeErrorInfo(&error, NULL, fileName, NULL); /*initialize errorInfo struct*/
+            initializeErrorInfo(&error, NULL, fileName, NULL); /*initialize empty errorInfo struct for the preAsmblr*/
 
             /*TODO maybe change the opening of this file to inside of the createFileWithMacros?*/
             oldFIle = fopen(fileName, "r");
             if (oldFIle) {
-                newFile = createFileWithMacros(oldFIle, argv[fileCount], &error); /*create a new file with the macros from the old file*/
+                newFile = createFileWithMacros(oldFIle, baseFileName, &error); /*create a new file with the macros from the old file*/
                 fclose(oldFIle);
 
                 /*TODO do i need to stop the run if there are errors in pre assembly??*/
@@ -40,16 +40,9 @@ int main(int argc, char** argv) {
 
                 assembler(newFile, baseFileName);
 
-                printFileContent("ps.ob");
-                printf("\n");
-                printFileContent("ps.ent");
-                printf("\n");
-                printFileContent("ps.ext");
-                printf("\n");
-                deleteFile("ps.ob");
-                deleteFile("ps.ent");
-                deleteFile("ps.ext");
-                deleteFile("ps.am");
+                fclose(newFile);
+
+                testPrintAndDeleteFile(baseFileName);
             }
             else
                 printf("Failed to open %s\n", argv[fileCount]);
@@ -135,8 +128,6 @@ void assembler(FILE* source, char* fileName){
         printf("%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
         closeFileAndExit(&errorInfo, &symbolTable);
     }
-
-    fclose(source); /*close the source file*/
 
     if (entryLabelCounter(&symbolTable) > 0) {
         createEntFile(&symbolTable, baseFileName, &errorInfo);

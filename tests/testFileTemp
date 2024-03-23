@@ -1,1 +1,31 @@
+; file testFileTemp.as
+ .entry MAIN
+ .extern EXT
+	.define size = 50
+	.define offset = 3
+MAIN:	add #323, r5
+sub #50, r5
+mov r5, r6
 
+mcr macro1
+add #size, r5
+cmp r5, LIST[2]
+bne LOOP
+endmcr
+
+LOOP: 	jmp W
+	prn #-5
+	mov STR[5], STR[2]
+	sub r1, r4
+	cmp K, #size
+	bne W
+L1: 	inc L3
+macro1
+.entry LOOP
+	bne LOOP
+END: hlt
+.define len = 50
+STR: .string "abcdef"
+LIST: .data 5, 25, len
+K: .data 22
+.extern L3

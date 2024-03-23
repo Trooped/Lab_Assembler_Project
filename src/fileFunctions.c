@@ -24,14 +24,12 @@
  * @return the new file
  */
 FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorInfo) {
-    char oldFileNameCopy[MAXFILENAME];
-    char newFileName[MAXFILENAME];
+    char newFileName[MAXFILENAME] = {0};
     FILE * resultFile;
 
-    strcpy(oldFileNameCopy, oldFileName);/*copy the old file name to a new string*/
+    strcpy(newFileName, oldFileName);/*copy the old file name to a new string*/
 
-    removeSubstring(oldFileNameCopy, ".as");/*TODO IS IT EVEN NEEDED? REMOVE.AS*/
-    sprintf(newFileName, "%s.am", oldFileNameCopy);
+    sprintf(newFileName, "%s.am", oldFileName); /*add the suffix to the new file name*/
 
     resultFile = fopen(newFileName, "w+");
     if (resultFile == NULL) {
