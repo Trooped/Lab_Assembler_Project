@@ -24,7 +24,7 @@
  * This struct will define each macro, it's lines (the actual lines of a text, a 2d pointer array) and a lines errorCounter.
  */
 typedef struct macros{
-    char * macroName;
+    char macroName[MAXMACRONAMELENGTH];
     char **lines;
     int linesCounter;
 }macro;
@@ -70,14 +70,14 @@ void processFileLines(FILE* source, FILE* resultFile);
  * @param macroArrSize the size of the macros array
  * @param tmpSize the temporary size of the macros array
  */
-void addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize);
+int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize);
 
 /**
  * This function will free the memory allocated for the macros array.
  * @param macros the macros array
  * @param macroCount the number of macros
  */
-void freeMacrosMemory(macro **macros, int macroCount);
+void freeMacrosArrayMemory(macro **macros, int macroCount);
 
 /**
  * This function will check if a macro exists in the macros array.
@@ -97,14 +97,6 @@ int checkIfMacroExists(char* word, int macroCount, macro *macros[]);
  */
 void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], int macroCount);
 
-
-/**
- * This function will remove the given substring from the given string.
- * @param string the string
- * @param sub the substring
- */
-void removeSubstring(char* string, const char* sub);
-
 /**
 * This function will check if the given binaryWord is a valid macro name.
 * @param word the binaryWord to check
@@ -120,5 +112,11 @@ int checkIfMacroNameIsValid(char* word);
  */
 void freeMemoryAndCloseFile(FILE* file, macro **macros, int macroCount);
 
+
+/**
+ * This function will free the memory allocated for an individual macro.
+ * @param macro the macro
+ */
+void freeMacroMemory(macro *macro);
 
 #endif

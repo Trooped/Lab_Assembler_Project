@@ -20,45 +20,46 @@
  * @param errorInfo The error struct.
  */
 void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
-    char lineBuffer[MAXCHARSPERLINE];
-    char fullLine[MAXCHARSPERLINE];
-    char* currentWord;
-    int L;
-    int operation;
-    (*IC) = 0;
+    char lineBuffer[MAXCHARSPERLINE]; /* Buffer for the current line*/
+    char fullLine[MAXCHARSPERLINE]; /* The full line*/
+    char* currentWord; /* The current word in the line*/
+    int L; /* The current L value = the number of lines to add to the IC*/
+    int operation; /* The current operation number*/
+    (*IC) = 0; /* Reset the IC*/
 
+    /* Loop through the source file line by line */
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
-        fullLine[0] = '\0';
-        strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);
+        strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);  /* Copy the current line into fullLine (for further parsing)*/
         fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
 
 
-        L = 0;
+        L = 0; /* Reset the L value*/
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
-        while(currentWord != NULL){
-            if (isDefine(currentWord)) {
-                break;
+        while(currentWord != NULL){ /* Loop through the words in the line*/
+            if (isDefine(currentWord)) { /*checks if the first word is a define directive*/
+                break; /* Skip the define line*/
             }
             if (searchSymbolList(symbolTable, currentWord, "general") == 0) { /* Label found in the list*/
-                currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+                currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){
                 currentWord = strtok(NULL, " \n\r\t"); /*If for example, we have a valid Label name before extern or entry that was ignored in the first pass*/
             }
-            if (isData(currentWord) || isString(currentWord)  || isExtern(currentWord)) {
-                break;
+            if (isData(currentWord) || isString(currentWord)  || isExtern(currentWord)) { /*checks if the first word is a data, string or extern*/
+                break; /* Skip the data or string line*/
             }
-            else if (isEntry(currentWord)) {
-                currentWord = strtok(NULL, " \n\r\t");
+            else if (isEntry(currentWord)) { /*checks if the first word is an entry directive*/
+                currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
                 markLabelAsEntry(symbolTable, currentWord, errorInfo); /*Calling the function with ONLY the label name, all other tests have been made in the first pass.*/
-                break;
+                break; /* Skip the entry line*/
             }
 
-            operation = isValidOperation(currentWord, operationsArray);
+            operation = isValidOperation(currentWord, operationsArray); /*checks if the first word is a valid operation*/
+            /* If the operation is valid, handle the operation*/
             L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo,1);
-            (*IC) += L;
-            break;
+            (*IC) += L; /* Increment the IC by L*/
+            break; /* Break the loop*/
         }
     }
 }
