@@ -18,8 +18,6 @@
 
 #include "include/listFunctions.h"
 
-
-
 /**
  * This function searches the symbol table for a specific label.
  *
@@ -29,10 +27,10 @@
  * @return int 1 if the label wasn't found, 0 if it was found in the table.
  */
 int searchSymbolList(symbolList** head, char* name, char* type) {
-    char tempLabel[MAXLABELNAME] = {0};
-    symbolList* current = *head;
-    trimWhitespace(name);
-    if (name[strlen(name) - 1] == ':') {
+    char tempLabel[MAXLABELNAME] = {0}; /* Temporary label to store the name without the colon*/
+    symbolList* current = *head; /* Set the current node to the head of the list*/
+    trimWhitespace(name); /* Remove any leading or trailing whitespace*/
+    if (name[strlen(name) - 1] == ':') { /* Check if the label has a colon at the end*/
         strncpy(tempLabel, name, strlen(name) - 1); /* Remove the colon*/
         tempLabel[strlen(name) - 1] = '\0'; /* Ensure null termination*/
     }
@@ -43,7 +41,7 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
 
     /* Search for the name in the list*/
     while (current != NULL) {
-        if ((strcmp(type, "entry")==0) && (strcmp(current->name, tempLabel)==0) && (current->isEntry==1)){
+        if ((strcmp(type, "entry")==0) && (strcmp(current->name, tempLabel)==0) && (current->isEntry==1)){ /*Searching for an entry label*/
             /* Entry label was already found in the list)*/
             return 0;
         }
@@ -59,7 +57,6 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
         }
         current = current->next;
     }
-
     /* Name not found in the list, send 1 to signify creating a new node*/
     return 1;
 }
@@ -75,45 +72,44 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
  * @param errorInfo A pointer to the errorInfo struct.
  */
 void addLabel(symbolList** head, char* name, char* type, int value, error** errorInfo) {
-    int i;
-    symbolList* newNode = NULL;
-    if (name == NULL || name[0] == '\0') {
+    int i; /* Loop index*/
+    symbolList* newNode = NULL; /* The new node to add to the list*/
+    if (name == NULL || name[0] == '\0') { /* Check if the label is empty*/
         printError(errorInfo, "Empty label isn't allowed");
         return; /* Early return to avoid processing further*/
     }
 
-    if (searchSymbolList(head, name, "external") == 0) {
+    if (searchSymbolList(head, name, "external") == 0) { /* Check if the label was already defined as external*/
         printf("WARNING: Double declaration- Label '%s' was already defined as external\n", name);
         return; /* Early return to avoid processing further*/
     }
-    else if (searchSymbolList(head, name, "general") == 0) {
+    else if (searchSymbolList(head, name, "general") == 0) { /* Check if the label was already defined in the symbol table*/
         printError(errorInfo, "Label already exists in the symbol table");
         return; /* Early return to avoid processing further*/
     }
-    trimWhitespace(name);
+    trimWhitespace(name); /* Remove any leading or trailing whitespace*/
 
-    newNode = (symbolList*)malloc(sizeof(symbolList));
-    if (newNode == NULL) {
+    newNode = (symbolList*)malloc(sizeof(symbolList)); /* Allocate memory for the new node*/
+    if (newNode == NULL) { /* If the memory allocation failed, print an error message and exit*/
         printError(errorInfo, "Failed to allocate memory for new Symbol Table node");
         closeFileAndExit(errorInfo, head);
     }
 
     /* Initialize the new node*/
-    strncpy(newNode->name, name, MAXLABELNAME - 1);
+    strncpy(newNode->name, name, MAXLABELNAME - 1); /* Copy the name to the new node*/
     newNode->name[MAXLABELNAME - 1] = '\0'; /* Ensure null termination*/
-    strncpy(newNode->type, type, MAXLABELNAME - 1);
+    strncpy(newNode->type, type, MAXLABELNAME - 1); /* Copy the type to the new node*/
     newNode->type[MAXLABELNAME - 1] = '\0'; /* Ensure null termination*/
-    newNode->value = value;
-    newNode->next = NULL;
-    newNode->isEntry = 0;
-    for (i = 0; i < MAXEXTERNALADDRESSES; i++) {
+    newNode->value = value; /* Set the value of the new node*/
+    newNode->next = NULL; /* Set the next pointer to NULL*/
+    newNode->isEntry = 0; /* Set the isEntry flag to 0*/
+    for (i = 0; i < MAXEXTERNALADDRESSES; i++) { /* Initialize the external addresses array to -1*/
         newNode->externalAddresses[i] = -1;
     }
 
-    if (*head == NULL) {
+    if (*head == NULL) { /* Check if the list is empty*/
         *head = newNode; /* Set new node as the head if list is empty*/
-    } else {
-        /* Append the new node to the end of the list*/
+    } else { /* Append the new node to the end of the list*/
         symbolList* current = *head;
         while (current->next != NULL) {
             current = current->next;
@@ -129,8 +125,8 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
  * @param head The head of the symbol table.
  */
 void deleteSymbolList(symbolList** head) {
-    symbolList* current = *head;
-    symbolList* nextNode = NULL;
+    symbolList* current = *head; /* Set the current node to the head of the list*/
+    symbolList* nextNode = NULL; /* The next node in the list*/
     while (current != NULL) {
         nextNode = current->next;
         free(current);
@@ -139,17 +135,23 @@ void deleteSymbolList(symbolList** head) {
     *head = NULL; /* Ensure the caller's head pointer is set to NULL*/
 }
 
-
+/**
+ * This function adds an external address usage to an extern symbol in the symbol table.
+ *
+ * @param head The head of the symbol table.
+ * @param name The name of the label to add the external address to.
+ * @param address The address to add to the label.
+ */
 void addExternAddress(symbolList** head, char* name, int address){
-    int i=0;
-    symbolList* current = *head;
-    while (current != NULL) {
+    int i = 0; /* Loop index*/
+    symbolList* current = *head; /* Set the current node to the head of the list*/
+    while (current != NULL) { /* Loop through the list*/
         if (strcmp(current->name, name) == 0) {
-            while (current->externalAddresses[i] != -1) {
+            while (current->externalAddresses[i] != -1) { /* Find the first empty slot in the external addresses array*/
                 i++;
             }
-            current->externalAddresses[i] = address;
-            return;
+            current->externalAddresses[i] = address; /* Add the address to the array*/
+            return; /* Early return to avoid processing further*/
         }
         current = current->next;
     }
@@ -167,14 +169,14 @@ void incrementDataSymbolValues(symbolList** head, int byValue) {
     symbolList* current = (*head);
     while (current != NULL) {
         if (strcmp(current->type, "data") == 0) {
-            current->value += byValue;
+            current->value += byValue; /* Increment the value by the specified value*/
         }
         current = current->next;
     }
 }
 
 /**
- * This function searches the symbol table for a specific label and returns its value.
+ * This function searches the symbol table for a specific label, by name and type- and returns its value.
  *
  * @param head The head of the symbol table.
  * @param name The name of the label to search for.
@@ -183,12 +185,12 @@ void incrementDataSymbolValues(symbolList** head, int byValue) {
  * @return int 1 if the label was found, 0 if it wasn't.
  */
 int findSymbolValue(symbolList **head, const char* name,char* type, int* value) {
-    symbolList* current = *head;
-    while (current != NULL) {
-        if (strcmp(current->name, name) == 0) {
-            if (strcmp(current->type, type) == 0) {
-                *value = current->value;
-                return 1;
+    symbolList* current = *head; /* Set the current node to the head of the list*/
+    while (current != NULL) { /* Loop through the list*/
+        if (strcmp(current->name, name) == 0) { /* Check if the name matches*/
+            if (strcmp(current->type, type) == 0) { /* Check if the type matches*/
+                *value = current->value; /* Set the value to the value of the current node*/
+                return 1; /* Return 1 to signify the label was found*/
             }
         }
         current = current->next;
@@ -204,30 +206,30 @@ int findSymbolValue(symbolList **head, const char* name,char* type, int* value) 
  * @param errorInfo A pointer to the errorInfo struct.
  */
 void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
-    char* entryLabelName;
-    symbolList* current = *head;
+    char* entryLabelName; /* The name of the entry label*/
+    symbolList* current = *head; /* Set the current node to the head of the list*/
     entryLabelName = strtok(line, " \n\r\t"); /* Get the next word.*/
 
-    if (searchSymbolList(head, entryLabelName, "entry") == 0){
+    if (searchSymbolList(head, entryLabelName, "entry") == 0){ /* Check if the same label was already defined as entry*/
         printf("WARNING: Double declaration- label '%s' was already defined as entry\n", entryLabelName);
         return;
     }
 
     /* Search for the name in the list*/
     while (current != NULL) {
-        if (strcmp(current->name, entryLabelName) == 0){
-            if (strcmp(current->type, "code") == 0 || strcmp(current->type, "data") == 0){
-                current->isEntry = 1;
-                return;
+        if (strcmp(current->name, entryLabelName) == 0){ /* Check if the name matches*/
+            if (strcmp(current->type, "code") == 0 || strcmp(current->type, "data") == 0){ /* Check if the type is code or data*/
+                current->isEntry = 1; /* Mark the label as an entry*/
+                return; /* Early return to avoid processing further*/
             }
-            else{
+            else{ /* If the type is not code or data, print an error message and exit*/
                 printError(errorInfo, ".entry label is not of type code or data");
                 return;
             }
         }
         current = current->next;
     }
-    printError(errorInfo, ".entry Label not found in the symbol table");
+    printError(errorInfo, ".entry Label not found in the symbol table"); /* If the label wasn't found, print an error message*/
 }
 
 /**

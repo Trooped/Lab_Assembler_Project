@@ -24,105 +24,121 @@
  * @return the new file
  */
 FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorInfo) {
-    char newFileName[MAXFILENAME] = {0};
-    FILE * resultFile;
-
-    strcpy(newFileName, oldFileName);/*copy the old file name to a new string*/
+    char newFileName[MAXFILENAME] = {0}; /*the new file name*/
+    FILE * resultFile; /*the new file*/
 
     sprintf(newFileName, "%s.am", oldFileName); /*add the suffix to the new file name*/
 
-    resultFile = fopen(newFileName, "w+");
-    if (resultFile == NULL) {
+    resultFile = fopen(newFileName, "w+"); /*open the new file*/
+    if (resultFile == NULL) { /*if the file couldn't be opened, print an error message*/
         fprintf(stderr, "Error opening file '%s': %s\n", newFileName, strerror(errno));
         (*errorInfo)->errorFlag = 1;
         return NULL;
     }
-
+    /*process the lines of the file*/
     processFileLines(source, resultFile);
 
-    return resultFile;
+    return resultFile; /*return the new result file*/
 }
 
 
+/**
+ * This function will create the object file.
+ * @param dataArray the data array
+ * @param instructionArray the instruction array
+ * @param IC the instruction counter
+ * @param DC the data counter
+ * @param fileName the file name
+ */
 void createObjectFile(binaryWord* dataArray, binaryWord* instructionArray, int IC, int DC, char* fileName, error** errorInfo, symbolList** symbolTable){
-    FILE* objectFile;
-    char tempFileName[MAXFILENAME];
-    int i;
-    sprintf(tempFileName, "%s.ob", fileName);
-    objectFile = fopen(tempFileName, "w");
-    if (objectFile == NULL) {
+    FILE* objectFile; /*the object file*/
+    char tempFileName[MAXFILENAME]; /*the temporary file name*/
+    int i; /*index*/
+    sprintf(tempFileName, "%s.ob", fileName); /*add the suffix to the file name*/
+    objectFile = fopen(tempFileName, "w"); /*open the object file*/
+    if (objectFile == NULL) { /*if the file couldn't be opened, print an error message and exit*/
         printf("Failed to open file %s\n", tempFileName);
         closeFileAndExit(errorInfo, symbolTable);
     }
 
-    fprintf(objectFile, "%d %d\n", IC, DC);
-    for (i = 0; i < IC; i++) {
-        char* base4String = convertBinaryToBase4Symbols(instructionArray[i].wordBits);
+    fprintf(objectFile, "%d %d\n", IC, DC); /*print the IC and DC to the top of the file*/
+    for (i = 0; i < IC; i++) { /*print the instructions memory image to the file*/
+        char* base4String = convertBinaryToBase4Symbols(instructionArray[i].wordBits); /*convert the binary to base 4*/
         if (base4String != NULL) {
-            fprintf(objectFile, "0%d %s\n", i+INITIAL_IC_VALUE, base4String);
-            free(base4String);
-        } else {
-            fprintf(stderr, "Memory allocation failed for value at index %d.\n", i);
-            break;
+            fprintf(objectFile, "0%d %s\n", i+INITIAL_IC_VALUE, base4String); /*print the instruction to the file*/
+            free(base4String); /*free the base 4 string*/
+        } else { /*if the memory allocation failed, print an error message and exit*/
+            printf("Memory allocation failed for value at index %d.\n", i);
+            closeFileAndExit(errorInfo, symbolTable);
         }
     }
-    for (i = 0; i < DC; i++) {
-        char* base4String = convertBinaryToBase4Symbols(dataArray[i].wordBits);
+    for (i = 0; i < DC; i++) { /*print the data memory image to the file*/
+        char* base4String = convertBinaryToBase4Symbols(dataArray[i].wordBits); /*convert the binary to base 4*/
         if (base4String != NULL) {
-            fprintf(objectFile, "0%d %s\n", i+IC+INITIAL_IC_VALUE, base4String);
-            free(base4String);
-        } else {
-            fprintf(stderr, "Memory allocation failed for value at index %d.\n", i);
-            break;
+            fprintf(objectFile, "0%d %s\n", i+IC+INITIAL_IC_VALUE, base4String); /*print the data to the file*/
+            free(base4String); /*free the base 4 string*/
+        } else { /*if the memory allocation failed, print an error message and exit*/
+            printf("Memory allocation failed for value at index %d.\n", i);
+            closeFileAndExit(errorInfo, symbolTable);
         }
     }
-    fclose(objectFile);
+    fclose(objectFile); /*close the object file*/
 }
 
-
+/**
+ * This function will create the entry file.
+ * @param head the symbol table
+ * @param fileName the file name
+ */
 void createEntFile(symbolList** head, char* fileName, error** errorInfo) {
-    char tempFileName[MAXFILENAME];
-    symbolList* current;
-    FILE* entFile;
-    sprintf(tempFileName, "%s.ent", fileName);
-    entFile = fopen(tempFileName, "w");
-    if (entFile == NULL) {
+    char tempFileName[MAXFILENAME]; /*the temporary file name*/
+    symbolList* current; /*the current symbol*/
+    FILE* entFile; /*the entry file*/
+    sprintf(tempFileName, "%s.ent", fileName); /*add the suffix to the file name*/
+    entFile = fopen(tempFileName, "w"); /*open the entry file*/
+    if (entFile == NULL) { /*if the file couldn't be opened, print an error message and exit*/
         printf("Failed to open file %s\n", tempFileName);
         closeFileAndExit(errorInfo, head);
     }
 
-    current = *head;
-    while (current != NULL) {
-        if (current->isEntry == 1) {
+    current = *head; /*set the current symbol to the head of the symbol table*/
+    while (current != NULL) { /*loop through the symbol table*/
+        if (current->isEntry == 1) { /*if the symbol is an entry symbol, print it to the file*/
             fprintf(entFile, "%s 0%d\n", current->name, current->value);
         }
-        current = current->next;
+        current = current->next; /*move to the next symbol*/
     }
-    fclose(entFile);
+    fclose(entFile); /*close the entry file*/
 }
 
+/**
+ * This function will create the external file.
+ * It'll only be called if there are external symbols in the symbol table, which are used in the source code.
+ * @param head the symbol table
+ * @param fileName the file name
+ */
 void createExtFile(symbolList** head, char* fileName, error** errorInfo) {
-    char tempFileName[MAXFILENAME];
-    int i;
-    symbolList* current;
-    FILE* extFile;
-    sprintf(tempFileName, "%s.ext", fileName);
-    extFile = fopen(tempFileName, "w");
-    if (extFile == NULL) {
+    char tempFileName[MAXFILENAME]; /*the temporary file name*/
+    int i; /*index*/
+    symbolList* current; /*the current symbol*/
+    FILE* extFile; /*the external file*/
+    sprintf(tempFileName, "%s.ext", fileName); /*add the suffix to the file name*/
+    extFile = fopen(tempFileName, "w"); /*open the external file*/
+    if (extFile == NULL) { /*if the file couldn't be opened, print an error message and exit*/
         printf("Failed to open file %s\n", tempFileName);
         closeFileAndExit(errorInfo, head);
     }
 
-    current = *head;
+    current = *head; /*set the current symbol to the head of the symbol table*/
     while (current != NULL) {
-        if (strcmp(current->type, "external") == 0) {
+        if (strcmp(current->type, "external") == 0) { /*if the symbol is an external symbol, print it to the file*/
             i = 0;
-            while (current->externalAddresses[i] != -1) {
+            while (current->externalAddresses[i] != -1) { /*loop through the external addresses, and print them after the Label*/
                 fprintf(extFile, "%s\t0%d\n", current->name, current->externalAddresses[i]);
                 i++;
             }
         }
-        current = current->next;
+        current = current->next; /*move to the next symbol*/
     }
-    fclose(extFile);
+    fclose(extFile); /*close the external file*/
 }

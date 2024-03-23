@@ -9,17 +9,24 @@
 
 #include "include/assembler.h"
 
+/**
+ * @file main.c
+ * The main function of the assembler, which calls the pre-assembly and assembly functions.
+ * @param argc The number of arguments given to the program.
+ * @param argv The arguments given to the program.
+ * @return 0 if the program ran successfully.
+ */
 int main(int argc, char** argv) {
-    int fileCount;
-    error* error;
-    FILE* oldFIle, *newFile;
-    char fileName[MAXFILENAME];
-    char baseFileName[MAXFILENAME];
+    int fileCount; /*Counter for the files*/
+    error* error; /*Empty error struct for the preAsmblr*/
+    FILE* oldFIle, *newFile; /*File pointers for the old and new files*/
+    char fileName[MAXFILENAME]; /*The name of the file*/
+    char baseFileName[MAXFILENAME]; /*The base file name without the suffix*/
 
     if (argc >= 2) {
         for (fileCount=1; fileCount < argc; fileCount++) {
-            sprintf(fileName, "%s.as", argv[fileCount]); /*TODO do i even need to add the .as??*/
             sprintf(baseFileName, "%s", argv[fileCount]); /*Keep a copy of the original file name, without a suffix*/
+            sprintf(fileName, "%s.as", argv[fileCount]); /*Add the suffix to the file name, so we can access it.*/
             initializeErrorInfo(&error, NULL, fileName, NULL); /*initialize empty errorInfo struct for the preAsmblr*/
 
             /*TODO maybe change the opening of this file to inside of the createFileWithMacros?*/
@@ -29,31 +36,32 @@ int main(int argc, char** argv) {
                 fclose(oldFIle);
 
                 /*TODO do i need to stop the run if there are errors in pre assembly??*/
+                /*If there are errors in pre-assembly, stop the run*/
                 if (error->errorFlag == 1) {
                     printf("Errors found in pre-assembly, stopping..\n");
                     fclose(newFile);
                     continue;
                 }
                 else {
-                    free(error);
+                    free(error); /*free the error struct*/
                 }
 
+                /*Call the assembler function*/
                 assembler(newFile, baseFileName);
-
+                /*Close the file*/
                 fclose(newFile);
 
                 testPrintAndDeleteFile(baseFileName);
             }
-            else
+            else { /*If the file couldn't be opened, print an error message*/
                 printf("Failed to open %s\n", argv[fileCount]);
+            }
         }
     }
-    else {
-        printf("not enough arguments\n");
+    else { /*If no files were given as arguments, print an error message*/
+        printf("no files were given as arguments to the assembler\n");
     }
-
     return 0;
-
 }
 
 
@@ -64,80 +72,54 @@ int main(int argc, char** argv) {
  * @param fileName The name of the file.
  */
 void assembler(FILE* source, char* fileName){
-    char baseFileName[MAXFILENAME];
-    binaryWord dataArray[MAXDATA]; /* array for data to be put in the memory image */
-    binaryWord instructionArray[MAXINSTRUCTIONS]; /* array for the instructions to be put in the memory image.*/
-    symbolList* symbolTable = NULL; /* linked list for labels */
+    char baseFileName[MAXFILENAME]; /* The base file name without the suffix - copy string */
+    binaryWord instructionArray[MAXINSTRUCTIONS]; /* Array for the instructions to be put in the memory image.*/
+    binaryWord dataArray[MAXDATA]; /* Array for data to be put in the memory image */
+    symbolList* symbolTable = NULL; /* Linked list for symbols, be it Labels or Defines */
     error* errorInfo; /* Empty errorInfo struct for errors!*/
-    operationInfo operationsArray[NUMOFOPERATIONS];
-    int IC = 0, DC = 0; /* instruction errorCounter and data errorCounter */
+    operationInfo operationsArray[NUMOFOPERATIONS]; /* Array for the operations */
+    int IC = 0, DC = 0; /* instruction Counter and data Counter, for each of the arrays. */
 
-    int i; /*TODO FOR TESTING, DELETE LATER!!!*/
-
-
-    initializeOperationsArray(operationsArray); /*initialize operations array according to the known operations*/
-
-    strncpy(baseFileName, fileName, MAXFILENAME - 1); /* Keep a copy of the original file name, without a suffix*/
-
-    /*TODO real start of assembler function!*/
-
+    /*initialize the arrays, error Struct and the symbol table*/
     initializeErrorInfo(&errorInfo,&symbolTable, fileName, source); /*initialize errorInfo struct*/
-
-    /*initializing both of the arrays*/
+    initializeOperationsArray(operationsArray); /*initialize operations array according to the known operations*/
     initializeDataArray(dataArray, 0);
     initializeInstructionArray(instructionArray, 0);
 
-    /*call firstPass function*/
 
+    strncpy(baseFileName, fileName, MAXFILENAME - 1); /* Keep a copy of the original file name, without a suffix*/
+
+    /*Initiating the first pass*/
     rewind(source); /*reset the file pointer to the beginning of the file*/
     firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
+    incrementDataSymbolValues(&symbolTable, (IC) + INITIAL_IC_VALUE); /*increment the data symbols by the initial IC value- 100*/
 
-    incrementDataSymbolValues(&symbolTable, (IC) + INITIAL_IC_VALUE); /*increment the data symbols by the IC value*/
-
+    /*Initiating the second pass*/
     rewind(source); /*reset the file pointer to the beginning of the file*/
-    printf("SECOND PASS\n");
     secondPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
-
-    /*TODO TESTINGGGGGGGGG
-    printSymbolList(symbolTable);
-    printf("\nIC: %d\n", IC);
-    printf("DC: %d\n", DC);
-    for (i = 0; i < DC; i++) {
-        printf("dataArray[%d]: ", i);
-        printBits(dataArray[i].wordBits);
-        printf("\t decimal: %d", instructionArray[i].wordBits);
-        printf("\n");
-    }
-    for (i = 0; i < IC; i++) {
-        printf("instructionArray[%d]: ", i);
-        printBits(instructionArray[i].wordBits);
-        printf("\t decimal: %d", instructionArray[i].wordBits);
-        printf("\n");
-    }
-
-    if (errorInfo->errorFlag == 1) {
-        printf("%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
-        closeFileAndExit(&errorInfo, &symbolTable);
-    }
-     */
-
-    /*TODO testinggggggggggggggggggggg*/
-
+    /*Check if there are any errors, if there are- print the number of errors and exit the process*/
     if (errorInfo->errorFlag == 1) {
         printf("%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
         closeFileAndExit(&errorInfo, &symbolTable);
     }
 
+    /****************
+    *If there are no errors, create the object file and the entry and external files
+    *****************/
+
+    /*If there are entry labels, create the entry file*/
     if (entryLabelCounter(&symbolTable) > 0) {
         createEntFile(&symbolTable, baseFileName, &errorInfo);
     }
-    if (externLabelCounter(&symbolTable) > 0) { /*if there are external labels and they are mentioned in another line, create the external file*/
+    /*if there are external labels and they are mentioned in another line, create the external file*/
+    if (externLabelCounter(&symbolTable) > 0) {
         createExtFile(&symbolTable, baseFileName, &errorInfo);
     }
-
+    /*Create the object file*/
     createObjectFile(dataArray, instructionArray, IC, DC, baseFileName, &errorInfo, &symbolTable);
 
+    /*Delete the symbol table and the error struct, and return to main function*/
     deleteSymbolList(&symbolTable);
     free(errorInfo);
 }

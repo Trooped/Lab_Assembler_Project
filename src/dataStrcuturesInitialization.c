@@ -19,10 +19,10 @@
  * @param operands The operands array to initialize.
  */
 void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]) {
-    int i, j;
-    for (i = 0; i < MAXOPERANDS; i++) {
-        for (j = 0; j < MAXOPERANDLENGTH; j++) {
-            operands[i][j] = '\0';
+    int i, j; /* Loop counters */
+    for (i = 0; i < MAXOPERANDS; i++) { /* Loop through the array */
+        for (j = 0; j < MAXOPERANDLENGTH; j++) { /* Loop through the string */
+            operands[i][j] = '\0'; /* Set each character to null */
         }
     }
 }
@@ -122,11 +122,11 @@ void initializeOperationsArray(operationInfo* operationsArray) {
  * @param initialValue The value to initialize the array with.
  */
 void initializeDataArray(binaryWord* dataArray, int initialValue) {
-    int i;
+    int i; /* Loop counter */
 
     /* Initialize each element*/
-    for (i = 0; i < MAXDATA; i++) {
-        dataArray[i].wordBits = initialValue;
+    for (i = 0; i < MAXDATA; i++) { /* Loop through the array */
+        dataArray[i].wordBits = initialValue; /* Set the value of the word to the initial value */
     }
 }
 
@@ -136,10 +136,10 @@ void initializeDataArray(binaryWord* dataArray, int initialValue) {
  * @param initialValue The value to initialize the array with.
  */
 void initializeInstructionArray(binaryWord* instructionArray, int initialValue) {
-    int i;
+    int i;  /* Loop counter */
 
     /* Initialize each element*/
-    for (i = 0; i < MAXINSTRUCTIONS; i++) {
-        instructionArray[i].wordBits = initialValue;
+    for (i = 0; i < MAXINSTRUCTIONS; i++) { /* Loop through the array */
+        instructionArray[i].wordBits = initialValue; /* Set the value of the word to the initial value */
     }
 }

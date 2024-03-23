@@ -2,7 +2,7 @@
 MAIN:	mov r3, LIST[sz]
 MAIN: .string"abcdef"
 
-abcdefghijklmnopqrstuvwxyza1234: .data -2048, -2048, -2048, -2048, -2048, -2048, 234
+abcdefghijklmnopqrstuvwxyza1234: .data -2048, -2048, -2048, -2048, -2048, -2048, 1999, 2023
 
 LIST: .data 6. -9, len
 LIST1: d .data 6, -9,. len

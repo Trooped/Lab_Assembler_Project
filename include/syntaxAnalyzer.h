@@ -52,6 +52,8 @@ int isValidInteger(char* str);
 
 int isRegister(char* word);
 
+int checkLineLengthAndSkip(FILE *sourceFile, char *lineBuffer, error** errorInfo);
+
 
 
 

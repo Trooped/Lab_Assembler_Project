@@ -27,6 +27,7 @@
  * 17. isRegister - This function checks if a string is a register.
  * 18. checkEntrySyntax - This function checks the syntax of the .entry directive.
  * 19. analyzeOperandsAndInsertIntoArraySecondPass - This function analyzes the operands and inserts them into the instruction array in the second pass.
+ * 20. checkLineLengthAndSkip - This function checks the length of the line and skips it if it's too long.
  */
 
 #include "include/syntaxAnalyzer.h"
@@ -1005,5 +1006,23 @@ int isRegister(char* word){
         return 1;
     }
     return 0;
+}
+
+/**
+ * Checks if the current line exceeds the maximum allowed length.
+ * If so, it consumes the rest of the line and sets an appropriate error.
+ * Returns 0 if the line is too long (and was skipped), or 1 if the line is okay.
+ */
+int checkLineLengthAndSkip(FILE* sourceFile, char* lineBuffer, error** errorInfo) {
+    int ch;
+    size_t lineLen = strlen(lineBuffer);
+    if (lineBuffer[lineLen - 1] != '\n' && !feof(sourceFile)) {
+        /* Line is longer than the buffer, so it's considered too long */
+        printError(errorInfo, "Line exceeds the maximum allowed length.");
+        /* Consume the rest of the line */
+        while ((ch = fgetc(sourceFile)) != '\n' && ch != EOF);
+        return 0; /* Indicate that the line is too long and was skipped */
+    }
+    return 1; /* Line is within the acceptable length */
 }
 

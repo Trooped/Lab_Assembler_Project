@@ -17,111 +17,103 @@
  * @param errorInfo The error struct.
  */
 void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
-    int labelFlag = 0;
-    int operation = 0;
-    int L;
-    char lineBuffer[MAXCHARSPERLINE];
-    char fullLine[MAXCHARSPERLINE];
-    char tempLabelName[MAXLABELNAME];
-    char* currentWord;
+    int labelFlag = 0; /* Flag to check if the current line begins with a label*/
+    int operation = 0; /* The current operation number*/
+    int L; /* The current L value = the number of lines to add to the IC*/
+    char lineBuffer[MAXCHARSPERLINE]; /* Buffer for the current line*/
+    char fullLine[MAXCHARSPERLINE]; /* Buffer for the full line*/
+    char tempLabelName[MAXLABELNAME]; /* String for the temporary label name (the label name to add in the current line)*/
+    char* currentWord; /* The current word in the line*/
 
+    /* Loop through the source file line by line */
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
-        size_t lineLen = strlen(lineBuffer);
-        int ch;
-        (*errorInfo)->lineCounter++; /* Increment the line counter*/
-
-        /* Copy the current line into a fullLine (for further parsing) and to the errorInfo struct*/
-        fullLine[0] = '\0';
+        /* Copy the current line into fullLine (for further parsing)*/
         strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);
         fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
+
+        /* Updating the errorInfo struct with the current line information */
+        (*errorInfo)->lineCounter++; /* Increment the line counter*/
+        (*errorInfo)->lineText[0] = '\0'; /* Reset the line text*/
         strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
 
-        /* Check if we've read a complete line, if it's longer - then it exceeds the limit of 80 chars.
-         * Throw an error, skip the line and check for other errors, if they exist.*/
-        if (lineBuffer[lineLen - 1] != '\n') {
-            /* We didn't find a newline, which means the line is longer than our buffer */
-            printError(errorInfo, "Line exceeds the maximum allowed length.");
 
-            /* Consume the rest of the line to get back in sync for the next iteration */
-            while ((ch = fgetc(sourceFile)) != '\n' && ch != EOF);
-
-            /* Skip processing this line since it's too long */
+        /* Check if the line is too long, and skip it if it is */
+        if (!checkLineLengthAndSkip(sourceFile, lineBuffer, errorInfo)) {
+            /* Line is too long and has been skipped, so continue to the next iteration */
             continue;
         }
 
-        L = 0;
-        labelFlag = 0;
+        L = 0; /* Reset the L value*/
+        labelFlag = 0; /* Reset the label flag*/
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while (currentWord != NULL) {
-            if (isDefine(currentWord)){
+            if (isDefine(currentWord)){ /*checks if the first word is a define directive*/
                 handleDefine(symbolTable, operationsArray, fullLine, errorInfo);
                 break;
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
-                labelFlag = 1;
-                strncpy(tempLabelName, currentWord, MAXLABELNAME);
+                labelFlag = 1; /* Set the label flag*/
+                strncpy(tempLabelName, currentWord, MAXLABELNAME);  /* Copy the label name to the tempLabelName, for use with addLabel later*/
             }
-            else if (isData(currentWord) || isString(currentWord)){
-                if (labelFlag) {
+            else if (isData(currentWord) || isString(currentWord)){ /*checks if the first word is a data or string directive*/
+                if (labelFlag) { /* If there is a label, add it to the symbol table*/
                     addLabel(symbolTable, tempLabelName, "data", *DC, errorInfo);
                 }
-
-                if (isData(currentWord)){
+                if (isData(currentWord)){ /* If the directive is .data*/
                     handleData("data", fullLine, symbolTable, DC, dataArray, errorInfo);
                     break;
                 }
-                else{
+                else{ /* If the directive is .string*/
                     handleData("string", fullLine, symbolTable, DC, dataArray, errorInfo);
                     break;
                 }
             }
-            else if (isExtern(currentWord)){
-                if (labelFlag) {
+            else if (isExtern(currentWord)){ /*checks if the first word is an extern directive*/
+                if (labelFlag) { /* If there was label before it, send '1' to the function to ignore the label*/
                     handleExtern(symbolTable, fullLine, errorInfo, operationsArray, 1);
                 }
-                else{
+                else{ /* If there was no label before it, send '0' to the function to handle it normally*/
                     handleExtern(symbolTable, fullLine, errorInfo, operationsArray, 0);
                 }
                 break;
             }
-            else if (isEntry(currentWord)){
-                if (labelFlag) {
+            else if (isEntry(currentWord)){ /*checks if the first word is an entry directive*/
+                if (labelFlag) { /* If there was label before it, send '1' to the function to ignore the label*/
                     checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray,1);
                 }
-                else{
+                else{ /* If there was no label before it, send '0' to the function to handle it normally*/
                     checkEntrySyntax(symbolTable, fullLine, errorInfo, operationsArray, 0);
                 }
                 break;
             }
-            else if (isValidOperation(currentWord, operationsArray)!=-1){
-                if (labelFlag) {
-                    addLabel(symbolTable, tempLabelName, "code", *IC + 100, errorInfo);
+            else if (isValidOperation(currentWord, operationsArray)!=-1){ /*checks if the first word is a valid operation*/
+                if (labelFlag) { /* If there was label before it, add it to the symbol table*/
+                    addLabel(symbolTable, tempLabelName, "code", ((*IC) + INITIAL_IC_VALUE), errorInfo);
                 }
-                strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
-                operation = isValidOperation(currentWord, operationsArray);
-
+                strtok(NULL, " \n\r\t"); /* Get the next word.*/
+                operation = isValidOperation(currentWord, operationsArray); /* Get the operation number*/
+                /* Handle the operation and get the L value*/
                 L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 0);
                 if (L == INSTRUCTIONFAILCODE){
-                    break;
+                    break; /* If the operation failed, break the loop*/
                 }
-                else{
+                else{ /* If the operation succeeded, increment the IC by L*/
                     (*IC) += L;
                     break;
                 }
             }
-            else{
+            else{ /* If the first word is not a label, operation or directive, print an error and break the loop*/
                 printError(errorInfo, "Invalid label, operation or directive");
                 break;
             }
             currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
 
-            /*Checking if there was an empty label declaration, if there is- throw an error*/
+            /* If we reached here, there was an empty label declaration, throw an error!*/
             if (labelFlag && currentWord == NULL){
                 printError(errorInfo, "Empty label declaration isn't allowed");
                 break;
             }
-
-        }
-    }
-}
+        }/* End of the inner while loop (to parse words in line)*/
+    } /* End of the main while loop (to parse the source code line by line)*/
+} /* End of the firstPass function*/
 

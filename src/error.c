@@ -18,11 +18,12 @@
  * @param errorDescription The description of the error.
  */
 void printError(error** errorInfo, char* errorDescription){
-    (*errorInfo)->errorCounter++;
-    (*errorInfo)->errorFlag = 1;
-    if ((*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] == '\n') {
+    (*errorInfo)->errorCounter++; /* Increment the error counter*/
+    (*errorInfo)->errorFlag = 1; /* Set the error flag*/
+    if ((*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] == '\n') { /* Check if the line ends with a newline character*/
         (*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] = '\0'; /* Remove the newline character*/
     }
+    /* Print the detailed error message*/
     printf("Error #%d found in file '%s', line %d:\n'%s'\nerror description: %s\n\n", (*errorInfo)->errorCounter, (*errorInfo)->fileName,(*errorInfo)->lineCounter, (*errorInfo)->lineText, errorDescription);
 }
 
@@ -36,18 +37,18 @@ void printError(error** errorInfo, char* errorDescription){
  * @param file The file pointer.
  */
 void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileName, FILE* file) {
-    *errorInfo = malloc(sizeof(error));
-    if (*errorInfo == NULL) {
+    *errorInfo = malloc(sizeof(error)); /* Allocate memory for the errorInfo struct*/
+    if (*errorInfo == NULL) { /* Check if the memory allocation was successful*/
         fprintf(stderr, "Failed to allocate memory for errorInfo\n");
-        closeFileAndExit(errorInfo, symbolTable);
+        closeFileAndExit(errorInfo, symbolTable); /* Close the file and free the memory*/
     }
     /* Initialize errorInfo*/
-    (*errorInfo)->errorFlag = 0;
-    (*errorInfo)->errorCounter = 0;
+    (*errorInfo)->errorFlag = 0; /* Set the error flag to 0*/
+    (*errorInfo)->errorCounter = 0; /* Set the error counter to 0*/
     strcpy((*errorInfo)->fileName, fileName);
-    (*errorInfo)->file = NULL;
-    (*errorInfo)->lineText[0] = '\0';
-    (*errorInfo)->lineCounter = 0;
+    (*errorInfo)->file = NULL; /*set the file pointer to NULL*/
+    (*errorInfo)->lineText[0] = '\0'; /* Set the line text to an empty string*/
+    (*errorInfo)->lineCounter = 0; /* Set the line counter to 0*/
 }
 
 /**
@@ -57,14 +58,14 @@ void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileN
  * @param symbolTable A pointer to the symbol table.
  */
 void closeFileAndExit(error** errorInfo, symbolList** symbolTable) {
-    if ((*errorInfo)->file != NULL) {
-        fclose((*errorInfo)->file);
+    if ((*errorInfo)->file != NULL) { /* Check if the file pointer is not NULL*/
+        fclose((*errorInfo)->file); /* Close the file*/
     }
     if ((*errorInfo) != NULL) {
-        free(*errorInfo);
+        free(*errorInfo); /* Free the errorInfo struct*/
     }
     if ((*symbolTable) != NULL) {
-        deleteSymbolList(symbolTable);
+        deleteSymbolList(symbolTable); /* Free the symbol table*/
     }
     exit(1);
 }
