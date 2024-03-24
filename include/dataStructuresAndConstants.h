@@ -1,3 +1,17 @@
+/**
+ * dataStructuresAndConstants.h
+ * This file contains the data structures and constants used in the assembler.
+ * The data structures are used to store the data and instructions, as well as the symbols and errors.
+ * The constants are used to define the sizes of the arrays and the maximum values for the data and instructions, as well as other general constants.
+ *
+ * The data structures include:
+ * 1. symbolList - A struct for the symbol list, which will be used for a linked list consisting of the symbols in the program- "symbol table"
+ * 2. binaryWord - A struct for the binary word, which will be used to store the binary words in the data and instruction arrays
+ * 3. operationInfo - A struct for the operation info, which will be used to store the operations in the operations array
+ * 4. errorInfo - A struct for the error info, which will be used to store the errors in the error struct and print them at the end of the program
+ * */
+
+
 #ifndef DATASTRUCTURESANDCONSTANTS_H
 #define DATASTRUCTURESANDCONSTANTS_H
 
@@ -53,12 +67,12 @@ typedef struct operations{
 
 /*A struct for the error info, which will be used to store the errors in the error struct and print them at the end of the program*/
 typedef struct errorInfo{
-    int errorFlag;
-    int errorCounter;
-    char fileName[MAX_FILE_NAME];
-    char lineText[MAX_CHARS_PER_LINE];
-    int lineCounter;
-    FILE* file;
+    int errorFlag; /* 1 if there is an error, 0 otherwise*/
+    int errorCounter; /* Number of errors*/
+    char fileName[MAX_FILE_NAME]; /* Current file name*/
+    char lineText[MAX_CHARS_PER_LINE]; /* Current line content*/
+    int lineCounter; /* Current line number*/
+    FILE* file; /* Pointer to the current file*/
 }error;
 
 

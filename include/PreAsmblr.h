@@ -14,7 +14,7 @@
 #include "dataStructuresAndConstants.h"
 #include "error.h"
 
-/*TODO move the definitions to a different file?*/
+/*Constants that are used solely in the pre-assembly process*/
 #define MAX_MACRO_NAME_LENGTH 31 /*Maximum number of characters in a macro name*/
 #define MAX_LINES_PER_MACRO 32 /*Initial maximum number of lines in a macro, will be adjusted dynamically*/
 #define MAX_MACROS 32 /*Starter number for number of macros, dynamically allocated further on*/
