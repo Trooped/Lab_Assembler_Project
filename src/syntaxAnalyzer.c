@@ -48,26 +48,25 @@
  */
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo){
     int i = 0, j=0;
-    char tempVal[MAX_OPERAND_LENGTH] = {0};
-    char tempOperand[MAX_OPERAND_LENGTH] = {0};
+    char tempVal[MAX_OPERAND_LENGTH] = {0}; /* Temp string for the offset value*/
+    char tempOperand[MAX_OPERAND_LENGTH] = {0}; /* Temp string for the operand*/
 
-    if (operand[0] == '#') {
-        strcpy(tempOperand, operand+1);
-
-        if (!isValidInteger(tempOperand)){
+    if (operand[0] == '#') { /* Immediate operand*/
+        strcpy(tempOperand, operand+1); /* Copy the operand without the '#'*/
+        if (!isValidInteger(tempOperand)){ /* Check if the token is a valid integer*/
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
                 printError(errorInfo, "Invalid Integer or undefined symbol for immediate operand");
-                return INSTRUCTION_FAIL_CODE;
+                return INSTRUCTION_FAIL_CODE; /* Return fail code, as the operand is not a valid integer*/
             }
         }
-        return 0;
+        return 0; /* Immediate operand*/
     }
-    else if (isRegister(operand)) {
-        return 3;
+    else if (isRegister(operand)) { /* Register operand*/
+        return 3; /* Register operand*/
     }
     else { /* case of Label or Label offset */
-        trimWhitespace(operand);
+        trimWhitespace(operand); /* Remove leading and trailing whitespace*/
 
         /* Extract the label part before the '['*/
         while (operand[i] != '[' && operand[i] != '\0') {
@@ -79,7 +78,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         /* Check if there's a space between the label and the offset, if there is, send error*/
         if (isspace((unsigned char)tempOperand[i-1]) && operand[i] == '['){
             printError(errorInfo, "Label with offset cannot have spaces between the label and the offset value");
-            return INSTRUCTION_FAIL_CODE;
+            return INSTRUCTION_FAIL_CODE; /* Return fail code, as the label with offset has a space between the label and the '[' char*/
         }
 
         /* Check if it's just a label without offset*/
@@ -117,11 +116,11 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     }
                 }
                 return 2; /* Valid label with offset*/
-            } else {
+            } else { /* Invalid offset declaration, doesn't end with ']'*/
                 printError(errorInfo, "Invalid offset declaration, doesn't end with ']'");
                 return INSTRUCTION_FAIL_CODE;
             }
-        } else {
+        } else { /*undefined operand*/
             printError(errorInfo, "Invalid operand");
             return INSTRUCTION_FAIL_CODE;
         }
@@ -144,12 +143,12 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
  * @return the length of the operation or INSTRUCTION_FAIL_CODE if the operation failed
  */
 int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo, int isSecondPass) {
-    int L = 0;
-    char* colon;
-    int firstOperand;
-    int secondOperand;
-    char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH];
-    initializeOperandsArray(operands);
+    int L = 0; /* The number of lines to add to the IC*/
+    char* colon; /* Pointer to the colon in the line*/
+    int firstOperand; /* The first operand code*/
+    int secondOperand; /* The second operand code*/
+    char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH]; /* Array for the operands*/
+    initializeOperandsArray(operands); /* Initialize the operands array*/
 
     /* Skip label if present*/
     colon = strchr(line, ':');
@@ -169,6 +168,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         return INSTRUCTION_FAIL_CODE;
     }
 
+    /* Checking the number of operands and their validity*/
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
             printError(errorInfo, "Too many operands for a 0 operand operation");
@@ -190,7 +190,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         }
         else{
             firstOperand = 0;
-            secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
+            secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /* Get the operand code*/
             if (secondOperand == INSTRUCTION_FAIL_CODE){
                 return INSTRUCTION_FAIL_CODE;
             }
@@ -210,20 +210,19 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             return INSTRUCTION_FAIL_CODE;
         }
         else{
-            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
+            firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /* Get the first operand code*/
             if (firstOperand != INSTRUCTION_FAIL_CODE){
-                secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo);
+                secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo); /* Get the second operand code*/
             }
         }
     }
-    /*TODO ADD ERROR FOR TOO LITTLE OPERANDS!*/
 
-    /*Another test if anything failed*/
+    /*Another test to check if anything failed*/
     if (firstOperand == INSTRUCTION_FAIL_CODE || secondOperand == INSTRUCTION_FAIL_CODE) {
         return INSTRUCTION_FAIL_CODE;
     }
 
-
+    /*If there's offset for an operand, increment the line counter for each offset*/
     if (firstOperand == 2){
         L++;
     }
@@ -231,6 +230,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         L++;
     }
 
+    /*switch case for the different operations, with specific errors for each operation*/
     switch(opcode){
         case 0: /*mov*/
             if (secondOperand == 0){
@@ -248,13 +248,13 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             break;
         case 3: /*sub*/
             if (secondOperand == 0){
-                printError(errorInfo, "Cannot subtract from an immediate operand");
+                printError(errorInfo, "Cannot subtract into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 4: /*lea*/
             if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
-                printError(errorInfo, "Illegal operands for lea operation");
+                printError(errorInfo, "Invalid operands for lea operation");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
@@ -284,13 +284,13 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             break;
         case 9: /*jmp*/
             if (secondOperand == 0 || secondOperand==2){
-                printError(errorInfo, "Illegal operands for jmp");
+                printError(errorInfo, "Invalid operands for jmp");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 10: /*bne*/
             if (secondOperand == 0 || secondOperand==2){
-                printError(errorInfo, "Illegal operands for bne");
+                printError(errorInfo, "Invalid operands for bne");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
@@ -304,7 +304,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             break;
         case 13: /*jsr*/
             if (secondOperand == 0 || secondOperand==2){
-                printError(errorInfo, "Illegal operands for jsr");
+                printError(errorInfo, "Invalid operands for jsr");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
@@ -318,20 +318,21 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             break;
     }
 
-    if (firstOperand == 3 &&  secondOperand == 3){ /*Sharing one binary word with 2 registers*/
-        L--;
+    /*Special case where both operands are registers, sharing one binary word*/
+    if (firstOperand == 3 &&  secondOperand == 3){
+        L--; /* Decrement the line counter, as the 2 operands are sharing one binary word*/
     }
 
-    L += operationsArray[opcode].numOfOperands + 1; /* The number of operands + the operation itself*/
+    L += operationsArray[opcode].numOfOperands + 1; /* The number of operands + the operation line itself*/
 
-    if (!isSecondPass){
+    if (!isSecondPass){ /*If it's the first pass, only add the first word and update the IC*/
         insertFirstInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
     }
     else if (operationsArray[opcode].numOfOperands != 0){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
-        analyzeOperandsAndInsertIntoArraySecondPass(instructionArray, L, IC, operands, head, errorInfo);
+        analyzeOperandsAndInsertIntoArraySecondPass(instructionArray, L, IC, operands, head, errorInfo); /*Analyze the operands and insert them into the instruction array*/
     }
 
-    return L;
+    return L; /* Return the number of lines to add to the IC*/
 }
 
 /**
@@ -344,33 +345,33 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
  * @param errorInfo - the error struct
  */
 void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
-    char* numbers;
-    char* ptr;
-    char* token;
-    char* lastNonWhitespaceChar;
-    long val;
-    short dataCounter = 0;
-    char copiedLine[MAX_CHARS_PER_LINE];
-    if (strcmp(type, "data") == 0) {
-        numbers = strstr(line, ".data");
+    char* numbers; /* Pointer to the numbers in the line*/
+    char* ptr; /* Pointer for iterating through the line*/
+    char* token; /* Token for the strtok function*/
+    char* lastNonWhitespaceChar; /* Pointer to the last non-whitespace character in the line*/
+    long val; /* The value of the current number*/
+    short dataCounter = 0; /* Counter for the number of data values*/
+    char copiedLine[MAX_CHARS_PER_LINE]; /* Copy of the line for further processing*/
+    if (strcmp(type, "data") == 0) { /* If it's a .data directive*/
+        numbers = strstr(line, ".data");  /* Find the .data in the line*/
         numbers += strlen(".data"); /* Move past ".data" */
         while (isspace((unsigned char)*numbers)) numbers++; /* Skip whitespace */
 
-        if (*numbers == '\n' || *numbers == '\0') {
+        if (*numbers == '\n' || *numbers == '\0') { /* If there are no values after .data*/
             printError(errorInfo, "No values found after .data.");
             return;
         }
 
         /* Initially check for a trailing comma and consecutive commas */
-        ptr = numbers;
+        ptr = numbers; /* Set the pointer to the numbers*/
         lastNonWhitespaceChar = NULL;
-        while (*ptr) {
-            if (*ptr == ',' && (!lastNonWhitespaceChar || *lastNonWhitespaceChar == ',')) {
+        while (*ptr) { /* Iterate through the line*/
+            if (*ptr == ',' && (!lastNonWhitespaceChar || *lastNonWhitespaceChar == ',')) { /* If there are consecutive commas or a trailing comma*/
                 printError(errorInfo, "Consecutive commas or trailing comma detected.");
-                return;
+                return; /* Return, as the line is invalid*/
             }
-            if (!isspace((unsigned char)*ptr)) {
-                lastNonWhitespaceChar = ptr;
+            if (!isspace((unsigned char)*ptr)) { /* If the character is not whitespace*/
+                lastNonWhitespaceChar = ptr; /* Set the last non-whitespace character*/
             }
             ptr++;
         }
@@ -381,60 +382,60 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
             return;
         }
 
-        /* Tokenization and value processing */
+        /* Initial tests succeeded, Tokenization and value processing */
         token = strtok(numbers, ",");
-        while (token) {
-            if (dataCounter >= MAX_VALUES_PER_DATA_DIRECTIVE) {
-                printError(errorInfo, "Too many data values inserted.");
+        while (token) { /* Iterate through the tokens*/
+            if (dataCounter >= MAX_VALUES_PER_DATA_DIRECTIVE) { /* If there are too many data values (more than 36)*/
+                printError(errorInfo, "Too many data values inserted into the .data directive.");
                 return;
             }
 
             trimWhitespace(token); /* Clean up token*/
 
-            if (!isValidInteger(token)) {
+            if (!isValidInteger(token)) { /* If the token is not a valid integer*/
                 int symbolValue;
                 if (!findSymbolValue(head, token, "define", &symbolValue)) {
                     printError(errorInfo, "Invalid integer or undefined symbol.");
-                    return;
+                    return; /* Return, as the token is not a valid integer*/
                 }
                 val = symbolValue; /* Use the value from the symbol list*/
             } else {
                 val = atoi(token);
             }
 
-            convertValueToBinaryAndInsertToDataArray(dataArray, *DC, val);
+            convertValueToBinaryAndInsertToDataArray(dataArray, *DC, val); /* Convert the value to binary and insert it into the data array*/
             (*DC)++;
             dataCounter++;
 
             token = strtok(NULL, ",");
         }
     }
-    else if (strcmp(type, "string")==0) {
-        char* stringPosition = strstr(line, ".string");
-        int i;
+    else if (strcmp(type, "string")==0) { /* If it's a .string directive*/
+        char* stringPosition = strstr(line, ".string"); /* Find the .string in the line*/
+        int i; /* Iterator for the loop*/
 
-
-        strcpy(copiedLine, stringPosition + strlen(".string") + 1); /* Copy the characters AFTER the .string declaration.*/
-        if (copiedLine[0] == '\0') {
+        /* Copy the line content following the .string declaration.*/
+        strcpy(copiedLine, stringPosition + strlen(".string") + 1);
+        if (copiedLine[0] == '\0') { /* If there are no values after .string*/
             printError(errorInfo, "No valid string was found after .string");
             return;
         }
         trimWhitespace(copiedLine); /* Remove leading and trailing whitespace*/
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
             for (i = 1; i < strlen(copiedLine)-1; i++) {
-                if (isprint(copiedLine[i])){
-                    convertValueToBinaryAndInsertToDataArray(dataArray, *DC, copiedLine[i]);
-                    (*DC)++;
+                if (isprint(copiedLine[i])){ /* If the character is printable*/
+                    convertValueToBinaryAndInsertToDataArray(dataArray, *DC, copiedLine[i]); /* Convert the character to binary and insert it into the data array*/
+                    (*DC)++; /* Increment the DC*/
                 }
                 else{
-                    printError(errorInfo, "Invalid ASCII character in string");
+                    printError(errorInfo, "Invalid ASCII character in string"); /* If the character is not printable, print an error*/
                     return;
                 }
             }
-            convertValueToBinaryAndInsertToDataArray(dataArray, *DC, '\0');
-            (*DC)++;
+            convertValueToBinaryAndInsertToDataArray(dataArray, *DC, '\0'); /* Insert the null terminator into the data array*/
+            (*DC)++; /* Increment the DC*/
         }
-        else {
+        else { /* If the string is not enclosed in double quotes or is empty*/
             printError(errorInfo, "No valid string was found after .string");
             return;
         }
@@ -451,10 +452,10 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
  * @param labelFlag - a flag to signal if the first word is a label
  */
 void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag){
-    char* currentWord;
-    int flag = 0;
+    char* currentWord; /* The current word in the line*/
+    int flag = 0; /* Flag to check if the first label was already added*/
 
-    if(labelFlag){
+    if(labelFlag){ /* If the first word is a label, ignore it and print a warning*/
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -465,21 +466,21 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
 
-    if (!currentWord){
+    if (!currentWord){  /* If there are no symbols after .extern*/
         printError(errorInfo, "No symbols found after .extern");
         return;
     }
 
-    while (currentWord!= NULL) {
-        if (flag){
+    while (currentWord!= NULL) { /* Loop through the words in the line*/
+        if (flag){ /* If the first label was already added, print an error because there are extraneous labels*/
             printError(errorInfo, "Extraneous text after First label of .extern");
             return;
         }
-        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
+        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) { /* If the label is not valid*/
             printError(errorInfo, "Not a valid .extern symbol name");
             return;
         }
-        else {
+        else { /* If the label is valid, add it to the symbol table*/
             addLabel(head, currentWord, "external", 0, errorInfo);
             flag = 1;
         }
@@ -495,15 +496,15 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
  * @param errorInfo - the error struct
  */
 void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
-    char name[MAX_LABEL_NAME] = {0};
-    int value = 0;
-    int tempValue = 0;
-    char* ptr = line;
-    char* startName;
-    int nameLength;
-    char* equalPos;
-    char* tempPtr;
-    int equalCounter = 0;
+    char name[MAX_LABEL_NAME] = {0}; /* The name of the label*/
+    int value = 0; /* The value of the .define directive*/
+    int tempValue = 0; /* Temporary value for the .define directive*/
+    char* ptr = line; /* Pointer to the line*/
+    char* startName; /* Pointer to the start of the name*/
+    int nameLength; /* The length of the name*/
+    char* equalPos; /* Pointer to the position of the '='*/
+    char* tempPtr; /* Temporary pointer for iterating through the line*/
+    int equalCounter = 0; /* Counter for the number of '='*/
 
     /* Skip past ".define" and any whitespace that immediately follows */
     while (isspace((unsigned char)*ptr)) ptr++;
@@ -513,7 +514,7 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
     /* Now, 'ptr' should be at the start of the name */
     startName = ptr;
     equalPos = strchr(ptr, '='); /* Find the position of '=' */
-    if (!equalPos) {
+    if (!equalPos) { /* If there's no '=' */
         printError(errorInfo, "Missing '=' in .define statement");
         return;
     }
@@ -537,30 +538,33 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
         nameLength--; /* Exclude trailing spaces or tabs from the name */
     }
 
-    if (nameLength >= MAX_LABEL_NAME) nameLength = MAX_LABEL_NAME - 1;
+    if (nameLength > MAX_LABEL_NAME){ /* If the name is too long*/
+        printError(errorInfo, "Label name too long for .define");
+        return;
+    }
     strncpy(name, startName, nameLength);
     name[nameLength] = '\0'; /* Ensure null-termination */
 
-
-    findSymbolValue(head, name, "define", &tempValue);
-    if (tempValue != 0){
+    /* Check if the .define directive was already defined */
+    findSymbolValue(head, name, "define", &tempValue); /* Trying to find the value (if it exists) */
+    if (tempValue != 0){ /* If there's a value that was already initialized for the define label*/
         /* Move 'ptr' past '=' and optional whitespace */
         ptr = equalPos + 1;
         while (*ptr == ' ' || *ptr == '\t') ptr++; /* Skip spaces or tabs after '=' */
         trimWhitespace(ptr); /* Remove leading and trailing whitespace*/
 
         /* 'ptr' should now be at the start of the value */
-        if (!isValidInteger(ptr)) {
+        if (!isValidInteger(ptr)) { /* If the value is not a valid integer*/
             printError(errorInfo, "Invalid integer or undefined symbol for '.define'");
             return;
         }
         value = atoi(ptr);
 
-        if (value == tempValue) {
+        if (value == tempValue) { /* If the value is the same as the one that was already defined, print a warning*/
             printf("WARNING: Double declaration- Label '%s' was already defined as .define with the same value\n", name);
             return;
         }
-        else{
+        else{ /* If the define directive was initialized twice with different values, print an error*/
             printError(errorInfo, "Double declaration- Label was already defined as .define with a different value");
             return;
         }
@@ -584,7 +588,6 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
         }
         value = atoi(ptr);
     }
-
     /* If all checks pass, add the label */
     addLabel(head, name, "define", value, errorInfo);
 }
@@ -592,16 +595,17 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
 
 /**
  * This function checks the syntax of the .entry directive, as well as if it's been already been defined as .extern.
+ * It does not add the label to the symbol table, as it's only used for checking the syntax.
  * @param head The symbol list.
  * @param line The line to be checked.
  * @param errorInfo The error struct.
  * @param operationsArray The operations array.
  */
 void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag) {
-    char* currentWord;
-    int flag = 0;
+    char* currentWord; /* The current word in the line.*/
+    int flag = 0; /* Flag to check if the first label was already added.*/
 
-    if(labelFlag){
+    if(labelFlag){ /* If the first word is a label, ignore it and print a warning.*/
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -611,26 +615,26 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
 
-    if (!currentWord){
+    if (!currentWord){ /* If there are no symbols after .entry*/
         printError(errorInfo, "No symbols found after .entry");
         return;
     }
 
     while (currentWord!= NULL) {
-        if(flag){
+        if(flag){ /* If the first label was already added, print an error because there are extraneous labels*/
             printError(errorInfo, "Extraneous text after Label definition for .entry");
             return;
         }
-        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) {
+        else if (!isValidLabelName(currentWord, operationsArray, head, 0)) { /* If the label is not valid*/
             printError(errorInfo, "Not a valid .entry symbol name");
             return;
         }
-        else if (searchSymbolList(head, currentWord, "extern") == 0) {
+        else if (searchSymbolList(head, currentWord, "extern") == 0) { /* If the label is defined as .extern*/
             printError(errorInfo, "Invalid .entry symbol name, it's already defined as .extern");
             return;
         }
         else{
-            flag = 1;
+            flag = 1; /* If the label is valid, set the flag to 1*/
         }
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
@@ -645,17 +649,18 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
  * @return 1 if the parsing was successful, 0 otherwise.
  */
 int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], error** errorInfo) {
-    char* token;
-    int operandIndex = 0;
-    char* nextToken;
+    char* token; /* The current token*/
+    int operandIndex = 0; /* The index of the current operand*/
+    char* nextToken; /* The next token*/
 
+    /* Check for invalid syntax: comma before or after operands, or two consecutive commas */
     if (line[0] == ',' || strstr(line, ",,") != NULL || line[strlen(line) - 1] == ',') {
         printError(errorInfo, "Invalid syntax: comma before or after operands, or two consecutive commas found.");
         return 0;
     }
 
     token = strtok(line, ",");
-    while (token != NULL && operandIndex < MAX_OPERANDS) {
+    while (token != NULL && operandIndex < MAX_OPERANDS) { /* Iterate through the tokens*/
         trimWhitespace(token); /* Remove leading and trailing whitespace */
 
         /* Check for an empty token, indicating " , ," pattern */
@@ -665,19 +670,18 @@ int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_L
         }
 
         nextToken = strtok(NULL, ",");
-        if (operandIndex == MAX_OPERANDS - 1 && nextToken != NULL) {
+        if (operandIndex == MAX_OPERANDS - 1 && nextToken != NULL) { /* If there are more than 2 operands*/
             printError(errorInfo, "Invalid syntax: too many operands provided.");
-            printf("Invalid syntax: too many operands provided.\n");
             return 0; /* Early return if there's content after the second operand */
         }
 
-        strncpy(operands[operandIndex], token, MAX_OPERAND_LENGTH - 1);
+        strncpy(operands[operandIndex], token, MAX_OPERAND_LENGTH - 1); /* Copy the token to the operands array*/
         operands[operandIndex][MAX_OPERAND_LENGTH - 1] = '\0'; /* Ensure null termination */
 
-        operandIndex++;
+        operandIndex++; /* Increment the operand index */
         token = nextToken; /* Proceed to the next token */
     }
-    return 1;
+    return 1; /* Return 1 if the parsing was successful */
 }
 
 
@@ -692,9 +696,10 @@ int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_L
  * @param errorInfo A pointer to the errorInfo struct.
  */
 void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo){
-    binaryWord newWord;
-    int regNumSource, regNumDest;
+    binaryWord newWord; /* The new word to be inserted into the instruction array*/
+    int regNumSource, regNumDest; /* The register numbers for the source and destination registers*/
 
+    /* Initialize the operands and offsets */
     char firstOperand[MAX_OPERAND_LENGTH];
     char firstOffset[MAX_OPERAND_LENGTH];
     char secondOperand[MAX_OPERAND_LENGTH];
@@ -714,11 +719,11 @@ void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, i
 
     /*If the first operand is a register and the second is a register, special case where one word is being used*/
     if(isRegister(operands[0]) && isRegister(operands[1])){
-        regNumSource = atoi(operands[0] + 1);
-        regNumDest = atoi(operands[1] + 1);
-        newWord.wordBits = (regNumSource << 5) | (regNumDest << 2);
-        instructionArray[(*IC)+1] = newWord;
-        return;
+        regNumSource = atoi(operands[0] + 1); /* Get the 1st register number*/
+        regNumDest = atoi(operands[1] + 1); /* Get the 2nd register number*/
+        newWord.wordBits = (regNumSource << 5) | (regNumDest << 2); /* Combine the register numbers into one word*/
+        instructionArray[(*IC)+1] = newWord; /* Insert the word into the instruction array*/
+        return;  /* Return, as we've inserted the word into the instruction array*/
     }
 
     /*This part is quite complicated, so i'll write which case it is near each function call/ condition
@@ -765,10 +770,10 @@ void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, i
  * @param outLabelOrDefine The output label or define.
  */
 void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine) {
-    char* bracketPos;
-    char* endBracketPos;
+    char* bracketPos; /* The position of the bracket*/
+    char* endBracketPos; /* The position of the end bracket*/
 
-    if (operand == NULL) {
+    if (operand == NULL) { /* If the operand is NULL*/
         outOperand[0] = '\0'; /* Indicate empty string*/
         outLabelOrDefine[0] = '\0'; /* Indicate empty string*/
         return;
@@ -819,7 +824,7 @@ void trimWhitespace(char* str) {
     end = length - 1;
 
     /* Trim trailing space */
-    while (end > start && isspace((unsigned char)str[end])) end--;
+    while (end > start && isspace((unsigned char)str[end])) end--; /* Find the last non-whitespace character */
 
     /* Shift everything to the left */
     length = end - start + 1;
@@ -906,8 +911,9 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
     int i;
     char lastChar = name[strlen(name) - 1];
 
-    if (colonFlag && lastChar != ':') {
-        return 0;
+    /* Check if the label has a colon at the end */
+    if (colonFlag && lastChar != ':') { /* If the label is supposed to have a colon, but the last character is not a colon*/
+        return 0; /* Return 0, as the label is invalid*/
     }
     else if (colonFlag == 1){ /*Remove the colon for testing!*/
         name[strlen(name) - 1] = '\0';
@@ -948,9 +954,9 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
  */
 int isValidOperation(char* word, operationInfo* operationsArray) {
     int i;
-    for (i = 0; i < NUM_OF_OPERATIONS; i++) {
+    for (i = 0; i < NUM_OF_OPERATIONS; i++) { /* Iterate through the operations array*/
         if (strcmp(word, operationsArray[i].name) == 0) {
-            return i;
+            return i; /* Return the index of the operation if it's found*/
         }
     }
     return -1;
@@ -964,30 +970,30 @@ int isValidOperation(char* word, operationInfo* operationsArray) {
  */
 int isValidInteger(char* str) {
     int i;
-    int len = strlen(str);
-    int start = 0;
-    int temp;
+    int len = strlen(str); /* Get the length of the string*/
+    int start = 0;  /* The start index of the string*/
+    int temp; /* Temporary variable for the integer value*/
 
     /* Check if the string starts with '+' or '-'*/
     if (str[0] == '+' || str[0] == '-') {
         if (len == 1) {
             /* If the string is only '+' or '-', it's not a valid integer*/
-            return 0;
+            return 0; /* Return 0, as the string is not a valid integer*/
         }
         start = 1;
     }
 
     /* Check if the rest of the characters are digits*/
-    for (i = start; i < len; i++) {
-        if (!isdigit(str[i])) {
-            return 0;
+    for (i = start; i < len; i++) { /* Iterate through the string*/
+        if (!isdigit(str[i])) { /* If the character is not a digit*/
+            return 0; /* Return 0, as the string is not a valid integer*/
         }
     }
 
     /* Convert the string to an integer */
     temp = atoi(str);
 
-    /* Check if the number is greater than the constant */
+    /* Check if the number is greater than the maximum 12-bit integer or less than the minimum 12-bit integer */
     if (temp > MAX_INTEGER_12BIT || temp < MIN_INTEGER_12BIT) {
         return 0;
     }
@@ -1009,13 +1015,13 @@ int isRegister(char* word){
 }
 
 /**
- * Checks if the current line exceeds the maximum allowed length.
- * If so, it consumes the rest of the line and sets an appropriate error.
- * Returns 0 if the line is too long (and was skipped), or 1 if the line is okay.
+ * This function checks if the current line exceeds the maximum allowed length.
+ * If so, it consumes the rest of the line and prints an appropriate error.
+ * Returns 0 if the line is too long (and was skipped), or 1 if the line length is valid.
  */
 int checkLineLengthAndSkip(FILE* sourceFile, char* lineBuffer, error** errorInfo) {
-    int ch;
-    size_t lineLen = strlen(lineBuffer);
+    int ch; /* The current character*/
+    size_t lineLen = strlen(lineBuffer); /* The length of the line*/
     if (lineBuffer[lineLen - 1] != '\n' && !feof(sourceFile)) {
         /* Line is longer than the buffer, so it's considered too long */
         printError(errorInfo, "Line exceeds the maximum allowed length.");

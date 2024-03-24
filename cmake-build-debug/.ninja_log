@@ -76,3 +76,10 @@
 6	54	7330114607074114	CMakeFiles/assembler.dir/src/secondPass.c.obj	ec9e72e08a6fd46a
 2	54	7330114607074114	CMakeFiles/assembler.dir/src/assembler.c.obj	85a4e6d56661c3c9
 54	110	7330114607605538	assembler.exe	605c740312106fdc
+15	118	7330184688837606	CMakeFiles/assembler.dir/tests/testFunctions.c.obj	5110b73af3f499f8
+12	118	7330184688837606	CMakeFiles/assembler.dir/src/firstPass.c.obj	3daf58627df3e8ad
+1	119	7330184688837606	CMakeFiles/assembler.dir/src/assembler.c.obj	85a4e6d56661c3c9
+18	119	7330184688847603	CMakeFiles/assembler.dir/src/fileFunctions.c.obj	399be765689ac96e
+5	120	7330184688857603	CMakeFiles/assembler.dir/src/PreAsmblr.c.obj	3531d18818903a33
+9	122	7330184688887603	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+122	248	7330184690120803	assembler.exe	605c740312106fdc
