@@ -10,6 +10,7 @@
 
 /**
  * This function is the second pass of the assembler. It goes through the source file and creates the binary words for the instructions.
+ * In the end of the second pass function, the program checks if the program is too large for the memory we have, and if it is- ends the program prematurely.
  * @param sourceFile The source file to be read.
  * @param dataArray The array to store the data.
  * @param instructionArray The array to store the instructions.
@@ -27,6 +28,8 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
     int operation; /* The current operation number*/
     (*IC) = 0; /* Reset the IC*/
     (*errorInfo)->lineCounter = 0;
+    rewind(sourceFile); /*reset the file pointer to the beginning of the file*/
+
 
     /* Loop through the source file line by line */
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
@@ -70,4 +73,12 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
             break; /* Break the loop*/
         }
     }
+
+    /*Checking if the program is too large for the memory we have, which is 4096-100 words of memory
+     * if it is- end the program prematurely.*/
+    if ((*IC)+(*DC) > MEMORY_IMAGE_SIZE) {
+        printError(errorInfo, "The program is too large for the available memory, exiting the process");
+        closeFileAndExit(errorInfo, symbolTable);
+    }
+
 }

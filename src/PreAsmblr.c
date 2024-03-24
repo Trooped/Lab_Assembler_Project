@@ -10,9 +10,9 @@
  * 2. allocateMemoryToMacros - This function will allocate memory for the macros array.
  * 3. addNewMacroToMacrosArray - This function will add a new macro to the macros array.
  * 4. freeMacrosArrayMemory - This function will free the memory allocated for the macros array.
- * 5. checkIfMacroExists - This function will check if the given binaryWord is an existing macro.
+ * 5. checkIfMacroExists - This function will check if the given word is an existing macro.
  * 6. writeCurrentMacroIntoFile - This function will write the macro with the given name to the new file.
- * 7. checkIfMacroNameIsValid - This function will check if the given binaryWord is a valid macro name.
+ * 7. checkIfMacroNameIsValid - This function will check if the given word is a valid macro name.
  * 8. freeMemoryAndCloseFile - This function will free the memory allocated for the macros array and close the file.
  * 9. freeMacroMemory - This function will free the memory allocated for an individual macro.
  */
@@ -27,7 +27,7 @@
  * @param resultFile the new file
  */
 void processFileLines(FILE* source, FILE* resultFile) {
-    int macroArrSize = MAXMACROS; /* Maximum number of macros (initial size of the macros array, which will grow with need)*/
+    int macroArrSize = MAX_MACROS; /* Maximum number of macros (initial size of the macros array, which will grow with need)*/
     int tmpSize = 0; /* Temporary size for reallocating the macros array*/
     int macroCount = 0; /* Number of macros in total*/
     char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line parsing*/
@@ -85,7 +85,7 @@ macro** allocateMemoryToMacros(int macroArrSize){
  * @param source the old file
  * @param resultFile the new file
  * @param lineBuffer the current line
- * @param word the current binaryWord
+ * @param word the current word
  * @param macros the macros array
  * @param macroCount the number of macros
  * @param currentLine the current line
@@ -94,7 +94,7 @@ macro** allocateMemoryToMacros(int macroArrSize){
  */
 int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize) {
     int i; /* Loop index */
-    int tempLineCounter = LINES; /* Initial number of lines to allocate memory for */
+    int tempLineCounter = MAX_LINES_PER_MACRO; /* Initial number of lines to allocate memory for */
     macro *newMacro = NULL; /* Temporary pointer for the new macro instance */
     macro **newMacros = NULL; /* Temporary pointer for the macros array */
 
@@ -136,7 +136,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     strcpy(newMacro->macroName, word); /* Copy the name into the macro struct */
 
     /* Allocate initial memory for the macro's lines. */
-    newMacro->lines = (char **) malloc(LINES * sizeof(char *));
+    newMacro->lines = (char **) malloc(MAX_LINES_PER_MACRO * sizeof(char *));
     newMacro->linesCounter = 0; /* Initialize lines counter. */
     if (newMacro->lines == NULL) { /* Check if the allocation was successful */
         fprintf(stderr,"\nError: Memory allocation for macro lines failed.\n");
@@ -145,7 +145,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     }
 
     /* Allocate memory for each line */
-    for (i = 0; i < LINES; i++) {
+    for (i = 0; i < MAX_LINES_PER_MACRO; i++) {
         newMacro->lines[i] = (char *) malloc(MAX_CHARS_PER_LINE * sizeof(char));
         if (newMacro->lines[i] == NULL) { /* Check if the allocation was successful */
             fprintf(stderr,"\nError: Memory allocation for macro line failed.\n");
@@ -216,10 +216,10 @@ void freeMacrosArrayMemory(macro **macros, int macroCount) {
 
 /**
  * This function will check if the given word is an existing macro.
- * @param word the word to check
+ * @param word the name to check
  * @param macroCount the number of macros
  * @param macros the macros array
- * @return 1 if the binaryWord is a macro, else 0
+ * @return 1 if the the name is a macro, else 0
  */
 int checkIfMacroExists(char* word, int macroCount, macro *macros[]){
     int i; /* Loop index */
@@ -253,18 +253,27 @@ void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], 
 }
 
 /**
- * This function will check if the given word is a valid macro name.
- * @param word the word to check
- * @return 1 if the word is a valid macro name, else 0
+ * This function will check if the given string is a valid macro name.
+ * @param word the string to check
+ * @return 1 if the string is a valid macro name, else 0
  */
 int checkIfMacroNameIsValid(char* word){
+    char tempName[MAX_MACRO_NAME_LENGTH]; /* Temporary buffer for the macro name*/
     int numSavedWords; /* Number of saved words*/
     int i; /* Loop index*/
-    char* endptr; /* Pointer to the end of the binaryWord*/
+    char* endptr; /* Pointer to the end of the string*/
     /* Array of saved words*/
     char* savedWords[] = {".data", ".string", ".entry", ".extern","mcr","endmcr", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
-    if (word == NULL || strlen(word)>=MAXMACRONAMELENGTH || (word[0]>= '0' && word[0]<='9')) {
+    if (word == NULL || strlen(word) >= MAX_MACRO_NAME_LENGTH || (word[0] >= '0' && word[0] <= '9')) {
         return 0; /* Return 0 (false) if the word is NULL, too long, or starts with a number*/
+    }
+
+    /* Checking if the word contains a white space*/
+    strncpy(tempName, word, MAX_MACRO_NAME_LENGTH); /* Copy the word to the temporary buffer*/
+    for (i = 0; i < strlen(tempName); i++) { /* Loop through the word*/
+        if(isspace(tempName[i])){ /* If the character is a space*/
+            return 0; /* Return 0 (false) if the word contains a space*/
+        }
     }
 
     strtol(word, &endptr, 10); /* Try to convert the word to a long integer*/

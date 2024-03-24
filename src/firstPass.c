@@ -25,6 +25,8 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     char tempLabelName[MAX_LABEL_NAME]; /* String for the temporary label name (the label name to add in the current line)*/
     char* currentWord; /* The current word in the line*/
 
+    rewind(sourceFile); /* Reset the file pointer to the beginning of the file*/
+
     /* Loop through the source file line by line */
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
         /* Copy the current line into fullLine (for further parsing)*/
@@ -106,7 +108,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 printError(errorInfo, "Invalid label, operation or directive");
                 break;
             }
-            currentWord = strtok(NULL, " \n\r\t"); /* Get the next binaryWord.*/
+            currentWord = strtok(NULL, " \n\r\t"); /* Get the next word.*/
 
             /* If we reached here, there was an empty label declaration, throw an error!*/
             if (labelFlag && currentWord == NULL){
@@ -115,5 +117,8 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             }
         }/* End of the inner while loop (to parse words in line)*/
     } /* End of the main while loop (to parse the source code line by line)*/
+
+    /*increment the data symbols by the initial IC value- 100*/
+    incrementDataSymbolValues(symbolTable, (*IC) + INITIAL_IC_VALUE);
 } /* End of the firstPass function*/
 

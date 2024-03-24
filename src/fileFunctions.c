@@ -23,20 +23,33 @@
  * @param oldFileName the old file name
  * @return the new file
  */
-FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorInfo) {
+FILE* createFileWithMacros(FILE* source, const char* oldFileName) {
     char newFileName[MAX_FILE_NAME] = {0}; /*the new file name*/
     FILE * resultFile; /*the new file*/
+    error* error; /*Empty error struct for the preAsmblr*/
 
     sprintf(newFileName, "%s.am", oldFileName); /*add the suffix to the new file name*/
+    initializeErrorInfo(&error, NULL, newFileName, NULL); /*initialize empty errorInfo struct for the preAsmblr*/
 
     resultFile = fopen(newFileName, "w+"); /*open the new file*/
     if (resultFile == NULL) { /*if the file couldn't be opened, print an error message*/
         fprintf(stderr, "Error opening file '%s': %s\n", newFileName, strerror(errno));
-        (*errorInfo)->errorFlag = 1;
+        error->errorFlag = 1;
         return NULL;
     }
     /*process the lines of the file*/
     processFileLines(source, resultFile);
+
+    /*If there are errors in pre-assembly, stop the run*/
+    if (error->errorFlag == 1) {
+        fprintf(stderr, "Errors were found in the pre-assembly process, exiting the process\n");
+        free(error); /*free the error struct*/
+        fclose(resultFile); /*close the file*/
+        return NULL;
+    }
+    else {
+        free(error); /*free the error struct*/
+    }
 
     return resultFile; /*return the new result file*/
 }

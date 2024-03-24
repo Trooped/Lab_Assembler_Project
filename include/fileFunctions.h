@@ -1,5 +1,5 @@
-#ifndef _FILEFUNCTIONS_H
-#define _FILEFUNCTIONS_H
+#ifndef FILEFUNCTIONS_H
+#define FILEFUNCTIONS_H
 
 #include "dataStructuresAndConstants.h"
 #include "utilities.h"
@@ -14,9 +14,7 @@
  * @param oldFileName the old file name
  * @return the new file
  */
-FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorInfo);
-
-
+FILE* createFileWithMacros(FILE* source, const char* oldFileName);
 
 void createEntFile(symbolList** head, char* fileName, error** errorInfo);
 

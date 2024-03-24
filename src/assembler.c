@@ -18,7 +18,6 @@
  */
 int main(int argc, char** argv) {
     int fileCount; /*Counter for the files*/
-    error* error; /*Empty error struct for the preAsmblr*/
     FILE* oldFIle, *newFile; /*File pointers for the old and new files*/
     char fileName[MAX_FILE_NAME]; /*The name of the file*/
     char baseFileName[MAX_FILE_NAME]; /*The base file name without the suffix*/
@@ -27,29 +26,19 @@ int main(int argc, char** argv) {
         for (fileCount=1; fileCount < argc; fileCount++) {
             sprintf(baseFileName, "%s", argv[fileCount]); /*Keep a copy of the original file name, without a suffix*/
             sprintf(fileName, "%s.as", argv[fileCount]); /*Add the suffix to the file name, so we can access it.*/
-            initializeErrorInfo(&error, NULL, fileName, NULL); /*initialize empty errorInfo struct for the preAsmblr*/
 
             /*TODO maybe change the opening of this file to inside of the createFileWithMacros?*/
             oldFIle = fopen(fileName, "r");
             if (oldFIle) {
-                newFile = createFileWithMacros(oldFIle, baseFileName, &error); /*create a new file with the macros from the old file*/
+                newFile = createFileWithMacros(oldFIle, baseFileName); /*create a new file with the macros from the old file*/
                 fclose(oldFIle);
 
-                /*TODO do i need to stop the run if there are errors in pre assembly??*/
-                /*If there are errors in pre-assembly, stop the run*/
-                if (error->errorFlag == 1) {
-                    fprintf(stderr,"Errors found in pre-assembly, stopping..\n");
-                    fclose(newFile);
+                if (newFile == NULL) { /*If there were errors in the pre-assembly process, continue to the next file*/
                     continue;
-                }
-                else {
-                    free(error); /*free the error struct*/
                 }
 
                 /*Call the assembler function*/
                 assembler(newFile, baseFileName);
-                /*Close the file*/
-                fclose(newFile);
 
                 testPrintAndDeleteFile(baseFileName);
             }
@@ -86,23 +75,12 @@ void assembler(FILE* source, char* fileName){
     initializeDataArray(dataArray, 0);
     initializeInstructionArray(instructionArray, 0);
 
-
     strncpy(baseFileName, fileName, MAX_FILE_NAME - 1); /* Keep a copy of the original file name, without a suffix*/
 
     /*Initiating the first pass*/
-    rewind(source); /*reset the file pointer to the beginning of the file*/
     firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
-    incrementDataSymbolValues(&symbolTable, (IC) + INITIAL_IC_VALUE); /*increment the data symbols by the initial IC value- 100*/
-
-    /*Checking if the program is too large for the memory we have, which is 4096-100 words of memory
-     * if it is- end the program prematurely.*/
-    if (IC+DC > MEMORY_IMAGE_SIZE) {
-        fprintf(stderr,"The program is too large for the available memory, exiting the process\n");
-        closeFileAndExit(&errorInfo, &symbolTable);
-    }
 
     /*Initiating the second pass*/
-    rewind(source); /*reset the file pointer to the beginning of the file*/
     secondPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
     /*Check if there are any errors, if there are- print the number of errors and exit the process*/
@@ -119,16 +97,19 @@ void assembler(FILE* source, char* fileName){
     if (entryLabelCounter(&symbolTable) > 0) {
         createEntFile(&symbolTable, baseFileName, &errorInfo);
     }
-    /*if there are external labels and they are mentioned in another line, create the external file*/
+    /*if there are external labels and they are used in operations, create the external file*/
     if (externLabelCounter(&symbolTable) > 0) {
         createExtFile(&symbolTable, baseFileName, &errorInfo);
     }
     /*Create the object file*/
     createObjectFile(dataArray, instructionArray, IC, DC, baseFileName, &errorInfo, &symbolTable);
 
-    /*Delete the symbol table and the error struct, and return to main function*/
+
+
+    /*Delete the symbol table and the error struct*/
     deleteSymbolList(&symbolTable);
     free(errorInfo);
+    fclose(source); /*close the source file and return to the main function.*/
 }
 
 
