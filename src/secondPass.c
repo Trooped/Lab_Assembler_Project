@@ -20,18 +20,20 @@
  * @param errorInfo The error struct.
  */
 void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
-    char lineBuffer[MAXCHARSPERLINE]; /* Buffer for the current line*/
-    char fullLine[MAXCHARSPERLINE]; /* The full line*/
+    char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line*/
+    char fullLine[MAX_CHARS_PER_LINE]; /* The full line*/
     char* currentWord; /* The current word in the line*/
     int L; /* The current L value = the number of lines to add to the IC*/
     int operation; /* The current operation number*/
     (*IC) = 0; /* Reset the IC*/
+    (*errorInfo)->lineCounter = 0;
 
     /* Loop through the source file line by line */
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
-        strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);  /* Copy the current line into fullLine (for further parsing)*/
-        fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
-        strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
+        strncpy(fullLine, lineBuffer, MAX_CHARS_PER_LINE);  /* Copy the current line into fullLine (for further parsing)*/
+        fullLine[MAX_CHARS_PER_LINE - 1] = '\0'; /* Ensure null-termination*/
+        (*errorInfo)->lineCounter++; /* Increment the line counter*/
+        strncpy((*errorInfo)->lineText, fullLine, MAX_CHARS_PER_LINE); /* Copying the current line into the error struct*/
 
 
         L = 0; /* Reset the L value*/
@@ -56,8 +58,14 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
             }
 
             operation = isValidOperation(currentWord, operationsArray); /*checks if the first word is a valid operation*/
+            if (operation == -1) { /* If the operation is invalid*/
+                break; /* Break the loop, we already found this error in the first pass*/
+            }
             /* If the operation is valid, handle the operation*/
             L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo,1);
+            if (L == INSTRUCTION_FAIL_CODE){
+                break; /* Break the loop, we already found this error in the first pass*/
+            }
             (*IC) += L; /* Increment the IC by L*/
             break; /* Break the loop*/
         }

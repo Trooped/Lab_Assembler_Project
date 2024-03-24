@@ -7,7 +7,7 @@
 
 void initializeOperationsArray(operationInfo* operationsArray);
 
-void initializeOperandsArray(char operands[MAXOPERANDS][MAXOPERANDLENGTH]);
+void initializeOperandsArray(char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH]);
 
 void initializeDataArray(binaryWord* dataArray, int initialValue);
 

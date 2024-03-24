@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
     int fileCount; /*Counter for the files*/
     error* error; /*Empty error struct for the preAsmblr*/
     FILE* oldFIle, *newFile; /*File pointers for the old and new files*/
-    char fileName[MAXFILENAME]; /*The name of the file*/
-    char baseFileName[MAXFILENAME]; /*The base file name without the suffix*/
+    char fileName[MAX_FILE_NAME]; /*The name of the file*/
+    char baseFileName[MAX_FILE_NAME]; /*The base file name without the suffix*/
 
     if (argc >= 2) {
         for (fileCount=1; fileCount < argc; fileCount++) {
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
                 /*TODO do i need to stop the run if there are errors in pre assembly??*/
                 /*If there are errors in pre-assembly, stop the run*/
                 if (error->errorFlag == 1) {
-                    printf("Errors found in pre-assembly, stopping..\n");
+                    fprintf(stderr,"Errors found in pre-assembly, stopping..\n");
                     fclose(newFile);
                     continue;
                 }
@@ -54,12 +54,12 @@ int main(int argc, char** argv) {
                 testPrintAndDeleteFile(baseFileName);
             }
             else { /*If the file couldn't be opened, print an error message*/
-                printf("Failed to open %s\n", argv[fileCount]);
+                fprintf(stderr,"Failed to open %s\n", argv[fileCount]);
             }
         }
     }
     else { /*If no files were given as arguments, print an error message*/
-        printf("no files were given as arguments to the assembler\n");
+        fprintf(stderr,"no files were given as arguments to the assembler\n");
     }
     return 0;
 }
@@ -72,12 +72,12 @@ int main(int argc, char** argv) {
  * @param fileName The name of the file.
  */
 void assembler(FILE* source, char* fileName){
-    char baseFileName[MAXFILENAME]; /* The base file name without the suffix - copy string */
-    binaryWord instructionArray[MAXINSTRUCTIONS]; /* Array for the instructions to be put in the memory image.*/
-    binaryWord dataArray[MAXDATA]; /* Array for data to be put in the memory image */
+    char baseFileName[MAX_FILE_NAME]; /* The base file name without the suffix - copy string */
+    binaryWord instructionArray[INSTRUCTION_ARRAY_SIZE]; /* Array for the instructions to be put in the memory image.*/
+    binaryWord dataArray[DATA_ARRAY_SIZE]; /* Array for data to be put in the memory image */
     symbolList* symbolTable = NULL; /* Linked list for symbols, be it Labels or Defines */
     error* errorInfo; /* Empty errorInfo struct for errors!*/
-    operationInfo operationsArray[NUMOFOPERATIONS]; /* Array for the operations */
+    operationInfo operationsArray[NUM_OF_OPERATIONS]; /* Array for the operations */
     int IC = 0, DC = 0; /* instruction Counter and data Counter, for each of the arrays. */
 
     /*initialize the arrays, error Struct and the symbol table*/
@@ -87,12 +87,19 @@ void assembler(FILE* source, char* fileName){
     initializeInstructionArray(instructionArray, 0);
 
 
-    strncpy(baseFileName, fileName, MAXFILENAME - 1); /* Keep a copy of the original file name, without a suffix*/
+    strncpy(baseFileName, fileName, MAX_FILE_NAME - 1); /* Keep a copy of the original file name, without a suffix*/
 
     /*Initiating the first pass*/
     rewind(source); /*reset the file pointer to the beginning of the file*/
     firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
     incrementDataSymbolValues(&symbolTable, (IC) + INITIAL_IC_VALUE); /*increment the data symbols by the initial IC value- 100*/
+
+    /*Checking if the program is too large for the memory we have, which is 4096-100 words of memory
+     * if it is- end the program prematurely.*/
+    if (IC+DC > MEMORY_IMAGE_SIZE) {
+        fprintf(stderr,"The program is too large for the available memory, exiting the process\n");
+        closeFileAndExit(&errorInfo, &symbolTable);
+    }
 
     /*Initiating the second pass*/
     rewind(source); /*reset the file pointer to the beginning of the file*/
@@ -100,7 +107,7 @@ void assembler(FILE* source, char* fileName){
 
     /*Check if there are any errors, if there are- print the number of errors and exit the process*/
     if (errorInfo->errorFlag == 1) {
-        printf("%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
+        fprintf(stderr,"%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
         closeFileAndExit(&errorInfo, &symbolTable);
     }
 

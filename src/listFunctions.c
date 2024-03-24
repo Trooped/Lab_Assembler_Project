@@ -27,7 +27,7 @@
  * @return int 1 if the label wasn't found, 0 if it was found in the table.
  */
 int searchSymbolList(symbolList** head, char* name, char* type) {
-    char tempLabel[MAXLABELNAME] = {0}; /* Temporary label to store the name without the colon*/
+    char tempLabel[MAX_LABEL_NAME] = {0}; /* Temporary label to store the name without the colon*/
     symbolList* current = *head; /* Set the current node to the head of the list*/
     trimWhitespace(name); /* Remove any leading or trailing whitespace*/
     if (name[strlen(name) - 1] == ':') { /* Check if the label has a colon at the end*/
@@ -96,14 +96,14 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
     }
 
     /* Initialize the new node*/
-    strncpy(newNode->name, name, MAXLABELNAME - 1); /* Copy the name to the new node*/
-    newNode->name[MAXLABELNAME - 1] = '\0'; /* Ensure null termination*/
-    strncpy(newNode->type, type, MAXLABELNAME - 1); /* Copy the type to the new node*/
-    newNode->type[MAXLABELNAME - 1] = '\0'; /* Ensure null termination*/
+    strncpy(newNode->name, name, MAX_LABEL_NAME - 1); /* Copy the name to the new node*/
+    newNode->name[MAX_LABEL_NAME - 1] = '\0'; /* Ensure null termination*/
+    strncpy(newNode->type, type, MAX_LABEL_NAME - 1); /* Copy the type to the new node*/
+    newNode->type[MAX_LABEL_NAME - 1] = '\0'; /* Ensure null termination*/
     newNode->value = value; /* Set the value of the new node*/
     newNode->next = NULL; /* Set the next pointer to NULL*/
     newNode->isEntry = 0; /* Set the isEntry flag to 0*/
-    for (i = 0; i < MAXEXTERNALADDRESSES; i++) { /* Initialize the external addresses array to -1*/
+    for (i = 0; i < MAX_EXTERNAL_ADDRESSES; i++) { /* Initialize the external addresses array to -1*/
         newNode->externalAddresses[i] = -1;
     }
 

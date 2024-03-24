@@ -30,8 +30,8 @@ void processFileLines(FILE* source, FILE* resultFile) {
     int macroArrSize = MAXMACROS; /* Maximum number of macros (initial size of the macros array, which will grow with need)*/
     int tmpSize = 0; /* Temporary size for reallocating the macros array*/
     int macroCount = 0; /* Number of macros in total*/
-    char lineBuffer[MAXCHARSPERLINE]; /* Buffer for the current line parsing*/
-    char currentLine[MAXCHARSPERLINE]; /* Buffer for the current full line*/
+    char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line parsing*/
+    char currentLine[MAX_CHARS_PER_LINE]; /* Buffer for the current full line*/
     char *word; /* The current word in the line*/
     macro **macros = allocateMemoryToMacros(macroArrSize); /*initialize a pointer to a pointer macros array, and allocate memory for it.*/
 
@@ -101,17 +101,17 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     /* Move to the next word, which should be the macro's name. */
     word = strtok(NULL, " \n\r\t");
     if (word == NULL) {
-        printf("\nError: Macro name missing.\n");
+        fprintf(stderr,"\nError: Macro name missing.\n");
         return 0;
     }
 
     /* Check for macro name validity and existence. */
     if (!checkIfMacroNameIsValid(word)) {
-        printf("\nError: Invalid macro name.\n");
+        fprintf(stderr,"\nError: Invalid macro name.\n");
         return 0;
     }
     if (checkIfMacroExists(word, *macroCount, *macros)) {
-        printf("\nError: Macro already exists.\n");
+        fprintf(stderr,"\nError: Macro already exists.\n");
         return 0;
     }
 
@@ -120,7 +120,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
         *tmpSize = *macroArrSize * 2; /* Calculate new size */
         newMacros = (macro **) realloc(*macros, *tmpSize * sizeof(macro *));
         if (newMacros == NULL) {
-            printf("\nError: Memory reallocation failed for the macros array.\n");
+            fprintf(stderr,"\nError: Memory reallocation failed for the macros array.\n");
             return 0; /* Return 0 on failure */
         }
         *macros = newMacros;
@@ -130,7 +130,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     /* Allocate memory for the new macro struct. */
     newMacro = (macro *) malloc(sizeof(macro));
     if (newMacro == NULL) { /* Check if the allocation was successful */
-        printf("\nError: Memory allocation for new macro failed.\n");
+        fprintf(stderr,"\nError: Memory allocation for new macro failed.\n");
         return 0; /* Return 0 on failure */
     }
     strcpy(newMacro->macroName, word); /* Copy the name into the macro struct */
@@ -139,23 +139,23 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     newMacro->lines = (char **) malloc(LINES * sizeof(char *));
     newMacro->linesCounter = 0; /* Initialize lines counter. */
     if (newMacro->lines == NULL) { /* Check if the allocation was successful */
-        printf("\nError: Memory allocation for macro lines failed.\n");
+        fprintf(stderr,"\nError: Memory allocation for macro lines failed.\n");
         freeMacroMemory(newMacro);
         return 0; /* Return 0 on failure */
     }
 
     /* Allocate memory for each line */
     for (i = 0; i < LINES; i++) {
-        newMacro->lines[i] = (char *) malloc(MAXCHARSPERLINE * sizeof(char));
+        newMacro->lines[i] = (char *) malloc(MAX_CHARS_PER_LINE * sizeof(char));
         if (newMacro->lines[i] == NULL) { /* Check if the allocation was successful */
-            printf("\nError: Memory allocation for macro line failed.\n");
+            fprintf(stderr,"\nError: Memory allocation for macro line failed.\n");
             freeMacroMemory(newMacro);
             return 0; /* Return 0 on failure */
         }
     }
 
     /* Prepare to read the macro's content. */
-    while (fgets(lineBuffer, MAXCHARSPERLINE, source) != NULL) {
+    while (fgets(lineBuffer, MAX_CHARS_PER_LINE, source) != NULL) {
         char** expandedLines = NULL; /* Temporary pointer for reallocating the lines array */
         if (strstr(lineBuffer, "endmcr") != NULL) {
             break; /* Found the end of the macro definition. */
@@ -168,7 +168,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
             expandedLines = (char**) realloc(newMacro->lines, tempLineCounter * sizeof(char*));
 
             if (!expandedLines) {
-                printf("\nError: Memory reallocation for macro lines failed.\n");
+                fprintf(stderr,"\nError: Memory reallocation for macro lines failed.\n");
                 /* Cleanup logic here: free allocated memory before returning */
                 return 0;
             }
@@ -186,7 +186,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
         newMacro->lines[newMacro->linesCounter] = (char *) malloc(strlen(lineBuffer) + 1);
         if (newMacro->lines[newMacro->linesCounter] == NULL) {
             /* Allocation failure for the new line */
-            printf("\nError: Memory allocation for a macro line failed.\n");
+            fprintf(stderr,"\nError: Memory allocation for a macro line failed.\n");
             freeMacroMemory(newMacro);
             return 0; /* Return 0 on failure */
         }

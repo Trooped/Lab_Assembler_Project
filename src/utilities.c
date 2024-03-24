@@ -15,7 +15,7 @@
 
 /**
  * This function removes the colon from a label.
- * /*TODO remove it?? it isn't used!!!!!!!!!!!*/
+ * /*TODO remove it?? it isn't used!!!!!!!!!!!
  * @param label The label to remove the colon from.
  * @return char* The label without the colon.
  */
@@ -56,7 +56,7 @@ int externLabelCounter(symbolList** head) {
     int counter = 0;
     while (current != NULL) { /* Loop through the list*/
         if (strcmp(current->type, "external") == 0) { /* If the symbol is external*/
-            while (current->externalAddresses[i] != -1 && i<=MAXEXTERNALADDRESSES) {
+            while (current->externalAddresses[i] != -1 && i <= MAX_EXTERNAL_ADDRESSES) {
                 i++; /* Increment the index*/
             }
             if(i > 0 && current->externalAddresses[i-1] != -1){ /* If there are external addresses for this extern*/
@@ -81,7 +81,7 @@ void printSymbolList(const symbolList* head) {
         }
         if (head->externalAddresses[0] != -1) {
             printf("This label is external\n");
-            for (i = 0; i < MAXEXTERNALADDRESSES; i++) {
+            for (i = 0; i < MAX_EXTERNAL_ADDRESSES; i++) {
                 if (head->externalAddresses[i] != -1) {
                     printf("External address: %d\n", head->externalAddresses[i]);
                 }
@@ -93,7 +93,7 @@ void printSymbolList(const symbolList* head) {
 /*TODO delete!!!!!!!!!!!!*/
 void printBits(int value) {
     int i;
-    for (i = WORDSIZE - 1; i >= 0; i--) {
+    for (i = WORD_SIZE - 1; i >= 0; i--) {
         int bit = (value >> i) & 1;
         printf("%d", bit);
     }

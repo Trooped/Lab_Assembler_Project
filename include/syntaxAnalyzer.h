@@ -24,9 +24,9 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
 
 void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo);
 
-int parseOperandsFirstPass(char *input, char operands[MAXOPERANDS][MAXOPERANDLENGTH], error** errorInfo);
+int parseOperandsFirstPass(char *input, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], error** errorInfo);
 
-void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo);
+void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo);
 
 void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLabelOrDefine);
 

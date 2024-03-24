@@ -11,7 +11,7 @@
  * 1. getOperandCode - This function gets the operand code for the instruction.
  * 2. handleOperation - This function handles the operations, and does different actions depending on if it's the first or second pass.
  * 3. handleData - This function handles the .data and .string directives, and adds the data to the data array.
- * 4. handleExtern - This function handles the .extern directive, and adds the label to the symbol table if it's valid.
+ * 4. handleExtern - This function han   dles the .extern directive, and adds the label to the symbol table if it's valid.
  * 5. handleDefine - This function handles the .define directive, and adds the label to the symbol table if it's valid.
  * 6. parseOperandsFirstPass - This function parses the operands in the first pass of the assembler.
  * 7. parseOperandsSecondPass - This function parses the operands in the second pass of the assembler.
@@ -48,8 +48,8 @@
  */
 int getOperandCode(char* operand, symbolList** head, operationInfo* operationsArray, error** errorInfo){
     int i = 0, j=0;
-    char tempVal[MAXOPERANDLENGTH] = {0};
-    char tempOperand[MAXOPERANDLENGTH] = {0};
+    char tempVal[MAX_OPERAND_LENGTH] = {0};
+    char tempOperand[MAX_OPERAND_LENGTH] = {0};
 
     if (operand[0] == '#') {
         strcpy(tempOperand, operand+1);
@@ -58,7 +58,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
             int symbolValue;
             if (!findSymbolValue(head, tempOperand, "define",&symbolValue)) { /* Token wasn't a valid integer, check if it's a defined symbol*/
                 printError(errorInfo, "Invalid Integer or undefined symbol for immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
         }
         return 0;
@@ -79,7 +79,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         /* Check if there's a space between the label and the offset, if there is, send error*/
         if (isspace((unsigned char)tempOperand[i-1]) && operand[i] == '['){
             printError(errorInfo, "Label with offset cannot have spaces between the label and the offset value");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
 
         /* Check if it's just a label without offset*/
@@ -88,7 +88,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                 return 1; /* Valid label without offset*/
             } else {
                 printError(errorInfo, "Undefined Label name");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
         }
         /* Handle label with offset*/
@@ -105,7 +105,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                 /* Empty offset value is not valid*/
                 if (strlen(tempVal) == 0) {
                     printError(errorInfo, "Empty offset value is not valid");
-                    return INSTRUCTIONFAILCODE;
+                    return INSTRUCTION_FAIL_CODE;
                 }
                 trimWhitespace(tempVal);
                 /* Check if the offset is a valid integer or a defined symbol*/
@@ -113,17 +113,17 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                     int symbolValue;
                     if (!findSymbolValue(head, tempVal, "define", &symbolValue)) {
                         printError(errorInfo, "Invalid Integer or undefined symbol for offset operand");
-                        return INSTRUCTIONFAILCODE;
+                        return INSTRUCTION_FAIL_CODE;
                     }
                 }
                 return 2; /* Valid label with offset*/
             } else {
                 printError(errorInfo, "Invalid offset declaration, doesn't end with ']'");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
         } else {
             printError(errorInfo, "Invalid operand");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
     }
 }
@@ -141,14 +141,14 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
  * @param operationsArray - the array of operations
  * @param errorInfo - the error struct
  * @param isSecondPass - a flag to signal if it's the second pass, and use different actions accordingly
- * @return the length of the operation or INSTRUCTIONFAILCODE if the operation failed
+ * @return the length of the operation or INSTRUCTION_FAIL_CODE if the operation failed
  */
 int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo, int isSecondPass) {
     int L = 0;
     char* colon;
     int firstOperand;
     int secondOperand;
-    char operands[MAXOPERANDS][MAXOPERANDLENGTH];
+    char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH];
     initializeOperandsArray(operands);
 
     /* Skip label if present*/
@@ -166,13 +166,13 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
 
     /* Now 'line' should be positioned at the start of the operands*/
     if (!parseOperandsFirstPass(line, operands, errorInfo)) {
-        return INSTRUCTIONFAILCODE;
+        return INSTRUCTION_FAIL_CODE;
     }
 
     if (operationsArray[opcode].numOfOperands == 0) {
         if (operands[0][0] != '\0') {
             printError(errorInfo, "Too many operands for a 0 operand operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
         else{
             firstOperand = 0;
@@ -182,36 +182,36 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     else if (operationsArray[opcode].numOfOperands == 1) {
         if (operands[1][0] != '\0') {
             printError(errorInfo, "Too many operands for a 1 operand operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
         else if(operands[0][0] == '\0'){
             printError(errorInfo, "Too few operands for a 1 operand operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
         else{
             firstOperand = 0;
             secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
-            if (secondOperand == INSTRUCTIONFAILCODE){
-                return INSTRUCTIONFAILCODE;
+            if (secondOperand == INSTRUCTION_FAIL_CODE){
+                return INSTRUCTION_FAIL_CODE;
             }
         }
     }
     else if (operationsArray[opcode].numOfOperands == 2) {
         if (operands[2][0] != '\0') {
             printError(errorInfo, "Too many operands for a 2 operand operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
         else if (operands[1][0] == '\0'){
             printError(errorInfo, "Too few operands for a 2 operand operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
         else if (operands[0][0] == '\0'){
             printError(errorInfo, "Too few operands for a 2 operand operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
         }
         else{
             firstOperand = getOperandCode(operands[0], head, operationsArray, errorInfo);
-            if (firstOperand != INSTRUCTIONFAILCODE){
+            if (firstOperand != INSTRUCTION_FAIL_CODE){
                 secondOperand = getOperandCode(operands[1], head, operationsArray, errorInfo);
             }
         }
@@ -219,8 +219,8 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     /*TODO ADD ERROR FOR TOO LITTLE OPERANDS!*/
 
     /*Another test if anything failed*/
-    if (firstOperand == INSTRUCTIONFAILCODE || secondOperand == INSTRUCTIONFAILCODE) {
-        return INSTRUCTIONFAILCODE;
+    if (firstOperand == INSTRUCTION_FAIL_CODE || secondOperand == INSTRUCTION_FAIL_CODE) {
+        return INSTRUCTION_FAIL_CODE;
     }
 
 
@@ -235,7 +235,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 0: /*mov*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot move to an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 1: /*cmp*/
@@ -243,61 +243,61 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 2: /*add*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot add into an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 3: /*sub*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot subtract from an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 4: /*lea*/
             if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
                 printError(errorInfo, "Illegal operands for lea operation");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 5: /*not*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot negate an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 6: /*clr*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot clear an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 7: /*inc*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot increment an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 8: /*dec*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot decrement an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 9: /*jmp*/
             if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Illegal operands for jmp");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 10: /*bne*/
             if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Illegal operands for bne");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 11: /*red*/
             if (secondOperand == 0){
                 printError(errorInfo, "Cannot read into an immediate operand");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 12: /*prn*/
@@ -305,7 +305,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
         case 13: /*jsr*/
             if (secondOperand == 0 || secondOperand==2){
                 printError(errorInfo, "Illegal operands for jsr");
-                return INSTRUCTIONFAILCODE;
+                return INSTRUCTION_FAIL_CODE;
             }
             break;
         case 14: /*rts*/
@@ -314,7 +314,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             break;
         default:
             printError(errorInfo, "Invalid operation");
-            return INSTRUCTIONFAILCODE;
+            return INSTRUCTION_FAIL_CODE;
             break;
     }
 
@@ -350,7 +350,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
     char* lastNonWhitespaceChar;
     long val;
     short dataCounter = 0;
-    char copiedLine[MAXCHARSPERLINE];
+    char copiedLine[MAX_CHARS_PER_LINE];
     if (strcmp(type, "data") == 0) {
         numbers = strstr(line, ".data");
         numbers += strlen(".data"); /* Move past ".data" */
@@ -384,7 +384,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
         /* Tokenization and value processing */
         token = strtok(numbers, ",");
         while (token) {
-            if (dataCounter >= MAXDATAVALUESINARRAY) {
+            if (dataCounter >= MAX_VALUES_PER_DATA_DIRECTIVE) {
                 printError(errorInfo, "Too many data values inserted.");
                 return;
             }
@@ -495,7 +495,7 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
  * @param errorInfo - the error struct
  */
 void handleDefine(symbolList** head, operationInfo* operationsArray, char* line, error** errorInfo) {
-    char name[MAXLABELNAME] = {0};
+    char name[MAX_LABEL_NAME] = {0};
     int value = 0;
     int tempValue = 0;
     char* ptr = line;
@@ -537,7 +537,7 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
         nameLength--; /* Exclude trailing spaces or tabs from the name */
     }
 
-    if (nameLength >= MAXLABELNAME) nameLength = MAXLABELNAME - 1;
+    if (nameLength >= MAX_LABEL_NAME) nameLength = MAX_LABEL_NAME - 1;
     strncpy(name, startName, nameLength);
     name[nameLength] = '\0'; /* Ensure null-termination */
 
@@ -644,7 +644,7 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
  * @param errorInfo The error struct.
  * @return 1 if the parsing was successful, 0 otherwise.
  */
-int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENGTH], error** errorInfo) {
+int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], error** errorInfo) {
     char* token;
     int operandIndex = 0;
     char* nextToken;
@@ -655,7 +655,7 @@ int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENG
     }
 
     token = strtok(line, ",");
-    while (token != NULL && operandIndex < MAXOPERANDS) {
+    while (token != NULL && operandIndex < MAX_OPERANDS) {
         trimWhitespace(token); /* Remove leading and trailing whitespace */
 
         /* Check for an empty token, indicating " , ," pattern */
@@ -665,14 +665,14 @@ int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENG
         }
 
         nextToken = strtok(NULL, ",");
-        if (operandIndex == MAXOPERANDS - 1 && nextToken != NULL) {
+        if (operandIndex == MAX_OPERANDS - 1 && nextToken != NULL) {
             printError(errorInfo, "Invalid syntax: too many operands provided.");
             printf("Invalid syntax: too many operands provided.\n");
             return 0; /* Early return if there's content after the second operand */
         }
 
-        strncpy(operands[operandIndex], token, MAXOPERANDLENGTH - 1);
-        operands[operandIndex][MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null termination */
+        strncpy(operands[operandIndex], token, MAX_OPERAND_LENGTH - 1);
+        operands[operandIndex][MAX_OPERAND_LENGTH - 1] = '\0'; /* Ensure null termination */
 
         operandIndex++;
         token = nextToken; /* Proceed to the next token */
@@ -691,14 +691,14 @@ int parseOperandsFirstPass(char* line, char operands[MAXOPERANDS][MAXOPERANDLENG
  * @param head The head of the symbol table.
  * @param errorInfo A pointer to the errorInfo struct.
  */
-void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAXOPERANDS][MAXOPERANDLENGTH], symbolList** head, error** errorInfo){
+void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo){
     binaryWord newWord;
     int regNumSource, regNumDest;
 
-    char firstOperand[MAXOPERANDLENGTH];
-    char firstOffset[MAXOPERANDLENGTH];
-    char secondOperand[MAXOPERANDLENGTH];
-    char secondOffset[MAXOPERANDLENGTH];
+    char firstOperand[MAX_OPERAND_LENGTH];
+    char firstOffset[MAX_OPERAND_LENGTH];
+    char secondOperand[MAX_OPERAND_LENGTH];
+    char secondOffset[MAX_OPERAND_LENGTH];
     firstOperand[0] = '\0';
     firstOffset[0] = '\0';
     secondOperand[0] = '\0';
@@ -779,13 +779,13 @@ void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLab
 
     if (bracketPos == NULL) {
         /* No bracket found, the entire operand is just the operand */
-        strncpy(outOperand, operand, MAXOPERANDLENGTH - 1);
-        outOperand[MAXOPERANDLENGTH - 1] = '\0'; /* Ensure null-termination*/
+        strncpy(outOperand, operand, MAX_OPERAND_LENGTH - 1);
+        outOperand[MAX_OPERAND_LENGTH - 1] = '\0'; /* Ensure null-termination*/
         outLabelOrDefine[0] = '\0'; /* Indicate empty string*/
     } else {
         /* Extract operand up to the bracket */
         int operandLen = bracketPos - operand;
-        operandLen = (operandLen < MAXOPERANDLENGTH - 1) ? operandLen : MAXOPERANDLENGTH - 1;
+        operandLen = (operandLen < MAX_OPERAND_LENGTH - 1) ? operandLen : MAX_OPERAND_LENGTH - 1;
         strncpy(outOperand, operand, operandLen);
         outOperand[operandLen] = '\0'; /* Null-terminate*/
 
@@ -793,7 +793,7 @@ void parseOperandsSecondPass(const char* operand, char* outOperand, char* outLab
         endBracketPos = strchr(bracketPos, ']');
         if (endBracketPos != NULL) {
             int labelLen = endBracketPos - bracketPos - 1;
-            labelLen = (labelLen < MAXOPERANDLENGTH - 1) ? labelLen : MAXOPERANDLENGTH - 1;
+            labelLen = (labelLen < MAX_OPERAND_LENGTH - 1) ? labelLen : MAX_OPERAND_LENGTH - 1;
             strncpy(outLabelOrDefine, bracketPos + 1, labelLen);
             outLabelOrDefine[labelLen] = '\0'; /* Null-terminate*/
         } else {
@@ -914,7 +914,7 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
     }
 
     /* Check if the name is bigger than the maximum possible number (31), or if it's one of the operations, or if it already exists in the symbol table.*/
-    if (strlen(name) > MAXLABELNAME || isValidOperation(name, operationsArray) != -1){
+    if (strlen(name) > MAX_LABEL_NAME || isValidOperation(name, operationsArray) != -1){
         return 0;
     }
     /*check if the name is one of the registers*/
@@ -948,7 +948,7 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
  */
 int isValidOperation(char* word, operationInfo* operationsArray) {
     int i;
-    for (i = 0; i < NUMOFOPERATIONS; i++) {
+    for (i = 0; i < NUM_OF_OPERATIONS; i++) {
         if (strcmp(word, operationsArray[i].name) == 0) {
             return i;
         }
@@ -988,7 +988,7 @@ int isValidInteger(char* str) {
     temp = atoi(str);
 
     /* Check if the number is greater than the constant */
-    if (temp > MAXINTEGER12BIT || temp < MININTEGER12BIT) {
+    if (temp > MAX_INTEGER_12BIT || temp < MIN_INTEGER_12BIT) {
         return 0;
     }
 

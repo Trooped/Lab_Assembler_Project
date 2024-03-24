@@ -123,20 +123,20 @@ char* convertBinaryToBase4Symbols(int binary) {
     int i; /* Loop index. */
     char symbols[4] = {'*', '#', '%', '!'}; /* The symbols to represent the base 4 digits. */
     int mask = 0x3;  /* Binary 11, to extract two bits at a time. */
-    int tempIndex = ENCRYPTEDWORDSIZE;  /* Start from the end of the result string, which is 7. */
+    int tempIndex = ENCRYPTED_WORD_SIZE;  /* Start from the end of the result string, which is 7. */
     char* result = (char*)malloc(8);  /* Allocate on the heap. */
     if (result == NULL){ /* Check for malloc failure. */
         return NULL;  /* Return NULL to the main function (which will call the closeFileAndExit function) */
     }
 
-    result[ENCRYPTEDWORDSIZE] = '\0';  /* Null-terminate the string. */
+    result[ENCRYPTED_WORD_SIZE] = '\0';  /* Null-terminate the string. */
 
     /* Iterate 7 times to process all 14 bits, accounting for leading zeros. */
-    for (i = 0; i < ENCRYPTEDWORDSIZE; i++) {
+    for (i = 0; i < ENCRYPTED_WORD_SIZE; i++) {
         int currentDigit = binary & mask; /* Extract the two bits. */
         binary >>= 2;  /* Move to the next base 4 digit. */
         /* Fill the result from the end to start */
-        result[(ENCRYPTEDWORDSIZE - 1) - i] = symbols[currentDigit]; /* Assign the symbol to the result string. */
+        result[(ENCRYPTED_WORD_SIZE - 1) - i] = symbols[currentDigit]; /* Assign the symbol to the result string. */
     }
 
     return result; /* Return the result string. */

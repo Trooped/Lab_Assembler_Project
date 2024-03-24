@@ -20,21 +20,21 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
     int labelFlag = 0; /* Flag to check if the current line begins with a label*/
     int operation = 0; /* The current operation number*/
     int L; /* The current L value = the number of lines to add to the IC*/
-    char lineBuffer[MAXCHARSPERLINE]; /* Buffer for the current line*/
-    char fullLine[MAXCHARSPERLINE]; /* Buffer for the full line*/
-    char tempLabelName[MAXLABELNAME]; /* String for the temporary label name (the label name to add in the current line)*/
+    char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line*/
+    char fullLine[MAX_CHARS_PER_LINE]; /* Buffer for the full line*/
+    char tempLabelName[MAX_LABEL_NAME]; /* String for the temporary label name (the label name to add in the current line)*/
     char* currentWord; /* The current word in the line*/
 
     /* Loop through the source file line by line */
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
         /* Copy the current line into fullLine (for further parsing)*/
-        strncpy(fullLine, lineBuffer, MAXCHARSPERLINE);
-        fullLine[MAXCHARSPERLINE - 1] = '\0'; /* Ensure null-termination*/
+        strncpy(fullLine, lineBuffer, MAX_CHARS_PER_LINE);
+        fullLine[MAX_CHARS_PER_LINE - 1] = '\0'; /* Ensure null-termination*/
 
         /* Updating the errorInfo struct with the current line information */
         (*errorInfo)->lineCounter++; /* Increment the line counter*/
         (*errorInfo)->lineText[0] = '\0'; /* Reset the line text*/
-        strncpy((*errorInfo)->lineText, fullLine, MAXCHARSPERLINE); /* Copying the current line into the error struct*/
+        strncpy((*errorInfo)->lineText, fullLine, MAX_CHARS_PER_LINE); /* Copying the current line into the error struct*/
 
 
         /* Check if the line is too long, and skip it if it is */
@@ -53,7 +53,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
                 labelFlag = 1; /* Set the label flag*/
-                strncpy(tempLabelName, currentWord, MAXLABELNAME);  /* Copy the label name to the tempLabelName, for use with addLabel later*/
+                strncpy(tempLabelName, currentWord, MAX_LABEL_NAME);  /* Copy the label name to the tempLabelName, for use with addLabel later*/
             }
             else if (isData(currentWord) || isString(currentWord)){ /*checks if the first word is a data or string directive*/
                 if (labelFlag) { /* If there is a label, add it to the symbol table*/
@@ -94,7 +94,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 operation = isValidOperation(currentWord, operationsArray); /* Get the operation number*/
                 /* Handle the operation and get the L value*/
                 L = handleOperation(symbolTable, instructionArray, operation, fullLine, IC, operationsArray, errorInfo, 0);
-                if (L == INSTRUCTIONFAILCODE){
+                if (L == INSTRUCTION_FAIL_CODE){
                     break; /* If the operation failed, break the loop*/
                 }
                 else{ /* If the operation succeeded, increment the IC by L*/

@@ -45,7 +45,7 @@ void printFileContentFromPointer(FILE* file) {
 
 void printFileContent(const char* filePath, char* suffix) {
     int c;
-    char fileName[MAXFILENAME];
+    char fileName[MAX_FILE_NAME];
     FILE* file;
     sprintf(fileName, "%s.%s", filePath, suffix);
 
@@ -63,7 +63,7 @@ void printFileContent(const char* filePath, char* suffix) {
 }
 
 void deleteFile(const char* filePath, char* suffix) {
-    char fileName[MAXFILENAME];
+    char fileName[MAX_FILE_NAME];
     sprintf(fileName, "%s.%s", filePath, suffix);
     if (remove(fileName) == 0) {
         printf("File %s deleted successfully.\n", fileName);

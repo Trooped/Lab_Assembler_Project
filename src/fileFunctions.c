@@ -24,7 +24,7 @@
  * @return the new file
  */
 FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorInfo) {
-    char newFileName[MAXFILENAME] = {0}; /*the new file name*/
+    char newFileName[MAX_FILE_NAME] = {0}; /*the new file name*/
     FILE * resultFile; /*the new file*/
 
     sprintf(newFileName, "%s.am", oldFileName); /*add the suffix to the new file name*/
@@ -52,7 +52,7 @@ FILE* createFileWithMacros(FILE* source, const char* oldFileName, error** errorI
  */
 void createObjectFile(binaryWord* dataArray, binaryWord* instructionArray, int IC, int DC, char* fileName, error** errorInfo, symbolList** symbolTable){
     FILE* objectFile; /*the object file*/
-    char tempFileName[MAXFILENAME]; /*the temporary file name*/
+    char tempFileName[MAX_FILE_NAME]; /*the temporary file name*/
     int i; /*index*/
     sprintf(tempFileName, "%s.ob", fileName); /*add the suffix to the file name*/
     objectFile = fopen(tempFileName, "w"); /*open the object file*/
@@ -91,7 +91,7 @@ void createObjectFile(binaryWord* dataArray, binaryWord* instructionArray, int I
  * @param fileName the file name
  */
 void createEntFile(symbolList** head, char* fileName, error** errorInfo) {
-    char tempFileName[MAXFILENAME]; /*the temporary file name*/
+    char tempFileName[MAX_FILE_NAME]; /*the temporary file name*/
     symbolList* current; /*the current symbol*/
     FILE* entFile; /*the entry file*/
     sprintf(tempFileName, "%s.ent", fileName); /*add the suffix to the file name*/
@@ -118,7 +118,7 @@ void createEntFile(symbolList** head, char* fileName, error** errorInfo) {
  * @param fileName the file name
  */
 void createExtFile(symbolList** head, char* fileName, error** errorInfo) {
-    char tempFileName[MAXFILENAME]; /*the temporary file name*/
+    char tempFileName[MAX_FILE_NAME]; /*the temporary file name*/
     int i; /*index*/
     symbolList* current; /*the current symbol*/
     FILE* extFile; /*the external file*/

@@ -24,7 +24,7 @@ void printError(error** errorInfo, char* errorDescription){
         (*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] = '\0'; /* Remove the newline character*/
     }
     /* Print the detailed error message*/
-    printf("Error #%d found in file '%s', line %d:\n'%s'\nerror description: %s\n\n", (*errorInfo)->errorCounter, (*errorInfo)->fileName,(*errorInfo)->lineCounter, (*errorInfo)->lineText, errorDescription);
+    fprintf(stderr,"Error #%d found in file '%s', line %d:\n'%s'\nerror description: %s\n\n", (*errorInfo)->errorCounter, (*errorInfo)->fileName,(*errorInfo)->lineCounter, (*errorInfo)->lineText, errorDescription);
 }
 
 
