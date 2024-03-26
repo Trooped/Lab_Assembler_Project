@@ -254,6 +254,12 @@ void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], 
 
 /**
  * This function will check if the given string is a valid macro name.
+ * A valid macro name must:
+ * - Be less than 32 characters long
+ * - Not start with a number
+ * - Not contain a white space
+ * - Not be a saved word
+ * - Not be a number
  * @param word the string to check
  * @return 1 if the string is a valid macro name, else 0
  */
@@ -265,7 +271,7 @@ int checkIfMacroNameIsValid(char* word){
     /* Array of saved words*/
     char* savedWords[] = {".data", ".string", ".entry", ".extern","mcr","endmcr", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
     if (word == NULL || strlen(word) >= MAX_MACRO_NAME_LENGTH || (word[0] >= '0' && word[0] <= '9')) {
-        return 0; /* Return 0 (false) if the word is NULL, too long, or starts with a number*/
+        return 0; /* Return 0 (false) if the word is NULL, too long (more than 31 characters), or starts with a number*/
     }
 
     /* Checking if the word contains a white space*/

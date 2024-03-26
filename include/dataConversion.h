@@ -14,9 +14,9 @@
 #define SHIFT_5 5 /* The number of bits to shift by 5*/
 
 /* A,R,E for addressing methods values */
-#define ABSOLUTE_ADDRESSING 0x0000
-#define RELOCATABLE_ADDRESSING 0x0002
-#define EXTERNAL_ADDRESSING 0x0001
+#define ABSOLUTE_ADDRESSING 0x0000 /*A*/
+#define RELOCATABLE_ADDRESSING 0x0002 /*R*/
+#define EXTERNAL_ADDRESSING 0x0001 /*E*/
 
 void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
 

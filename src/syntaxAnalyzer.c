@@ -819,7 +819,7 @@ int isEntry(char* word) {
  * The rules are:
  * Not a reserved word, not a register, not a number, not a defined symbol, not a label that already exists.
  * As well as the first character being an alphabetical character, and the rest of the characters being either uppercase or digits.
- * And the name being less than 31 characters.
+ * And the name being 31 characters at most.
  * TODO maybe add a specific error for each case? can do this with a table of defines maybe
  * @param name The label name to be checked.
  * @param operationsArray The operations array.
