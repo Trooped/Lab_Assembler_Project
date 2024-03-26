@@ -188,7 +188,7 @@ int findSymbolValue(symbolList **head, const char* name,char* type, int* value) 
     symbolList* current = *head; /* Set the current node to the head of the list*/
     while (current != NULL) { /* Loop through the list*/
         if (strcmp(current->name, name) == 0) { /* Check if the name matches*/
-            if (strcmp(current->type, type) == 0) { /* Check if the type matches*/
+            if (strcmp(current->type, type) == 0 || strcmp(type, "general")==0) { /* Check if the type matches, or if the type is general*/
                 *value = current->value; /* Set the value to the value of the current node*/
                 return 1; /* Return 1 to signify the label was found*/
             }

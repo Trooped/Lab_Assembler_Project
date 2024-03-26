@@ -26,8 +26,7 @@
  * 16. isValidInteger - This function checks if a string is a valid integer.
  * 17. isRegister - This function checks if a string is a register.
  * 18. checkEntrySyntax - This function checks the syntax of the .entry directive.
- * 19. analyzeOperandsAndInsertIntoArraySecondPass - This function analyzes the operands and inserts them into the instruction array in the second pass.
- * 20. checkLineLengthAndSkip - This function checks the length of the line and skips it if it's too long.
+ * 19. checkLineLengthAndSkip - This function checks the length of the line and skips it if it's too long.
  */
 
 #include "include/syntaxAnalyzer.h"
@@ -683,85 +682,6 @@ int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_L
     }
     return 1; /* Return 1 if the parsing was successful */
 }
-
-
-/**
- * This function inserts the operands into the instruction array, calling the convertOperandToBinaryAndInsertIntoArray function for each operand.
- *
- * @param instructionArray The instruction array to insert the operands into.
- * @param numOfLines The number of lines in the file.
- * @param IC The instruction errorCounter.
- * @param operands The operands to insert into the instruction array.
- * @param head The head of the symbol table.
- * @param errorInfo A pointer to the errorInfo struct.
- */
-void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo){
-    binaryWord newWord; /* The new word to be inserted into the instruction array*/
-    int regNumSource, regNumDest; /* The register numbers for the source and destination registers*/
-
-    /* Initialize the operands and offsets */
-    char firstOperand[MAX_OPERAND_LENGTH];
-    char firstOffset[MAX_OPERAND_LENGTH];
-    char secondOperand[MAX_OPERAND_LENGTH];
-    char secondOffset[MAX_OPERAND_LENGTH];
-    firstOperand[0] = '\0';
-    firstOffset[0] = '\0';
-    secondOperand[0] = '\0';
-    secondOffset[0] = '\0';
-
-    /*If there are operands, parse them to get the first and second operands and offsets*/
-    if (numOfLines>0) {
-        parseOperandsSecondPass(operands[0], firstOperand, firstOffset);
-    }
-    if (numOfLines>2) { /*If there are two operands*/
-        parseOperandsSecondPass(operands[1], secondOperand, secondOffset);
-    }
-
-    /*If the first operand is a register and the second is a register, special case where one word is being used*/
-    if(isRegister(operands[0]) && isRegister(operands[1])){
-        regNumSource = atoi(operands[0] + 1); /* Get the 1st register number*/
-        regNumDest = atoi(operands[1] + 1); /* Get the 2nd register number*/
-        newWord.wordBits = (regNumSource << 5) | (regNumDest << 2); /* Combine the register numbers into one word*/
-        instructionArray[(*IC)+1] = newWord; /* Insert the word into the instruction array*/
-        return;  /* Return, as we've inserted the word into the instruction array*/
-    }
-
-    /*This part is quite complicated, so i'll write which case it is near each function call/ condition
-     * In general, it checks how many operands and offsets we have in our operation.
-     * It also converts them into binary accordingly (while maintaining other tests, for syntax accuracy)
-     */
-    /*There is always at least one operand, because we check it in an earlier condition. analyze and convert it*/
-    convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+1, firstOperand, head, errorInfo,1, 0);
-    if (firstOffset[0] != '\0') { /*If there is an offset for the first operand*/
-        if (searchSymbolList(head, firstOperand, "data")!=0 && searchSymbolList(head, firstOperand, "string")!=0){
-            printError(errorInfo, "Offset can only be used with data or string labels");
-            return; /*If the label for which the offset is used is not data or string, error*/
-        }
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, firstOffset, head, errorInfo, 0, 1);
-        if (secondOperand[0] != '\0') { /*If there is a second operand, AFTER a first operand + offset*/
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 3, secondOperand, head, errorInfo, 0, 0);
-            if (secondOffset[0] != '\0') {/*If there is an offset for the second operand*/
-                if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
-                    printError(errorInfo, "Offset can only be used with data or string labels");
-                    return;/*If the label for which the offset is used is not data or string, error*/
-                }
-                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, secondOffset, head, errorInfo, 0, 1);
-            }
-        }
-    }
-    else if (secondOperand[0] != '\0'){ /*If there is a second operand, but no offset for the first operand*/
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, secondOperand, head, errorInfo,0, 0);
-        if (secondOffset[0] != '\0') { /*If there is an offset for the second operand*/
-            if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
-                printError(errorInfo, "Offset can only be used with data or string labels");
-                return; /*If the label for which the offset is used is not data or string, error*/
-            }
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, secondOffset, head, errorInfo, 0, 1);
-        }
-    }
-}
-
-
 
 /**
  * This function parses the operands in the second pass of the assembler.
