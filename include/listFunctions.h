@@ -28,4 +28,13 @@ void incrementDataSymbolValues(symbolList** head, int byValue);
 
 int isSymbolExtern(symbolList** head, char* symbolName);
 
+
+/**
+ * This function returns a pointer to a symbol in the symbol table.
+ * @param head The symbol list.
+ * @param symbolName The symbol name.
+ * @return A pointer to the symbol in the symbol table.
+ */
+symbolList* getPointerToSymbol(symbolList** head, char* symbolName);
+
 #endif

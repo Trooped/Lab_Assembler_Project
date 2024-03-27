@@ -47,6 +47,7 @@
 typedef struct symbolList {
     char name[MAX_LABEL_NAME]; /* Label name*/
     char type[MAX_LABEL_NAME]; /*define, data, extern, or code*/
+    short int dataCounter; /* Data counter for .data array elements, to check if we're out of .data array bounds*/
     int isEntry; /* 1 if the label is an entry, 0 otherwise*/
     int externalAddresses[MAX_EXTERNAL_ADDRESSES]; /* Array of external addresses, per external symbol*/
     int value; /* Label value*/

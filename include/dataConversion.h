@@ -22,7 +22,7 @@ void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int o
 
 void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo);
 
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset);
+void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset, symbolList* prevLabelPtr);
 
 void convertValueToBinaryAndInsertToDataArray(binaryWord* dataArray, int DC, int value);
 

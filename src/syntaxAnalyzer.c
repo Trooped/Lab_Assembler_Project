@@ -335,7 +335,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
 }
 
 /**
- * This function handles the .data and .string directives, and adds the data to the data array
+ * This function handles the .data and .string directives, and adds their data to the data array and to the symbol table.
  * @param type - the type of directive (data or string)
  * @param line - the current line text
  * @param head - the symbol table
@@ -343,7 +343,8 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
  * @param dataArray - the array of data
  * @param errorInfo - the error struct
  */
-void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
+void handleData(char* type, char* labelName, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
+    symbolList *tempPtr = NULL; /* Temporary pointer for the symbol list*/
     char* numbers; /* Pointer to the numbers in the line*/
     char* ptr; /* Pointer for iterating through the line*/
     char* token; /* Token for the strtok function*/
@@ -381,6 +382,11 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
             return;
         }
 
+        if (labelName) { /* If there is a label*/
+            /* Find the symbol in the symbol list, (if it exists) */
+            tempPtr = getPointerToSymbol(head, labelName);
+        }
+
         /* Initial tests succeeded, Tokenization and value processing */
         token = strtok(numbers, ",");
         while (token) { /* Iterate through the tokens*/
@@ -405,6 +411,9 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
             convertValueToBinaryAndInsertToDataArray(dataArray, *DC, val); /* Convert the value to binary and insert it into the data array*/
             (*DC)++;
             dataCounter++;
+            if (tempPtr) { /* If there is a label*/
+                tempPtr->dataCounter++; /* Increment the data counter for the symbol*/
+            }
 
             token = strtok(NULL, ",");
         }
@@ -419,12 +428,21 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
             printError(errorInfo, "No valid string was found after .string");
             return;
         }
+
+        if (labelName) { /* If there is a label*/
+            /* Find the symbol in the symbol list, (if it exists) */
+            tempPtr = getPointerToSymbol(head, labelName);
+        }
+
         trimWhitespace(copiedLine); /* Remove leading and trailing whitespace*/
         if (strlen(copiedLine) > 2 && copiedLine[0] == '"' && copiedLine[strlen(copiedLine)-1] == '"') {
             for (i = 1; i < strlen(copiedLine)-1; i++) {
                 if (isprint(copiedLine[i])){ /* If the character is printable*/
                     convertValueToBinaryAndInsertToDataArray(dataArray, *DC, copiedLine[i]); /* Convert the character to binary and insert it into the data array*/
                     (*DC)++; /* Increment the DC*/
+                    if (tempPtr){
+                        tempPtr->dataCounter++; /* Increment the char counter for the string symbol*/
+                    }
                 }
                 else{
                     printError(errorInfo, "Invalid ASCII character in string"); /* If the character is not printable, print an error*/
@@ -432,7 +450,7 @@ void handleData(char* type, char* line, symbolList** head, int *DC, binaryWord* 
                 }
             }
             convertValueToBinaryAndInsertToDataArray(dataArray, *DC, '\0'); /* Insert the null terminator into the data array*/
-            (*DC)++; /* Increment the DC*/
+            (*DC)++; /* Increment the DC, but don't increment the data counter for the symbol (so we won't be able to access the \0 character)*/
         }
         else { /* If the string is not enclosed in double quotes or is empty*/
             printError(errorInfo, "No valid string was found after .string");

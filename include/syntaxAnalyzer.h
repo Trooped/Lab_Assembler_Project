@@ -18,7 +18,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
 
 int handleOperation(symbolList** head, binaryWord* instructionArray, int operation, char* line, int *IC, operationInfo* operationsArray, error** errorInfo, int isSecondPass);
 
-void handleData(char* type, char* line, symbolList ** head, int *DC, binaryWord* dataArray, error** errorInfo);
+void handleData(char* type, char* labelName, char* line, symbolList ** head, int *DC, binaryWord* dataArray, error** errorInfo);
 
 void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag);
 

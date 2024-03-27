@@ -62,11 +62,11 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                     addLabel(symbolTable, tempLabelName, "data", *DC, errorInfo);
                 }
                 if (isData(currentWord)){ /* If the directive is .data*/
-                    handleData("data", fullLine, symbolTable, DC, dataArray, errorInfo);
+                    handleData("data",tempLabelName, fullLine, symbolTable, DC, dataArray, errorInfo);
                     break;
                 }
                 else{ /* If the directive is .string*/
-                    handleData("string", fullLine, symbolTable, DC, dataArray, errorInfo);
+                    handleData("string", tempLabelName, fullLine, symbolTable, DC, dataArray, errorInfo);
                     break;
                 }
             }

@@ -16,8 +16,6 @@ STR1: .string "This is a valid string"
 START: .data 8,-12,maximum
 J: .data 33
     .extern L4
-
-
 LOOP2: cmp #size,r6
     cmp r1, START[size]
     dec r5

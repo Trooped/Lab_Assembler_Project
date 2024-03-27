@@ -42,6 +42,7 @@ void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int o
 void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo){
     binaryWord newWord; /* The new word to be inserted into the instruction array*/
     int regNumSource, regNumDest; /* The register numbers for the source and destination registers*/
+    symbolList *tempPtr = NULL; /* A temporary pointer to a symbol in the symbol table*/
 
     /* Initialize the operands and offsets */
     char firstOperand[MAX_OPERAND_LENGTH];
@@ -75,32 +76,35 @@ void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, i
      * It also converts them into binary accordingly (while maintaining other tests, for syntax accuracy)
      */
     /*There is always at least one operand, because we check it in an earlier condition. analyze and convert it*/
-    convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+1, firstOperand, head, errorInfo,1, 0);
+    convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+1, firstOperand, head, errorInfo,1, 0, NULL);
     if (firstOffset[0] != '\0') { /*If there is an offset for the first operand*/
-        if (searchSymbolList(head, firstOperand, "data")!=0 && searchSymbolList(head, firstOperand, "string")!=0){
-            printError(errorInfo, "Offset can only be used with data or string labels");
-            return; /*If the label for which the offset is used is not data or string, error*/
+        if (searchSymbolList(head, firstOperand, "data")!=0){
+            printError(errorInfo, "Offset can only be used with .data and .string entries");
+            return; /*If the label for which the offset is used is not a data entry, error*/
         }
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, firstOffset, head, errorInfo, 0, 1);
+        tempPtr = getPointerToSymbol(head, firstOperand); /*Get the pointer to the symbol in the symbol table, to check if we're out of array bounds*/
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, firstOffset, head, errorInfo, 0, 1, tempPtr);
         if (secondOperand[0] != '\0') { /*If there is a second operand, AFTER a first operand + offset*/
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 3, secondOperand, head, errorInfo, 0, 0);
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 3, secondOperand, head, errorInfo, 0, 0, NULL);
             if (secondOffset[0] != '\0') {/*If there is an offset for the second operand*/
-                if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
-                    printError(errorInfo, "Offset can only be used with data or string labels");
-                    return;/*If the label for which the offset is used is not data or string, error*/
+                if (searchSymbolList(head, secondOperand, "data")!=0){
+                    printError(errorInfo, "Offset can only be used with data and .string labels");
+                    return;/*If the label for which the offset is used is not data, error*/
                 }
-                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, secondOffset, head, errorInfo, 0, 1);
+                tempPtr = getPointerToSymbol(head, secondOperand); /*Get the pointer to the symbol in the symbol table, to check if we're out of array bounds*/
+                convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC) + 4, secondOffset, head, errorInfo, 0, 1, tempPtr);
             }
         }
     }
     else if (secondOperand[0] != '\0'){ /*If there is a second operand, but no offset for the first operand*/
-        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, secondOperand, head, errorInfo,0, 0);
+        convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+2, secondOperand, head, errorInfo,0, 0, NULL);
         if (secondOffset[0] != '\0') { /*If there is an offset for the second operand*/
-            if (searchSymbolList(head, secondOperand, "data")!=0 && searchSymbolList(head, secondOperand, "string")!=0){
-                printError(errorInfo, "Offset can only be used with data or string labels");
-                return; /*If the label for which the offset is used is not data or string, error*/
+            if (searchSymbolList(head, secondOperand, "data")!=0){
+                printError(errorInfo, "Offset can only be used with data and .string labels");
+                return; /*If the label for which the offset is used is not data, error*/
             }
-            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, secondOffset, head, errorInfo, 0, 1);
+            tempPtr = getPointerToSymbol(head, secondOperand); /*Get the pointer to the symbol in the symbol table, to check if we're out of array bounds*/
+            convertOperandToBinaryAndInsertIntoArray(instructionArray, (*IC)+3, secondOffset, head, errorInfo, 0, 1, tempPtr);
         }
     }
 }
@@ -116,8 +120,9 @@ void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, i
  * @param errorInfo A pointer to the errorInfo struct.
  * @param source A flag to indicate if the operand is a source operand (1) or a destination operand (0).
  * @param offset A flag to indicate if the operand is an offset operand.
+ * @param prevLabelPtr A pointer to the PREVIOUS label in the symbol table (to check if we're out of array bounds in offset declarations).
  */
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset) {
+void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset, symbolList* prevLabelPtr) {
     int val; /* The value of the operand, if it's a number. */
     binaryWord newWord; /* Create a new binary word. */
 
@@ -140,6 +145,10 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
 
         if (val < 0){ /*if the offset is negative, which isn't allowed.*/
             printError(errorInfo, "Offset value can't be negative");
+            return;
+        }
+        else if (val > prevLabelPtr->dataCounter){ /*if the offset is out of bounds for the .data array entry, meaning if we try to access an index that isn't there*/
+            printError(errorInfo, "Offset value is out of bounds for the .data array entry");
             return;
         }
         newWord.wordBits = val << SHIFT_2 | ABSOLUTE_ADDRESSING; /*shift the value by 2 bits and insert it into the word*/

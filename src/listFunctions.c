@@ -103,6 +103,7 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
     newNode->value = value; /* Set the value of the new node*/
     newNode->next = NULL; /* Set the next pointer to NULL*/
     newNode->isEntry = 0; /* Set the isEntry flag to 0*/
+    newNode->dataCounter = -1; /* Set the data counter to -1 (because we want it to represent the amount of integers in a .data label)*/
     for (i = 0; i < MAX_EXTERNAL_ADDRESSES; i++) { /* Initialize the external addresses array to -1*/
         newNode->externalAddresses[i] = -1;
     }
@@ -128,9 +129,9 @@ void deleteSymbolList(symbolList** head) {
     symbolList* current = *head; /* Set the current node to the head of the list*/
     symbolList* nextNode = NULL; /* The next node in the list*/
     while (current != NULL) {
-        nextNode = current->next;
-        free(current);
-        current = nextNode;
+        nextNode = current->next; /* Save the next node*/
+        free(current); /* Free the current node*/
+        current = nextNode; /* Move to the next node*/
     }
     *head = NULL; /* Ensure the caller's head pointer is set to NULL*/
 }
@@ -243,4 +244,22 @@ int isSymbolExtern(symbolList** head, char* symbolName){
         return 1;
     }
     return 0;
+}
+
+
+/**
+ * This function returns a pointer to a symbol in the symbol table.
+ * @param head The symbol list.
+ * @param symbolName The symbol name.
+ * @return A pointer to the symbol in the symbol table.
+ */
+symbolList* getPointerToSymbol(symbolList** head, char* symbolName){
+    symbolList* current = *head; /* Set the current node to the head of the list*/
+    while (current != NULL) { /* Loop through the list*/
+        if (strcmp(current->name, symbolName) == 0) { /* Check if the name matches*/
+            return current;
+        }
+        current = current->next;
+    }
+    return NULL;
 }
