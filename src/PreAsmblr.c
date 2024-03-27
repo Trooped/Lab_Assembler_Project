@@ -102,17 +102,17 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     word = strtok(NULL, " \n\r\t");
     if (word == NULL) {
         fprintf(stderr,"\nError: Macro name missing.\n");
-        return 0;
+        return FALSE;
     }
 
     /* Check for macro name validity and existence. */
     if (!checkIfMacroNameIsValid(word)) {
         fprintf(stderr,"\nError: Invalid macro name.\n");
-        return 0;
+        return FALSE;
     }
     if (checkIfMacroExists(word, *macroCount, *macros)) {
         fprintf(stderr,"\nError: Macro already exists.\n");
-        return 0;
+        return FALSE;
     }
 
     /* Ensure there's enough space in the macros array, reallocating if necessary. */
@@ -121,7 +121,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
         newMacros = (macro **) realloc(*macros, *tmpSize * sizeof(macro *));
         if (newMacros == NULL) {
             fprintf(stderr,"\nError: Memory reallocation failed for the macros array.\n");
-            return 0; /* Return 0 on failure */
+            return FALSE; /* Return 0 on failure */
         }
         *macros = newMacros;
         *macroArrSize = *tmpSize;
@@ -131,7 +131,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     newMacro = (macro *) malloc(sizeof(macro));
     if (newMacro == NULL) { /* Check if the allocation was successful */
         fprintf(stderr,"\nError: Memory allocation for new macro failed.\n");
-        return 0; /* Return 0 on failure */
+        return FALSE; /* Return 0 on failure */
     }
     strcpy(newMacro->macroName, word); /* Copy the name into the macro struct */
 
@@ -141,7 +141,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     if (newMacro->lines == NULL) { /* Check if the allocation was successful */
         fprintf(stderr,"\nError: Memory allocation for macro lines failed.\n");
         freeMacroMemory(newMacro);
-        return 0; /* Return 0 on failure */
+        return FALSE; /* Return 0 on failure */
     }
 
     /* Allocate memory for each line */
@@ -150,7 +150,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
         if (newMacro->lines[i] == NULL) { /* Check if the allocation was successful */
             fprintf(stderr,"\nError: Memory allocation for macro line failed.\n");
             freeMacroMemory(newMacro);
-            return 0; /* Return 0 on failure */
+            return FALSE; /* Return 0 on failure */
         }
     }
 
@@ -170,7 +170,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
             if (!expandedLines) {
                 fprintf(stderr,"\nError: Memory reallocation for macro lines failed.\n");
                 /* Cleanup logic here: free allocated memory before returning */
-                return 0;
+                return FALSE;
             }
 
             newMacro->lines = expandedLines;
@@ -188,7 +188,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
             /* Allocation failure for the new line */
             fprintf(stderr,"\nError: Memory allocation for a macro line failed.\n");
             freeMacroMemory(newMacro);
-            return 0; /* Return 0 on failure */
+            return FALSE; /* Return 0 on failure */
         }
         strcpy(newMacro->lines[newMacro->linesCounter], lineBuffer);
         newMacro->linesCounter++;
@@ -197,7 +197,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
     /* Add the fully defined macro to the array and increment the macro count. */
     (*macros)[*macroCount] = newMacro;
     (*macroCount)++;
-    return 1; /* Return 1 on success */
+    return TRUE; /* return true on success */
 }
 
 /**
@@ -219,16 +219,16 @@ void freeMacrosArrayMemory(macro **macros, int macroCount) {
  * @param word the name to check
  * @param macroCount the number of macros
  * @param macros the macros array
- * @return 1 if the the name is a macro, else 0
+ * @return true if the the name is a macro, else 0
  */
 int checkIfMacroExists(char* word, int macroCount, macro *macros[]){
     int i; /* Loop index */
     for (i = 0; i < macroCount; i++) { /* Loop through the macros array */
         if (strcmp(macros[i]->macroName, word) == 0) { /* Check if the word is a macro name */
-            return 1; /* Return 1 if the word is a macro */
+            return TRUE; /* return true if the word is a macro */
         }
     }
-    return 0; /* Return 0 if the word is not a macro */
+    return FALSE; /* Return 0 if the word is not a macro */
 }
 
 /**
@@ -261,7 +261,7 @@ void writeCurrentMacroIntoFile(FILE* newFile, char* macroName, macro *macros[], 
  * - Not be a saved word
  * - Not be a number
  * @param word the string to check
- * @return 1 if the string is a valid macro name, else 0
+ * @return true if the string is a valid macro name, else 0
  */
 int checkIfMacroNameIsValid(char* word){
     char tempName[MAX_MACRO_NAME_LENGTH]; /* Temporary buffer for the macro name*/
@@ -271,29 +271,29 @@ int checkIfMacroNameIsValid(char* word){
     /* Array of saved words*/
     char* savedWords[] = {".data", ".string", ".entry", ".extern","mcr","endmcr", "mov", "cmp", "add", "sub", "lea", "not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "rts", "hlt", "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
     if (word == NULL || strlen(word) >= MAX_MACRO_NAME_LENGTH || (word[0] >= '0' && word[0] <= '9')) {
-        return 0; /* Return 0 (false) if the word is NULL, too long (more than 31 characters), or starts with a number*/
+        return FALSE; /* Return 0 (false) if the word is NULL, too long (more than 31 characters), or starts with a number*/
     }
 
     /* Checking if the word contains a white space*/
     strncpy(tempName, word, MAX_MACRO_NAME_LENGTH); /* Copy the word to the temporary buffer*/
     for (i = 0; i < strlen(tempName); i++) { /* Loop through the word*/
         if(isspace(tempName[i])){ /* If the character is a space*/
-            return 0; /* Return 0 (false) if the word contains a space*/
+            return FALSE; /* Return 0 (false) if the word contains a space*/
         }
     }
 
     strtol(word, &endptr, 10); /* Try to convert the word to a long integer*/
     if (*endptr == '\0') { /* If the conversion is successful, endptr should point to the null terminator*/
-        return 0; /* Return 0 (false) if the word is a number*/
+        return FALSE; /* Return 0 (false) if the word is a number*/
     }
 
     numSavedWords = sizeof(savedWords) / sizeof(savedWords[0]); /* Calculate the number of saved words*/
     for (i = 0; i < numSavedWords; i++) { /* Loop through the saved words*/
         if (strcmp(word, savedWords[i]) == 0) { /* If the word is a saved word*/
-            return 0; /* Return 0 (false) if the word is a saved word*/
+            return FALSE; /* Return 0 (false) if the word is a saved word*/
         }
     }
-    return 1; /* Return 1 (true), we have valid macro name*/
+    return TRUE; /* return true, we have valid macro name*/
 }
 
 

@@ -61,7 +61,7 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
             }
 
             operation = isValidOperation(currentWord, operationsArray); /*checks if the first word is a valid operation*/
-            if (operation == -1) { /* If the operation is invalid*/
+            if (operation == INVALID_OPERATION_CODE) { /* If the operation is invalid*/
                 break; /* Break the loop, we already found this error in the first pass*/
             }
             /* If the operation is valid, handle the operation*/

@@ -88,7 +88,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 }
                 break;
             }
-            else if (isValidOperation(currentWord, operationsArray)!=-1){ /*checks if the first word is a valid operation*/
+            else if (isValidOperation(currentWord, operationsArray)!=INVALID_OPERATION_CODE){ /*checks if the first word is a valid operation*/
                 if (labelFlag) { /* If there was label before it, add it to the symbol table*/
                     addLabel(symbolTable, tempLabelName, "code", ((*IC) + INITIAL_IC_VALUE), errorInfo);
                 }

@@ -59,10 +59,10 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                 return INSTRUCTION_FAIL_CODE; /* Return fail code, as the operand is not a valid integer*/
             }
         }
-        return 0; /* Immediate operand*/
+        return IMMEDIATE_ADDRESSING; /* Immediate operand*/
     }
     else if (isRegister(operand)) { /* Register operand*/
-        return 3; /* Register operand*/
+        return REGISTER_ADDRESSING; /* Register operand*/
     }
     else { /* case of Label or Label offset */
         trimWhitespace(operand); /* Remove leading and trailing whitespace*/
@@ -83,7 +83,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
         /* Check if it's just a label without offset*/
         if (operand[i] == '\0') {
             if (isValidLabelName(tempOperand, operationsArray, head, 0)){
-                return 1; /* Valid label without offset*/
+                return DIRECT_ADDRESSING; /* Valid label without offset*/
             } else {
                 printError(errorInfo, "Undefined Label name");
                 return INSTRUCTION_FAIL_CODE;
@@ -114,7 +114,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
                         return INSTRUCTION_FAIL_CODE;
                     }
                 }
-                return 2; /* Valid label with offset*/
+                return OFFSET_ADDRESSING; /* Valid label with offset*/
             } else { /* Invalid offset declaration, doesn't end with ']'*/
                 printError(errorInfo, "Invalid offset declaration, doesn't end with ']'");
                 return INSTRUCTION_FAIL_CODE;
@@ -663,7 +663,7 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
  * @param line The line to be parsed.
  * @param operands The array to store the operands.
  * @param errorInfo The error struct.
- * @return 1 if the parsing was successful, 0 otherwise.
+ * @return true if the parsing was successful, false otherwise.
  */
 int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], error** errorInfo) {
     char* token; /* The current token*/
@@ -673,7 +673,7 @@ int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_L
     /* Check for invalid syntax: comma before or after operands, or two consecutive commas */
     if (line[0] == ',' || strstr(line, ",,") != NULL || line[strlen(line) - 1] == ',') {
         printError(errorInfo, "Invalid syntax: comma before or after operands, or two consecutive commas found.");
-        return 0;
+        return FALSE;
     }
 
     token = strtok(line, ",");
@@ -683,13 +683,13 @@ int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_L
         /* Check for an empty token, indicating " , ," pattern */
         if (token[0] == '\0') {
             printError(errorInfo, "Invalid syntax: extraneous text after operands");
-            return 0; /* Early return on finding an empty operand */
+            return FALSE; /* Early return on finding an empty operand */
         }
 
         nextToken = strtok(NULL, ",");
         if (operandIndex == MAX_OPERANDS - 1 && nextToken != NULL) { /* If there are more than 2 operands*/
             printError(errorInfo, "Invalid syntax: too many operands provided.");
-            return 0; /* Early return if there's content after the second operand */
+            return FALSE; /* Early return if there's content after the second operand */
         }
 
         strncpy(operands[operandIndex], token, MAX_OPERAND_LENGTH - 1); /* Copy the token to the operands array*/
@@ -698,7 +698,7 @@ int parseOperandsFirstPass(char* line, char operands[MAX_OPERANDS][MAX_OPERAND_L
         operandIndex++; /* Increment the operand index */
         token = nextToken; /* Proceed to the next token */
     }
-    return 1; /* Return 1 if the parsing was successful */
+    return TRUE; /* Return true if the parsing was successful */
 }
 
 /**
@@ -775,61 +775,61 @@ void trimWhitespace(char* str) {
 /**
  * This function checks if the word is a .define directive.
  * @param word The word to be checked.
- * @return 1 if the word is a .define directive, 0 otherwise.
+ * @return true if the word is a .define directive, false otherwise.
  */
 int isDefine(char* word) {
     if (strcmp(word, ".define") == 0) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
  * This function checks if the word is a .data directive.
  * @param word The word to be checked.
- * @return 1 if the word is a .data directive, 0 otherwise.
+ * @return true if the word is a .data directive, false otherwise.
  */
 int isData(char* word) {
     if (strcmp(word, ".data") == 0) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
  * This function checks if the word is a .string directive.
  * @param word The word to be checked.
- * @return 1 if the word is a .string directive, 0 otherwise.
+ * @return true if the word is a .string directive, false otherwise.
  */
 int isString(char* word) {
     if (strcmp(word, ".string") == 0) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
  * This function checks if the word is a .extern directive.
  * @param word The word to be checked.
- * @return 1 if the word is a .extern directive, 0 otherwise.
+ * @return true if the word is a .extern directive, false otherwise.
  */
 int isExtern(char* word) {
     if (strcmp(word, ".extern") == 0) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
  * This function checks if the word is a .entry directive.
  * @param word The word to be checked.
- * @return 1 if the word is a .entry directive, 0 otherwise.
+ * @return true if the word is a .entry directive, false otherwise.
  */
 int isEntry(char* word) {
     if (strcmp(word, ".entry") == 0) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
@@ -843,7 +843,7 @@ int isEntry(char* word) {
  * @param operationsArray The operations array.
  * @param head The symbol list.
  * @param colonFlag A flag indicating if the label has a colon.
- * @return 1 if the label name is valid, 0 otherwise.
+ * @return true if the label name is valid, false otherwise.
  */
 int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** head, int colonFlag){
     int i;
@@ -851,37 +851,37 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
 
     /* Check if the label has a colon at the end */
     if (colonFlag && lastChar != ':') { /* If the label is supposed to have a colon, but the last character is not a colon*/
-        return 0; /* Return 0, as the label is invalid*/
+        return FALSE; /* Return FALSE, as the label is invalid*/
     }
-    else if (colonFlag == 1){ /*Remove the colon for testing!*/
+    else if (colonFlag){ /*Remove the colon for testing!*/
         name[strlen(name) - 1] = '\0';
     }
 
     /* Check if the name is bigger than the maximum possible number (31), or if it's one of the operations, or if it already exists in the symbol table.*/
-    if (strlen(name) > MAX_LABEL_NAME || isValidOperation(name, operationsArray) != -1){
-        return 0;
+    if (strlen(name) > MAX_LABEL_NAME || isValidOperation(name, operationsArray) != INVALID_OPERATION_CODE){
+        return FALSE;
     }
     /*check if the name is one of the registers*/
     if (strcmp(name, "r0") == 0 || strcmp(name, "r1") == 0 || strcmp(name, "r2") == 0 || strcmp(name, "r3") == 0 || strcmp(name, "r4") == 0 || strcmp(name, "r5") == 0 || strcmp(name, "r6") == 0 || strcmp(name, "r7") == 0 ){
-        return 0;
+        return FALSE;
     }
     /* Check if the first character is an alphabetical character */
     if (!isalpha(name[0])) {
-        return 0;
+        return FALSE;
     }
 
     /* Check if the rest of the characters are either uppercase or digits */
     for (i = 1; name[i] != '\0'; i++) {
         if (!isalpha(name[i]) && !isdigit(name[i])) {
-            return 0;
+            return FALSE;
         }
         if (isspace(name[i])){
-            return 0;
+            return FALSE;
         }
     }
 
     /* If all checks pass, the string is valid */
-    return 1;
+    return TRUE;
 }
 
 /**
@@ -897,14 +897,14 @@ int isValidOperation(char* word, operationInfo* operationsArray) {
             return i; /* Return the index of the operation if it's found*/
         }
     }
-    return -1;
+    return INVALID_OPERATION_CODE; /* Return -1 if the operation is not found*/
 }
 
 
 /**
  * This function checks if the string is a valid integer.
  * @param str The string to be checked.
- * @return 1 if the string is a valid integer, 0 otherwise.
+ * @return true if the string is a valid integer, false otherwise.
  */
 int isValidInteger(char* str) {
     int i;
@@ -916,15 +916,15 @@ int isValidInteger(char* str) {
     if (str[0] == '+' || str[0] == '-') {
         if (len == 1) {
             /* If the string is only '+' or '-', it's not a valid integer*/
-            return 0; /* Return 0, as the string is not a valid integer*/
+            return FALSE; /* Return false, as the string is not a valid integer*/
         }
-        start = 1;
+        start = 1; /* Move the start index to the next character*/
     }
 
     /* Check if the rest of the characters are digits*/
     for (i = start; i < len; i++) { /* Iterate through the string*/
         if (!isdigit(str[i])) { /* If the character is not a digit*/
-            return 0; /* Return 0, as the string is not a valid integer*/
+            return FALSE; /* Return false, as the string is not a valid integer*/
         }
     }
 
@@ -933,23 +933,23 @@ int isValidInteger(char* str) {
 
     /* Check if the number is greater than the maximum 12-bit integer or less than the minimum 12-bit integer */
     if (temp > MAX_INTEGER_12BIT || temp < MIN_INTEGER_12BIT) {
-        return 0;
+        return FALSE; /* Return false, as the string is not a valid integer*/
     }
 
     /* If all checks pass, the string is a valid integer*/
-    return 1;
+    return TRUE;
 }
 
 /**
  * This function checks if the word is a register.
  * @param word The word to be checked.
- * @return 1 if the word is a register, 0 otherwise.
+ * @return true if the word is a register, false otherwise.
  */
 int isRegister(char* word){
     if (strcmp(word, "r0") == 0 || strcmp(word, "r1") == 0 || strcmp(word, "r2") == 0 || strcmp(word, "r3") == 0 || strcmp(word, "r4") == 0 || strcmp(word, "r5") == 0 || strcmp(word, "r6") == 0 || strcmp(word, "r7") == 0 ){
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
@@ -965,8 +965,8 @@ int checkLineLengthAndSkip(FILE* sourceFile, char* lineBuffer, error** errorInfo
         printError(errorInfo, "Line exceeds the maximum allowed length.");
         /* Consume the rest of the line */
         while ((ch = fgetc(sourceFile)) != '\n' && ch != EOF);
-        return 0; /* Indicate that the line is too long and was skipped */
+        return FALSE; /* Indicate that the line is too long and was skipped */
     }
-    return 1; /* Line is within the acceptable length */
+    return TRUE; /* Line is within the acceptable length */
 }
 

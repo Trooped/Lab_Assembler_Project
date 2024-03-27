@@ -43,22 +43,22 @@ int searchSymbolList(symbolList** head, char* name, char* type) {
     while (current != NULL) {
         if ((strcmp(type, "entry")==0) && (strcmp(current->name, tempLabel)==0) && (current->isEntry==1)){ /*Searching for an entry label*/
             /* Entry label was already found in the list)*/
-            return 0;
+            return FALSE;
         }
         else if (strcmp(type, "general") != 0) { /*Searching for a specific name AND type*/
             if (strcmp(current->name, tempLabel) == 0 && strcmp(current->type, type) == 0) {
                 /* Label found in the list*/
-                return 0;
+                return FALSE;
             }
         }
         else if (strcmp(current->name, tempLabel) == 0) { /*Searching for a specific name only*/
             /* Label found in the list*/
-            return 0;
+            return FALSE;
         }
         current = current->next;
     }
     /* Name not found in the list, send 1 to signify creating a new node*/
-    return 1;
+    return TRUE;
 }
 
 
@@ -191,12 +191,12 @@ int findSymbolValue(symbolList **head, const char* name,char* type, int* value) 
         if (strcmp(current->name, name) == 0) { /* Check if the name matches*/
             if (strcmp(current->type, type) == 0 || strcmp(type, "general")==0) { /* Check if the type matches, or if the type is general*/
                 *value = current->value; /* Set the value to the value of the current node*/
-                return 1; /* Return 1 to signify the label was found*/
+                return TRUE; /* Return 1 to signify the label was found*/
             }
         }
         current = current->next;
     }
-    return 0;
+    return FALSE;
 }
 
 /**
@@ -241,9 +241,9 @@ void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
  */
 int isSymbolExtern(symbolList** head, char* symbolName){
     if (searchSymbolList(head, symbolName, "external") == 0){
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 

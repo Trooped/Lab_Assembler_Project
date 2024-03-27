@@ -41,3 +41,16 @@
 5	62	7332296063833301	CMakeFiles/assembler.dir/src/dataConversion.c.obj	ede39ce07cad9516
 1	77	7332296063991482	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
 77	135	7332296064537574	assembler.exe	605c740312106fdc
+22	147	7332774847433996	CMakeFiles/assembler.dir/src/dataStrcuturesInitialization.c.obj	da03a89551409fff
+1	147	7332774847433996	CMakeFiles/assembler.dir/src/assembler.c.obj	85a4e6d56661c3c9
+15	148	7332774847433996	CMakeFiles/assembler.dir/src/firstPass.c.obj	3daf58627df3e8ad
+40	148	7332774847433996	CMakeFiles/assembler.dir/tests/testFunctions.c.obj	5110b73af3f499f8
+30	148	7332774847433996	CMakeFiles/assembler.dir/src/error.c.obj	a41ec198dac27721
+18	149	7332774847449028	CMakeFiles/assembler.dir/src/secondPass.c.obj	ec9e72e08a6fd46a
+9	149	7332774847459057	CMakeFiles/assembler.dir/src/utilities.c.obj	f47afe32f79de560
+33	149	7332774847459057	CMakeFiles/assembler.dir/src/listFunctions.c.obj	cde210ea2daa6ea0
+37	149	7332774847459057	CMakeFiles/assembler.dir/src/fileFunctions.c.obj	399be765689ac96e
+26	149	7332774847469061	CMakeFiles/assembler.dir/src/dataConversion.c.obj	ede39ce07cad9516
+12	150	7332774847479087	CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj	581d7fd2d1cd2cfc
+5	150	7332774847479087	CMakeFiles/assembler.dir/src/PreAsmblr.c.obj	3531d18818903a33
+151	320	7332774849166891	assembler.exe	605c740312106fdc

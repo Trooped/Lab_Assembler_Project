@@ -35,12 +35,19 @@
 #define MIN_INTEGER_12BIT (-2048) /*Minimum number for 12 bits to represent*/
 #define MAX_INTEGER_12BIT 2047 /*Maximum number for 12 bits to represent*/
 #define MAX_EXTERNAL_ADDRESSES 32 /*Maximum number of addresses reserved for each external symbol*/
+#define TRUE 1 /*Boolean true value*/
+#define FALSE 0 /*Boolean false value*/
 
 /*Data and instruction constants*/
+#define IMMEDIATE_ADDRESSING 0 /*Immediate addressing method*/
+#define DIRECT_ADDRESSING 1 /*Direct addressing method*/
+#define OFFSET_ADDRESSING 2 /*Relative addressing method*/
+#define REGISTER_ADDRESSING 3 /*Register addressing method*/
 #define MAX_VALUES_PER_DATA_DIRECTIVE 36 /*Maximum number of data values in an array*/
 #define MAX_OPERANDS 4 /*Maximum number of operands in an instruction + 2 spaces for offsets (if relevant)*/
 #define MAX_OPERAND_LENGTH (MAX_LABEL_NAME+1+MAX_LABEL_NAME+1) /*Maximum number of characters in an operand, calculated with maximum label name length, + '[' + maximum label name length + ']'*/
 #define INSTRUCTION_FAIL_CODE (-999) /*Specific code for when an instruction line fails (a line with operations and operands)*/
+#define INVALID_OPERATION_CODE (-1) /*Specific code for invalid operations*/
 
 
 /*A struct for the symbol list, which will be used for a linked list consisting of the symbols in the program- "symbol table"*/
