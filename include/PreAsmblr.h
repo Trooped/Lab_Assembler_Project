@@ -17,7 +17,7 @@
 /*Constants that are used solely in the pre-assembly process*/
 #define MAX_MACRO_NAME_LENGTH 31 /*Maximum number of characters in a macro name*/
 #define MAX_LINES_PER_MACRO 32 /*Initial maximum number of lines in a macro, will be adjusted dynamically*/
-#define MAX_MACROS 32 /*Starter number for number of macros, dynamically allocated further on*/
+#define DEFAULT_MACRO_SIZE 32 /*Starter number for number of macros, dynamically allocated further on*/
 
 /**
  * This struct will define each macro, it's lines (the actual lines of a text, a 2d pointer array) and a lines errorCounter.

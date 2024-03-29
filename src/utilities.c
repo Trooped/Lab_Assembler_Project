@@ -36,7 +36,7 @@ int entryLabelCounter(symbolList** head) {
     symbolList* current = *head; /* Start at the head of the list*/
     int counter = 0;
     while (current != NULL) {  /* Loop through the list*/
-        if (current->isEntry == 1) {
+        if (current->isEntry == TRUE) {
             counter++; /* Increment the counter*/
         }
         current = current->next;

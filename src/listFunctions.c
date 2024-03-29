@@ -102,7 +102,7 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
     newNode->type[MAX_LABEL_NAME - 1] = '\0'; /* Ensure null termination*/
     newNode->value = value; /* Set the value of the new node*/
     newNode->next = NULL; /* Set the next pointer to NULL*/
-    newNode->isEntry = 0; /* Set the isEntry flag to 0*/
+    newNode->isEntry = FALSE; /* Set the isEntry flag to 0*/
     newNode->dataCounter = -1; /* Set the data counter to -1 (because we want it to represent the amount of integers in a .data label)*/
     for (i = 0; i < MAX_EXTERNAL_ADDRESSES; i++) { /* Initialize the external addresses array to -1*/
         newNode->externalAddresses[i] = -1;
@@ -220,7 +220,7 @@ void markLabelAsEntry(symbolList** head, char* line, error** errorInfo) {
     while (current != NULL) {
         if (strcmp(current->name, entryLabelName) == 0){ /* Check if the name matches*/
             if (strcmp(current->type, "code") == 0 || strcmp(current->type, "data") == 0){ /* Check if the type is code or data*/
-                current->isEntry = 1; /* Mark the label as an entry*/
+                current->isEntry = TRUE; /* Mark the label as an entry*/
                 return; /* Early return to avoid processing further*/
             }
             else{ /* If the type is not code or data, print an error message and exit*/

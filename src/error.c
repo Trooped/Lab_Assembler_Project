@@ -19,12 +19,12 @@
  */
 void printError(error** errorInfo, char* errorDescription){
     (*errorInfo)->errorCounter++; /* Increment the error counter*/
-    (*errorInfo)->errorFlag = 1; /* Set the error flag*/
-    if ((*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] == '\n') { /* Check if the line ends with a newline character*/
-        (*errorInfo)->lineText[strlen((*errorInfo)->lineText) - 1] = '\0'; /* Remove the newline character*/
+    (*errorInfo)->errorFlag = TRUE; /* Set the error flag*/
+    if ((*errorInfo)->currentLineContent[strlen((*errorInfo)->currentLineContent) - 1] == '\n') { /* Check if the line ends with a newline character*/
+        (*errorInfo)->currentLineContent[strlen((*errorInfo)->currentLineContent) - 1] = '\0'; /* Remove the newline character*/
     }
     /* Print the detailed error message*/
-    fprintf(stderr,"Error #%d found in file '%s', line %d:\n'%s'\nerror description: %s\n\n", (*errorInfo)->errorCounter, (*errorInfo)->fileName,(*errorInfo)->lineCounter, (*errorInfo)->lineText, errorDescription);
+    fprintf(stderr, "Error #%d found in file '%s', line %d:\n'%s'\nerror description: %s\n\n", (*errorInfo)->errorCounter, (*errorInfo)->currentFileName, (*errorInfo)->currentLineNumber, (*errorInfo)->currentLineContent, errorDescription);
 }
 
 
@@ -43,12 +43,12 @@ void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileN
         closeFileAndExit(errorInfo, symbolTable); /* Close the file and free the memory*/
     }
     /* Initialize errorInfo*/
-    (*errorInfo)->errorFlag = 0; /* Set the error flag to 0*/
+    (*errorInfo)->errorFlag = FALSE; /* Set the error flag to 0*/
     (*errorInfo)->errorCounter = 0; /* Set the error counter to 0*/
-    strcpy((*errorInfo)->fileName, fileName);
+    strcpy((*errorInfo)->currentFileName, fileName);
     (*errorInfo)->file = NULL; /*set the file pointer to NULL*/
-    (*errorInfo)->lineText[0] = '\0'; /* Set the line text to an empty string*/
-    (*errorInfo)->lineCounter = 0; /* Set the line counter to 0*/
+    (*errorInfo)->currentLineContent[0] = '\0'; /* Set the line text to an empty string*/
+    (*errorInfo)->currentLineNumber = 0; /* Set the line counter to 0*/
 }
 
 /**

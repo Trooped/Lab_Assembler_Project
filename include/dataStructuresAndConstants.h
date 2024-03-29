@@ -77,9 +77,9 @@ typedef struct operations{
 typedef struct errorInfo{
     int errorFlag; /* 1 if there is an error, 0 otherwise*/
     int errorCounter; /* Number of errors*/
-    char fileName[MAX_FILE_NAME]; /* Current file name*/
-    char lineText[MAX_CHARS_PER_LINE]; /* Current line content*/
-    int lineCounter; /* Current line number*/
+    char currentFileName[MAX_FILE_NAME]; /* Current file name*/
+    char currentLineContent[MAX_CHARS_PER_LINE]; /* Current line content*/
+    int currentLineNumber; /* Current line number*/
     FILE* file; /* Pointer to the current file*/
 }error;
 

@@ -10,11 +10,11 @@
 
 /**
  * This function will create a new file to copy macros from the old file into the new file.
- * @param source the old file
+ * @param sourceFile the old file
  * @param oldFileName the old file name
  * @return the new file
  */
-FILE* createFileWithMacros(FILE* source, const char* oldFileName);
+FILE* createFileWithMacros(FILE* sourceFile, const char* oldFileName);
 
 void createEntFile(symbolList** head, char* fileName, error** errorInfo);
 

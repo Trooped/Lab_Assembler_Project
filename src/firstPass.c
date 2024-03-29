@@ -17,7 +17,7 @@
  * @param errorInfo The error struct.
  */
 void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
-    int labelFlag = 0; /* Flag to check if the current line begins with a label*/
+    int labelFlag = FALSE; /* Flag to check if the current line begins with a label*/
     int operation = 0; /* The current operation number*/
     int L; /* The current L value = the number of lines to add to the IC*/
     char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line*/
@@ -34,9 +34,9 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
         fullLine[MAX_CHARS_PER_LINE - 1] = '\0'; /* Ensure null-termination*/
 
         /* Updating the errorInfo struct with the current line information */
-        (*errorInfo)->lineCounter++; /* Increment the line counter*/
-        (*errorInfo)->lineText[0] = '\0'; /* Reset the line text*/
-        strncpy((*errorInfo)->lineText, fullLine, MAX_CHARS_PER_LINE); /* Copying the current line into the error struct*/
+        (*errorInfo)->currentLineNumber++; /* Increment the line counter*/
+        (*errorInfo)->currentLineContent[0] = '\0'; /* Reset the line text*/
+        strncpy((*errorInfo)->currentLineContent, fullLine, MAX_CHARS_PER_LINE); /* Copying the current line into the error struct*/
 
 
         /* Check if the line is too long, and skip it if it is */
@@ -46,7 +46,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
         }
 
         L = 0; /* Reset the L value*/
-        labelFlag = 0; /* Reset the label flag*/
+        labelFlag = FALSE; /* Reset the label flag*/
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while (currentWord != NULL) {
             if (isDefine(currentWord)){ /*checks if the first word is a define directive*/
@@ -54,7 +54,7 @@ void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionA
                 break;
             }
             else if (isValidLabelName(currentWord, operationsArray, symbolTable, 1)){ /*checks if the first word is a valid label definition*/
-                labelFlag = 1; /* Set the label flag*/
+                labelFlag = TRUE; /* Set the label flag*/
                 strncpy(tempLabelName, currentWord, MAX_LABEL_NAME);  /* Copy the label name to the tempLabelName, for use with addLabel later*/
             }
             else if (isData(currentWord) || isString(currentWord)){ /*checks if the first word is a data or string directive*/

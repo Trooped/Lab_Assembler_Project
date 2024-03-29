@@ -147,6 +147,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     int firstOperand; /* The first operand code*/
     int secondOperand; /* The second operand code*/
     char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH]; /* Array for the operands*/
+    int numOfOperands = operationsArray[opcode].numOfOperands; /* The number of operands for the current operation*/
     initializeOperandsArray(operands); /* Initialize the operands array*/
 
     /* Skip label if present*/
@@ -168,17 +169,17 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     }
 
     /* Checking the number of operands and their validity*/
-    if (operationsArray[opcode].numOfOperands == 0) {
+    if (numOfOperands == 0) {
         if (operands[0][0] != '\0') {
             printError(errorInfo, "Too many operands for a 0 operand operation");
             return INSTRUCTION_FAIL_CODE;
         }
-        else{
-            firstOperand = 0;
-            secondOperand = 0;
+        else{ /* No operands for a 0 operand operation*/
+            firstOperand = NO_OPERAND;
+            secondOperand = NO_OPERAND;
         }
     }
-    else if (operationsArray[opcode].numOfOperands == 1) {
+    else if (numOfOperands == 1) {
         if (operands[1][0] != '\0') {
             printError(errorInfo, "Too many operands for a 1 operand operation");
             return INSTRUCTION_FAIL_CODE;
@@ -188,14 +189,14 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             return INSTRUCTION_FAIL_CODE;
         }
         else{
-            firstOperand = 0;
+            firstOperand = NO_OPERAND; /* No first operand for a 1 operand operation*/
             secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /* Get the operand code*/
             if (secondOperand == INSTRUCTION_FAIL_CODE){
                 return INSTRUCTION_FAIL_CODE;
             }
         }
     }
-    else if (operationsArray[opcode].numOfOperands == 2) {
+    else if (numOfOperands == 2) {
         if (operands[2][0] != '\0') {
             printError(errorInfo, "Too many operands for a 2 operand operation");
             return INSTRUCTION_FAIL_CODE;
@@ -222,103 +223,102 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     }
 
     /*If there's offset for an operand, increment the line counter for each offset*/
-    if (firstOperand == 2){
+    if (firstOperand == OFFSET_ADDRESSING){
         L++;
     }
-    if (secondOperand == 2){
+    if (secondOperand == OFFSET_ADDRESSING){
         L++;
     }
 
     /*switch case for the different operations, with specific errors for each operation*/
     switch(opcode){
-        case 0: /*mov*/
-            if (secondOperand == 0){
+        case MOV_OP: /*mov*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot move to an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 1: /*cmp*/
+        case CMP_OP: /*cmp*/
             break;
-        case 2: /*add*/
-            if (secondOperand == 0){
+        case ADD_OP: /*add*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot add into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 3: /*sub*/
-            if (secondOperand == 0){
+        case SUB_OP: /*sub*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot subtract into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 4: /*lea*/
-            if (firstOperand == 3 || firstOperand == 0 || secondOperand == 0){
-                printError(errorInfo, "Invalid operands for lea operation");
-                return INSTRUCTION_FAIL_CODE;
-            }
-            break;
-        case 5: /*not*/
-            if (secondOperand == 0){
+        case NOT_OP: /*not*/ /*TODO change this and the 2 next ones according to the table*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot negate an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 6: /*clr*/
-            if (secondOperand == 0){
+        case CLR_OP: /*clr*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot clear an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 7: /*inc*/
-            if (secondOperand == 0){
+        case LEA_OP: /*lea*/
+            if (firstOperand == REGISTER_ADDRESSING || firstOperand == IMMEDIATE_ADDRESSING || secondOperand == IMMEDIATE_ADDRESSING){
+                printError(errorInfo, "Invalid operands for lea operation");
+                return INSTRUCTION_FAIL_CODE;
+            }
+            break;
+        case INC_OP: /*inc*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot increment an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 8: /*dec*/
-            if (secondOperand == 0){
+        case DEC_OP: /*dec*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot decrement an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 9: /*jmp*/
-            if (secondOperand == 0 || secondOperand==2){
+        case JMP_OP: /*jmp*/
+            if (secondOperand == IMMEDIATE_ADDRESSING || secondOperand == OFFSET_ADDRESSING){
                 printError(errorInfo, "Invalid operands for jmp");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 10: /*bne*/
-            if (secondOperand == 0 || secondOperand==2){
+        case BNE_OP: /*bne*/
+            if (secondOperand == IMMEDIATE_ADDRESSING || secondOperand == OFFSET_ADDRESSING){
                 printError(errorInfo, "Invalid operands for bne");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 11: /*red*/
-            if (secondOperand == 0){
+        case RED_OP: /*red*/
+            if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot read into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 12: /*prn*/
+        case PRN_OP: /*prn*/
             break;
-        case 13: /*jsr*/
-            if (secondOperand == 0 || secondOperand==2){
+        case JSR_OP: /*jsr*/
+            if (secondOperand == IMMEDIATE_ADDRESSING || secondOperand == OFFSET_ADDRESSING){
                 printError(errorInfo, "Invalid operands for jsr");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case 14: /*rts*/
+        case RTS_OP: /*rts*/
             break;
-        case 15: /*hlt*/
+        case HLT_OP: /*hlt*/
             break;
         default:
             printError(errorInfo, "Invalid operation");
             return INSTRUCTION_FAIL_CODE;
-            break;
     }
 
     /*Special case where both operands are registers, sharing one binary word*/
-    if (firstOperand == 3 &&  secondOperand == 3){
+    if (firstOperand == REGISTER_ADDRESSING &&  secondOperand == REGISTER_ADDRESSING){
         L--; /* Decrement the line counter, as the 2 operands are sharing one binary word*/
     }
 
@@ -327,7 +327,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     if (!isSecondPass){ /*If it's the first pass, only add the first word and update the IC*/
         insertFirstInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
     }
-    else if (operationsArray[opcode].numOfOperands != 0){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
+    else if (numOfOperands != 0){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
         analyzeOperandsAndInsertIntoArraySecondPass(instructionArray, L, IC, operands, head, errorInfo); /*Analyze the operands and insert them into the instruction array*/
     }
 
@@ -470,13 +470,13 @@ void handleData(char* type, char* labelName, char* line, symbolList** head, int 
  */
 void handleExtern(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag){
     char* currentWord; /* The current word in the line*/
-    int flag = 0; /* Flag to check if the first label was already added*/
+    int flag = FALSE; /* Flag to check if the first label was already added*/
 
     if(labelFlag){ /* If the first word is a label, ignore it and print a warning*/
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-        printf("WARNING: Label is ignored in .extern directive, in line '%s'\n", (*errorInfo)->lineText);
+        printf("WARNING: Label is ignored in .extern directive, in line '%s'\n", (*errorInfo)->currentLineContent);
     }
     else{
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
@@ -499,7 +499,7 @@ void handleExtern(symbolList** head, char* line, error** errorInfo, operationInf
         }
         else { /* If the label is valid, add it to the symbol table*/
             addLabel(head, currentWord, "external", 0, errorInfo);
-            flag = 1;
+            flag = TRUE;
         }
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }
@@ -620,13 +620,13 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
  */
 void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operationInfo* operationsArray, int labelFlag) {
     char* currentWord; /* The current word in the line.*/
-    int flag = 0; /* Flag to check if the first label was already added.*/
+    int flag = FALSE; /* Flag to check if the first label was already added.*/
 
     if(labelFlag){ /* If the first word is a label, ignore it and print a warning.*/
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
-        printf("WARNING: Label is ignored in .entry directive, in line '%s'\n", (*errorInfo)->lineText);    }
+        printf("WARNING: Label is ignored in .entry directive, in line '%s'\n", (*errorInfo)->currentLineContent);    }
     else{
         currentWord = strtok(line, " \n\r\t"); /* Get the next word.*/
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
@@ -651,7 +651,7 @@ void checkEntrySyntax(symbolList** head, char* line, error** errorInfo, operatio
             return;
         }
         else{
-            flag = 1; /* If the label is valid, set the flag to 1*/
+            flag = TRUE; /* If the label is valid, set the flag to 1*/
         }
         currentWord= strtok(NULL, " \n\r\t"); /* Get the next word.*/
     }

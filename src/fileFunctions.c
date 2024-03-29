@@ -19,11 +19,11 @@
 
 /**
  * This function will create a new file to copy macros from the old file into the new file.
- * @param source the old file
+ * @param sourceFile the old file
  * @param oldFileName the old file name
  * @return the new file
  */
-FILE* createFileWithMacros(FILE* source, const char* oldFileName) {
+FILE* createFileWithMacros(FILE* sourceFile, const char* oldFileName) {
     char newFileName[MAX_FILE_NAME] = {0}; /*the new file name*/
     FILE * resultFile; /*the new file*/
     error* error; /*Empty error struct for the preAsmblr*/
@@ -34,23 +34,21 @@ FILE* createFileWithMacros(FILE* source, const char* oldFileName) {
     resultFile = fopen(newFileName, "w+"); /*open the new file*/
     if (resultFile == NULL) { /*if the file couldn't be opened, print an error message*/
         fprintf(stderr, "Error opening file '%s': %s\n", newFileName, strerror(errno));
-        error->errorFlag = 1;
+        free(error); /*free the error struct*/
         return NULL;
     }
     /*process the lines of the file*/
-    processFileLines(source, resultFile);
+    processFileLines(sourceFile, resultFile);
 
     /*If there are errors in pre-assembly, stop the run*/
-    if (error->errorFlag == 1) {
+    if (error->errorFlag == TRUE) {
         fprintf(stderr, "Errors were found in the pre-assembly process, exiting the process\n");
         free(error); /*free the error struct*/
         fclose(resultFile); /*close the file*/
         return NULL;
     }
-    else {
-        free(error); /*free the error struct*/
-    }
 
+    free(error); /*free the error struct*/
     return resultFile; /*return the new result file*/
 }
 
@@ -116,7 +114,7 @@ void createEntFile(symbolList** head, char* fileName, error** errorInfo) {
 
     current = *head; /*set the current symbol to the head of the symbol table*/
     while (current != NULL) { /*loop through the symbol table*/
-        if (current->isEntry == 1) { /*if the symbol is an entry symbol, print it to the file*/
+        if (current->isEntry == TRUE) { /*if the symbol is an entry symbol, print it to the file*/
             fprintf(entFile, "%s 0%d\n", current->name, current->value);
         }
         current = current->next; /*move to the next symbol*/

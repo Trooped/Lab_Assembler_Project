@@ -27,7 +27,7 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
     int L; /* The current L value = the number of lines to add to the IC*/
     int operation; /* The current operation number*/
     (*IC) = 0; /* Reset the IC*/
-    (*errorInfo)->lineCounter = 0;
+    (*errorInfo)->currentLineNumber = 0;
     rewind(sourceFile); /*reset the file pointer to the beginning of the file*/
 
 
@@ -35,8 +35,8 @@ void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instruction
     while (fgets(lineBuffer, sizeof(lineBuffer), sourceFile)) {
         strncpy(fullLine, lineBuffer, MAX_CHARS_PER_LINE);  /* Copy the current line into fullLine (for further parsing)*/
         fullLine[MAX_CHARS_PER_LINE - 1] = '\0'; /* Ensure null-termination*/
-        (*errorInfo)->lineCounter++; /* Increment the line counter*/
-        strncpy((*errorInfo)->lineText, fullLine, MAX_CHARS_PER_LINE); /* Copying the current line into the error struct*/
+        (*errorInfo)->currentLineNumber++; /* Increment the line counter*/
+        strncpy((*errorInfo)->currentLineContent, fullLine, MAX_CHARS_PER_LINE); /* Copying the current line into the error struct*/
 
 
         L = 0; /* Reset the L value*/

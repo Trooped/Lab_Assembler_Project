@@ -55,17 +55,17 @@ void initializeOperationsArray(operationInfo* operationsArray) {
     operationsArray[3].numOfOperands = 2;
 
     /* Initialize operation 4 */
-    operationsArray[4].name = "lea";
+    operationsArray[4].name = "not";
     operationsArray[4].code = 4;
     operationsArray[4].numOfOperands = 2;
 
     /* Initialize operation 5 */
-    operationsArray[5].name = "not";
+    operationsArray[5].name = "clr";
     operationsArray[5].code = 5;
     operationsArray[5].numOfOperands = 1;
 
     /* Initialize operation 6 */
-    operationsArray[6].name = "clr";
+    operationsArray[6].name = "lea";
     operationsArray[6].code = 6;
     operationsArray[6].numOfOperands = 1;
 

@@ -84,7 +84,7 @@ void assembler(FILE* source, char* fileName){
     secondPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
     /*Check if there are any errors, if there are- print the number of errors and exit the process*/
-    if (errorInfo->errorFlag == 1) {
+    if (errorInfo->errorFlag == TRUE) {
         fprintf(stderr,"%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
         closeFileAndExit(&errorInfo, &symbolTable);
     }

@@ -27,13 +27,13 @@
  * @param resultFile the new file
  */
 void processFileLines(FILE* source, FILE* resultFile) {
-    int macroArrSize = MAX_MACROS; /* Maximum number of macros (initial size of the macros array, which will grow with need)*/
+    int macroArrSize = DEFAULT_MACRO_SIZE; /* Maximum number of macros (initial size of the macros array, which will grow with need)*/
     int tmpSize = 0; /* Temporary size for reallocating the macros array*/
     int macroCount = 0; /* Number of macros in total*/
     char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line parsing*/
     char currentLine[MAX_CHARS_PER_LINE]; /* Buffer for the current full line*/
-    char *word; /* The current word in the line*/
-    macro **macros = allocateMemoryToMacros(macroArrSize); /*initialize a pointer to a pointer macros array, and allocate memory for it.*/
+    char* word; /* The current word in the line*/
+    macro** macros = allocateMemoryToMacros(macroArrSize); /*initialize a pointer to a pointer macros array, and allocate memory for it.*/
 
     while (fgets(lineBuffer, sizeof(lineBuffer), source) != NULL) { /* Read each line from the file*/
         /*Checking if line is longer than 81 characters, if it is- skip the excess characters. (we'll check it again in the first pass and throw an error.)*/
@@ -71,7 +71,7 @@ void processFileLines(FILE* source, FILE* resultFile) {
  * @return the macros array
  */
 macro** allocateMemoryToMacros(int macroArrSize){
-    macro **macros = (macro**)malloc(macroArrSize * sizeof(macro*)); /* Allocate memory for the macros array*/
+    macro** macros = (macro**)malloc(macroArrSize * sizeof(macro*)); /* Allocate memory for the macros array*/
     if (macros == NULL) { /* Check if the memory allocation was successful*/
         fprintf(stderr, "Error allocating memory for macros array: %s\n", strerror(errno));
         exit(1); /*exiting without the freeMemoryAndCloseFile, because it's initial allocation*/
@@ -95,8 +95,8 @@ macro** allocateMemoryToMacros(int macroArrSize){
 int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize) {
     int i; /* Loop index */
     int tempLineCounter = MAX_LINES_PER_MACRO; /* Initial number of lines to allocate memory for */
-    macro *newMacro = NULL; /* Temporary pointer for the new macro instance */
-    macro **newMacros = NULL; /* Temporary pointer for the macros array */
+    macro* newMacro = NULL; /* Temporary pointer for the new macro instance */
+    macro** newMacros = NULL; /* Temporary pointer for the macros array */
 
     /* Move to the next word, which should be the macro's name. */
     word = strtok(NULL, " \n\r\t");
