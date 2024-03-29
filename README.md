@@ -13,7 +13,7 @@
  2. Two-Pass Assembly: The system then executes a two-pass assembly process on the ".am" file, culminating in the generation of a machine code file (".ob"). Additionally, it creates:
  - A ".ent" file detailing the addresses of all entry points.
  - A ".ext" file listing the addresses of external variables.
-#### This structure not only modularizes the assembly process but also ensures the generation of necessary metadata for linkage and execution.
+This structure not only modularizes the assembly process but also ensures the generation of necessary metadata for linkage and execution.
 ## 💻Code💻
 ### The code is divided into several modules:
  1. Preprocessor: This module is responsible for expanding macros in the source code file.
@@ -43,5 +43,3 @@
 
 ## ✒️Author✒️
 Omri Peretz
-```c
-```

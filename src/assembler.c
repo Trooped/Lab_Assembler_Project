@@ -4,7 +4,7 @@
  *
  * the functions in this file are:
  * 1. main - The main function of the assembler, which calls the pre-assembly and assembly functions.
- * 2. assembler - The second main function of the assembler. It reads the source file and creates the memory image.
+ * 2. assembler - The second main function of the assembler. It reads the source file (with macros spread) and creates the memory image.
  */
 
 #include "include/assembler.h"
@@ -18,7 +18,7 @@
  */
 int main(int argc, char** argv) {
     int fileCount; /*Counter for the files*/
-    FILE* oldFIle, *newFile; /*File pointers for the old and new files*/
+    FILE* initialFile, *macrosSpreadFile; /*File pointers for the old and new files*/
     char fileName[MAX_FILE_NAME]; /*The name of the file*/
     char baseFileName[MAX_FILE_NAME]; /*The base file name without the suffix*/
 
@@ -28,22 +28,22 @@ int main(int argc, char** argv) {
             sprintf(fileName, "%s.as", argv[fileCount]); /*Add the suffix to the file name, so we can access it.*/
 
             /*TODO maybe change the opening of this file to inside of the createFileWithMacros?*/
-            oldFIle = fopen(fileName, "r");
-            if (oldFIle) {
-                newFile = createFileWithMacros(oldFIle, baseFileName); /*create a new file with the macros from the old file*/
-                fclose(oldFIle);
+            initialFile = fopen(fileName, "r");
+            if (initialFile != NULL) {
+                macrosSpreadFile = createFileWithMacros(initialFile, baseFileName); /*create a new file with the macros from the old file*/
+                fclose(initialFile);
 
-                if (newFile == NULL) { /*If there were errors in the pre-assembly process, continue to the next file*/
-                    continue;
+                if (macrosSpreadFile == NULL) { /*If there were errors in the pre-assembly process (they were printed already), the file pointer is NULL*/
+                    continue; /*Continue to the next file*/
                 }
 
                 /*Call the assembler function*/
-                assembler(newFile, baseFileName);
+                assembler(macrosSpreadFile, baseFileName);
 
                 testPrintAndDeleteFile(baseFileName);
             }
             else { /*If the file couldn't be opened, print an error message*/
-                fprintf(stderr,"Failed to open %s\n", argv[fileCount]);
+                fprintf(stderr,"Failed to open file %s\n", argv[fileCount]);
             }
         }
     }
