@@ -24,19 +24,6 @@
  */
 char* removeColon(char* label);
 
-/**
- * This function counts the number of entry labels in the symbol table.
- * @param head The head of the symbol table.
- * @return int The number of entry labels.
- */
-int entryLabelCounter(symbolList** head);
-
-/**
- * This function counts the number of external labels in the symbol table.
- * @param head The head of the symbol table.
- * @return int The number of external labels.
- */
-int externLabelCounter(symbolList** head);
 
 
 void printSymbolList(const symbolList* head);

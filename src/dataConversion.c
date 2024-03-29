@@ -209,7 +209,6 @@ char* convertBinaryToBase4Symbols(int binary) {
     int i; /* Loop index. */
     char symbols[4] = {'*', '#', '%', '!'}; /* The symbols to represent the base 4 digits. */
     int mask = 0x3;  /* Binary 11, to extract two bits at a time. */
-    int tempIndex = ENCRYPTED_WORD_SIZE;  /* Start from the end of the result string, which is 7. TODO delete it? isn't used!!!*/
     char* result = (char*)malloc(ENCRYPTED_WORD_SIZE+1);  /* Allocate on the heap. */
     if (result == NULL){ /* Check for malloc failure. */
         return NULL;  /* Return NULL to the main function (which will call the closeFileAndExit function) */
