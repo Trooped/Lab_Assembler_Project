@@ -2,7 +2,7 @@
 #define LAB_PROJECT_ASSEMBLER_H
 
 #include "dataStructuresAndConstants.h"
-#include "dataStrcuturesInitialization.h"
+#include "initializationFunctions.h"
 #include "error.h"
 #include "fileFunctions.h"
 #include "listFunctions.h"

@@ -269,12 +269,12 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "src/dataStrcuturesInitialization.c",
+			"path" : "src/initializationFunctions.c",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
-			"path" : "include/dataStrcuturesInitialization.h",
+			"path" : "include/initializationFunctions.h",
 			"sourceGroupIndex" : 1
 		},
 		{

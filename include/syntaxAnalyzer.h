@@ -5,7 +5,7 @@
 #include "utilities.h"
 #include "listFunctions.h"
 #include "error.h"
-#include "dataStrcuturesInitialization.h"
+#include "initializationFunctions.h"
 #include "dataConversion.h"
 #include <stdio.h>
 #include <string.h>

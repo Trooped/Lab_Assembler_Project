@@ -26,8 +26,8 @@ add_executable(assembler
         include/error.h
         src/dataConversion.c
         include/dataConversion.h
-        src/dataStrcuturesInitialization.c
-        include/dataStrcuturesInitialization.h
+        src/initializationFunctions.c
+        include/initializationFunctions.h
         src/listFunctions.c
         include/listFunctions.h
         src/fileFunctions.c

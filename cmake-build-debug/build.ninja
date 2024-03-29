@@ -105,8 +105,8 @@ build CMakeFiles/assembler.dir/src/dataConversion.c.obj: C_COMPILER__assembler_u
   OBJECT_DIR = CMakeFiles\assembler.dir
   OBJECT_FILE_DIR = CMakeFiles\assembler.dir\src
 
-build CMakeFiles/assembler.dir/src/dataStrcuturesInitialization.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/dataStrcuturesInitialization.c || cmake_object_order_depends_target_assembler
-  DEP_FILE = CMakeFiles\assembler.dir\src\dataStrcuturesInitialization.c.obj.d
+build CMakeFiles/assembler.dir/src/initializationFunctions.c.obj: C_COMPILER__assembler_unscanned_Debug C$:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/src/initializationFunctions.c || cmake_object_order_depends_target_assembler
+  DEP_FILE = CMakeFiles\assembler.dir\src\initializationFunctions.c.obj.d
   FLAGS = -g -std=gnu90 -fdiagnostics-color=always -ansi -pedantic -Wall -g
   INCLUDES = -IC:/Users/Omri/Documents/GitHub/Lab_Project/Lab_Project/.
   OBJECT_DIR = CMakeFiles\assembler.dir
@@ -141,7 +141,7 @@ build CMakeFiles/assembler.dir/tests/testFunctions.c.obj: C_COMPILER__assembler_
 #############################################
 # Link the executable assembler.exe
 
-build assembler.exe: C_EXECUTABLE_LINKER__assembler_Debug CMakeFiles/assembler.dir/src/assembler.c.obj CMakeFiles/assembler.dir/src/PreAsmblr.c.obj CMakeFiles/assembler.dir/src/firstPass.c.obj CMakeFiles/assembler.dir/src/utilities.c.obj CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj CMakeFiles/assembler.dir/src/secondPass.c.obj CMakeFiles/assembler.dir/src/error.c.obj CMakeFiles/assembler.dir/src/dataConversion.c.obj CMakeFiles/assembler.dir/src/dataStrcuturesInitialization.c.obj CMakeFiles/assembler.dir/src/listFunctions.c.obj CMakeFiles/assembler.dir/src/fileFunctions.c.obj CMakeFiles/assembler.dir/tests/testFunctions.c.obj
+build assembler.exe: C_EXECUTABLE_LINKER__assembler_Debug CMakeFiles/assembler.dir/src/assembler.c.obj CMakeFiles/assembler.dir/src/PreAsmblr.c.obj CMakeFiles/assembler.dir/src/firstPass.c.obj CMakeFiles/assembler.dir/src/utilities.c.obj CMakeFiles/assembler.dir/src/syntaxAnalyzer.c.obj CMakeFiles/assembler.dir/src/secondPass.c.obj CMakeFiles/assembler.dir/src/error.c.obj CMakeFiles/assembler.dir/src/dataConversion.c.obj CMakeFiles/assembler.dir/src/initializationFunctions.c.obj CMakeFiles/assembler.dir/src/listFunctions.c.obj CMakeFiles/assembler.dir/src/fileFunctions.c.obj CMakeFiles/assembler.dir/tests/testFunctions.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\assembler.dir

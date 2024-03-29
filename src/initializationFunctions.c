@@ -10,7 +10,7 @@
  * 4. initializeInstructionArray - This function initializes the instruction array with a given value.
  */
 
-#include "include/dataStrcuturesInitialization.h"
+#include "include/initializationFunctions.h"
 
 
 /**
