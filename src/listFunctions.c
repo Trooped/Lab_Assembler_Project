@@ -79,7 +79,7 @@ void addLabel(symbolList** head, char* name, char* type, int value, error** erro
         return; /* Early return to avoid processing further*/
     }
 
-    if (searchSymbolList(head, name, "external") == 0) { /* Check if the label was already defined as external*/
+    if (searchSymbolList(head, name, "external") == 0 && strcmp(type, "external")==0) { /* Check if the label was already defined as external*/
         printf("WARNING: Double declaration- Label '%s' was already defined as external\n", name);
         return; /* Early return to avoid processing further*/
     }
