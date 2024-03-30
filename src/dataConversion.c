@@ -23,8 +23,8 @@
  * @param firstOperand The first operand of the instruction.
  * @param secondOperand The second operand of the instruction.
  */
-void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
-    binaryWord newWord; /* Create a new binary word. */
+void insertFirstInstructionIntoArray(memoryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand) {
+    memoryWord newWord; /* Create a new binary word. */
     newWord.wordBits = (opcode << SHIFT_6) | (firstOperand << SHIFT_4) | (secondOperand << SHIFT_2); /* Create the binary word with the opcode and operands. */
     instructionArray[IC] = newWord; /* Insert the word into the instruction array. */
 }
@@ -39,8 +39,8 @@ void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int o
  * @param head The head of the symbol table.
  * @param errorInfo A pointer to the errorInfo struct.
  */
-void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo){
-    binaryWord newWord; /* The new word to be inserted into the instruction array*/
+void analyzeOperandsAndInsertIntoArraySecondPass(memoryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo){
+    memoryWord newWord; /* The new word to be inserted into the instruction array*/
     int regNumSource, regNumDest; /* The register numbers for the source and destination registers*/
     symbolList *tempPtr = NULL; /* A temporary pointer to a symbol in the symbol table*/
 
@@ -122,9 +122,9 @@ void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, i
  * @param offset A flag to indicate if the operand is an offset operand.
  * @param prevLabelPtr A pointer to the PREVIOUS label in the symbol table (to check if we're out of array bounds in offset declarations).
  */
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset, symbolList* prevLabelPtr) {
+void convertOperandToBinaryAndInsertIntoArray(memoryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset, symbolList* prevLabelPtr) {
     int val; /* The value of the operand, if it's a number. */
-    binaryWord newWord; /* Create a new binary word. */
+    memoryWord newWord; /* Create a new binary word. */
 
     if (operand[0] == '#') { /*if it's an immediate number*/
         if (!isValidInteger(operand + 1)) { /*if it's not a valid number*/
@@ -191,8 +191,8 @@ void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int 
  * @param DC The data errorCounter.
  * @param value The value to add to the data array.
  */
-void convertValueToBinaryAndInsertToDataArray(binaryWord* dataArray, int DC, int value) {
-    binaryWord newWord; /* Create a new binary word. */
+void convertValueToBinaryAndInsertToDataArray(memoryWord* dataArray, int DC, int value) {
+    memoryWord newWord; /* Create a new binary word. */
     newWord.wordBits = value; /* Insert the value into the word. */
     dataArray[DC] = newWord; /* Insert the word into the data array. */
 }

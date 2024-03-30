@@ -6,7 +6,7 @@
  * The module works with a macros array, which is an array of macro pointers- which is dynamically allocated using a pointer to a pointer.
  *
  * The functions in this file are:
- * 1. processFileLines - This function will process the lines of the old file and write the macros into the new file.
+ * 1. expandMacrosAndWriteToNewFile - This function will process the lines of the old file and write the macros into the new file.
  * 2. allocateMemoryToMacros - This function will allocate memory for the macros array.
  * 3. addNewMacroToMacrosArray - This function will add a new macro to the macros array.
  * 4. freeMacrosArrayMemory - This function will free the memory allocated for the macros array.
@@ -26,7 +26,7 @@
  * @param source the old file
  * @param resultFile the new file
  */
-void processFileLines(FILE* source, FILE* resultFile) {
+void expandMacrosAndWriteToNewFile(FILE* source, FILE* resultFile) {
     int macroArrSize = DEFAULT_MACRO_SIZE; /* Maximum number of macros (initial size of the macros array, which will grow with need)*/
     int tmpSize = 0; /* Temporary size for reallocating the macros array*/
     int macroCount = 0; /* Number of macros in total*/
@@ -48,7 +48,7 @@ void processFileLines(FILE* source, FILE* resultFile) {
         if (strlen(currentLine) > 1 && currentLine[0] != ';') { /* Check if the line is not empty and not a comment*/
             if (strcmp(word, "mcr") == 0) { /* Check if the line starts with a macro definition*/
                 /* Add the macro to the macros array*/
-                if (!addNewMacroToMacrosArray(source, resultFile, lineBuffer, word, &macros, &macroCount, currentLine, &macroArrSize,&tmpSize)){
+                if (!addNewMacroToMacrosArray(source, resultFile, lineBuffer, &macros, &macroCount, currentLine, &macroArrSize,&tmpSize)){
                     freeMemoryAndCloseFile(resultFile, macros, macroCount);
                 }
             }
@@ -84,33 +84,39 @@ macro** allocateMemoryToMacros(int macroArrSize){
  * This function will add a new macro to the macros array.
  * @param source the old file
  * @param resultFile the new file
- * @param lineBuffer the current line
- * @param word the current word
  * @param macros the macros array
  * @param macroCount the number of macros
  * @param currentLine the current line
  * @param macroArrSize the size of the macros array
  * @param tmpSize the temporary size of the macros array
  */
-int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, char *word, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize) {
+int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char* lineBuffer, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize) {
     int i; /* Loop index */
     int tempLineCounter = MAX_LINES_PER_MACRO; /* Initial number of lines to allocate memory for */
     macro* newMacro = NULL; /* Temporary pointer for the new macro instance */
     macro** newMacros = NULL; /* Temporary pointer for the macros array */
+    char* mcrPosition; /* Position of the "mcr" keyword in the current line */
+    char* macroName; /* The rest of the line after mcr, which is supposed to be the name of the macro */
 
-    /* Move to the next word, which should be the macro's name. */
-    word = strtok(NULL, " \n\r\t");
-    if (word == NULL) {
-        fprintf(stderr,"\nError: Macro name missing.\n");
+    /* Find the position of the "mcr" keyword in the current line */
+    mcrPosition = strstr(currentLine, "mcr");
+
+    /* Calculate the position right after "mcr" to capture the rest of the line = the macro's supposed name*/
+    macroName = mcrPosition + strlen("mcr");
+
+    trimWhitespace(macroName); /* Trim any trailing whitespace (including newline characters) */
+
+    if (*macroName == '\0') {
+        fprintf(stderr, "\nError: Macro name missing after 'mcr'.\n");
         return FALSE;
     }
 
     /* Check for macro name validity and existence. */
-    if (!checkIfMacroNameIsValid(word)) {
+    if (!checkIfMacroNameIsValid(macroName)) {
         fprintf(stderr,"\nError: Invalid macro name.\n");
         return FALSE;
     }
-    if (checkIfMacroExists(word, *macroCount, *macros)) {
+    if (checkIfMacroExists(macroName, *macroCount, *macros)) {
         fprintf(stderr,"\nError: Macro already exists.\n");
         return FALSE;
     }
@@ -133,7 +139,7 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char *lineBuffer, c
         fprintf(stderr,"\nError: Memory allocation for new macro failed.\n");
         return FALSE; /* Return 0 on failure */
     }
-    strcpy(newMacro->macroName, word); /* Copy the name into the macro struct */
+    strcpy(newMacro->macroName, macroName); /* Copy the name into the macro struct */
 
     /* Allocate initial memory for the macro's lines. */
     newMacro->lines = (char **) malloc(MAX_LINES_PER_MACRO * sizeof(char *));
@@ -304,6 +310,7 @@ int checkIfMacroNameIsValid(char* word){
  * @param macroCount the number of macros
  */
 void freeMemoryAndCloseFile(FILE* file, macro **macros, int macroCount) {
+    fprintf(stderr, "Errors were found in the pre-assembly process, exiting the process\n");
     freeMacrosArrayMemory(macros, macroCount); /* Free the memory allocated for the macros array*/
     fclose(file); /* Close the file*/
     exit(1); /* Exit the program*/

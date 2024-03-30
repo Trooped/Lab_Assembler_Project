@@ -11,7 +11,7 @@
 #include "utilities.h"
 #include "firstPass.h"
 
-void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo);
+void secondPass(FILE *sourceFile, memoryWord *dataArray, memoryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo);
 
 
 #endif

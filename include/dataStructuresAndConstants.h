@@ -6,7 +6,7 @@
  *
  * The data structures include:
  * 1. symbolList - A struct for the symbol list, which will be used for a linked list consisting of the symbols in the program- "symbol table"
- * 2. binaryWord - A struct for the binary word, which will be used to store the binary words in the data and instruction arrays
+ * 2. memoryWord - A struct for the binary word, which will be used to store the binary words in the data and instruction arrays
  * 3. operationInfo - A struct for the operation info, which will be used to store the operations in the operations array
  * 4. errorInfo - A struct for the error info, which will be used to store the errors in the error struct and print them at the end of the program
  * */
@@ -15,9 +15,7 @@
 #ifndef DATASTRUCTURESANDCONSTANTS_H
 #define DATASTRUCTURESANDCONSTANTS_H
 
-
 #include <stdio.h>
-
 
 /*Memory image constants*/
 #define WORD_SIZE 14 /*Word size*/
@@ -44,11 +42,34 @@
 #define OFFSET_ADDRESSING 2 /*Relative addressing method*/
 #define REGISTER_ADDRESSING 3 /*Register addressing method*/
 #define MAX_VALUES_PER_DATA_DIRECTIVE 36 /*Maximum number of data values in an array*/
+#define INSTRUCTION_FAIL_CODE (-999) /*Specific code for when an instruction line fails (a line with operations and operands)*/
+
+/*Operation and operand constants*/
 #define MAX_OPERANDS 4 /*Maximum number of operands in an instruction + 2 spaces for offsets (if relevant)*/
 #define MAX_OPERAND_LENGTH (MAX_LABEL_NAME+1+MAX_LABEL_NAME+1) /*Maximum number of characters in an operand, calculated with maximum label name length, + '[' + maximum label name length + ']'*/
-#define INSTRUCTION_FAIL_CODE (-999) /*Specific code for when an instruction line fails (a line with operations and operands)*/
 #define INVALID_OPERATION_CODE (-1) /*Specific code for invalid operations*/
+#define NULL_OPERAND (0) /*Null operand constant*/
+#define ZERO_OPERANDS (0) /*No operand constant*/
+#define ONE_OPERAND (1) /*One operand constant*/
+#define TWO_OPERANDS (2) /*Two operands constant*/
 
+/*Constants for operation codes*/
+#define MOV_OPCODE 0 /*MOV operation code*/
+#define CMP_OPCODE 1 /*CMP operation code*/
+#define ADD_OPCODE 2 /*ADD operation code*/
+#define SUB_OPCODE 3 /*SUB operation code*/
+#define NOT_OPCODE 4 /*NOT operation code*/
+#define CLR_OPCODE 5 /*CLR operation code*/
+#define LEA_OPCODE 6 /*LEA operation code*/
+#define INC_OPCODE 7 /*INC operation code*/
+#define DEC_OPCODE 8 /*DEC operation code*/
+#define JMP_OPCODE 9 /*JMP operation code*/
+#define BNE_OPCODE 10 /*BNE operation code*/
+#define RED_OPCODE 11 /*RED operation code*/
+#define PRN_OPCODE 12 /*PRN operation code*/
+#define JSR_OPCODE 13 /*JSR operation code*/
+#define RTS_OPCODE 14 /*RTS operation code*/
+#define HLT_OPCODE 15 /*HLT operation code*/
 
 /*A struct for the symbol list, which will be used for a linked list consisting of the symbols in the program- "symbol table"*/
 typedef struct symbolList {
@@ -64,7 +85,7 @@ typedef struct symbolList {
 /*A struct for the binary word, which will be used to store the binary words in the data and instruction arrays*/
 typedef struct binaryWord{
     int wordBits : WORD_SIZE; /* The bits of the word*/
-}binaryWord;
+}memoryWord;
 
 /*A struct for the operation info, which will be used to store the operations in the operations array*/
 typedef struct operations{

@@ -1,7 +1,6 @@
 ; file ps.as
  .entry LIST
  .extern W
-	W: add r2, STR
 	.define sz = 2
 MAIN:	mov r3, LIST[sz]
 LOOP: 	jmp W

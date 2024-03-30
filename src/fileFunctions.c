@@ -38,7 +38,7 @@ FILE* createFileWithMacros(FILE* sourceFile, const char* oldFileName) {
         return NULL;
     }
     /*process the lines of the file*/
-    processFileLines(sourceFile, resultFile);
+    expandMacrosAndWriteToNewFile(sourceFile, resultFile);
 
     /*If there are errors in pre-assembly, stop the run*/
     if (error->errorFlag == TRUE) {
@@ -61,7 +61,7 @@ FILE* createFileWithMacros(FILE* sourceFile, const char* oldFileName) {
  * @param DC the data counter
  * @param fileName the file name
  */
-void createObjectFile(binaryWord* dataArray, binaryWord* instructionArray, int IC, int DC, char* fileName, error** errorInfo, symbolList** symbolTable){
+void createObjectFile(memoryWord* dataArray, memoryWord* instructionArray, int IC, int DC, char* fileName, error** errorInfo, symbolList** symbolTable){
     FILE* objectFile; /*the object file*/
     char tempFileName[MAX_FILE_NAME]; /*the temporary file name*/
     int i; /*index*/

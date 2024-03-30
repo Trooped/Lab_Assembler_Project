@@ -9,8 +9,8 @@ void initializeOperationsArray(operationInfo* operationsArray);
 
 void initializeOperandsArray(char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH]);
 
-void initializeDataArray(binaryWord* dataArray, int initialValue);
+void initializeDataArray(memoryWord* dataArray, int initialValue);
 
-void initializeInstructionArray(binaryWord* instructionArray, int initialValue);
+void initializeInstructionArray(memoryWord* instructionArray, int initialValue);
 
 #endif

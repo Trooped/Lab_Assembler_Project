@@ -20,7 +20,7 @@
  * @param DC The data errorCounter.
  * @param errorInfo The error struct.
  */
-void secondPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
+void secondPass(FILE *sourceFile, memoryWord *dataArray, memoryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
     char lineBuffer[MAX_CHARS_PER_LINE]; /* Buffer for the current line*/
     char fullLine[MAX_CHARS_PER_LINE]; /* The full line*/
     char* currentWord; /* The current word in the line*/

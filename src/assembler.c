@@ -55,22 +55,25 @@ int main(int argc, char** argv) {
 
 
 /**
- * This function is the main function of the assembler. It reads the source file and creates the memory image.
+ * This function is the main function of the assembler. It reads the sourceFile file and creates the memory image.
  * it also calls the firstPass and secondPass functions.
- * @param source The source file to be read.
+ * @param sourceFile The sourceFile file to be read.
  * @param fileName The name of the file.
  */
-void assembler(FILE* source, char* fileName){
+void assembler(FILE* sourceFile, char* fileName){
     char baseFileName[MAX_FILE_NAME]; /* The base file name without the suffix - copy string */
-    binaryWord instructionArray[INSTRUCTION_ARRAY_SIZE]; /* Array for the instructions to be put in the memory image.*/
-    binaryWord dataArray[DATA_ARRAY_SIZE]; /* Array for data to be put in the memory image */
+    char tempFileName[MAX_FILE_NAME]; /* The temporary file name */
+    memoryWord instructionArray[INSTRUCTION_ARRAY_SIZE]; /* Array for the instructions to be put in the memory image.*/
+    memoryWord dataArray[DATA_ARRAY_SIZE]; /* Array for data to be put in the memory image */
     symbolList* symbolTable = NULL; /* Linked list for symbols, be it Labels or Defines */
     error* errorInfo; /* Empty errorInfo struct for errors!*/
     operationInfo operationsArray[NUM_OF_OPERATIONS]; /* Array for the operations */
     int IC = 0, DC = 0; /* instruction Counter and data Counter, for each of the arrays. */
 
+    strncpy(tempFileName, fileName, MAX_FILE_NAME - 1); /* Keep a copy of the original file name, without a suffix*/
+    strcat(tempFileName, ".am"); /* Add the suffix to the file name, so we can access print it specifically.*/
     /*initialize the arrays, error Struct and the symbol table*/
-    initializeErrorInfo(&errorInfo,&symbolTable, fileName, source); /*initialize errorInfo struct*/
+    initializeErrorInfo(&errorInfo, &symbolTable, tempFileName, sourceFile); /*initialize errorInfo struct*/
     initializeOperationsArray(operationsArray); /*initialize operations array according to the known operations*/
     initializeDataArray(dataArray, 0);
     initializeInstructionArray(instructionArray, 0);
@@ -78,10 +81,10 @@ void assembler(FILE* source, char* fileName){
     strncpy(baseFileName, fileName, MAX_FILE_NAME - 1); /* Keep a copy of the original file name, without a suffix*/
 
     /*Initiating the first pass*/
-    firstPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
+    firstPass(sourceFile, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
     /*Initiating the second pass*/
-    secondPass(source, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
+    secondPass(sourceFile, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
     /*Check if there are any errors, if there are- print the number of errors and exit the process*/
     if (errorInfo->errorFlag == TRUE) {
@@ -109,7 +112,7 @@ void assembler(FILE* source, char* fileName){
     /*Delete the symbol table and the error struct*/
     deleteSymbolList(&symbolTable);
     free(errorInfo);
-    fclose(source); /*close the source file and return to the main function.*/
+    fclose(sourceFile); /*close the sourceFile file and return to the main function.*/
 }
 
 

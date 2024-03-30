@@ -16,7 +16,7 @@
  * @param DC The data errorCounter.
  * @param errorInfo The error struct.
  */
-void firstPass(FILE *sourceFile, binaryWord *dataArray, binaryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
+void firstPass(FILE *sourceFile, memoryWord *dataArray, memoryWord *instructionArray, operationInfo *operationsArray, symbolList** symbolTable, int *IC, int *DC, error** errorInfo){
     int labelFlag = FALSE; /* Flag to check if the current line begins with a label*/
     int operation = 0; /* The current operation number*/
     int L; /* The current L value = the number of lines to add to the IC*/

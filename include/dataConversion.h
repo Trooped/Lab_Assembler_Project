@@ -18,13 +18,13 @@
 #define RELOCATABLE_ADDRESSING 0x0002 /*R*/
 #define EXTERNAL_ADDRESSING 0x0001 /*E*/
 
-void insertFirstInstructionIntoArray(binaryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
+void insertFirstInstructionIntoArray(memoryWord* instructionArray, int IC, int opcode, int firstOperand, int secondOperand);
 
-void analyzeOperandsAndInsertIntoArraySecondPass(binaryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo);
+void analyzeOperandsAndInsertIntoArraySecondPass(memoryWord* instructionArray, int numOfLines, int *IC, char operands[MAX_OPERANDS][MAX_OPERAND_LENGTH], symbolList** head, error** errorInfo);
 
-void convertOperandToBinaryAndInsertIntoArray(binaryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset, symbolList* prevLabelPtr);
+void convertOperandToBinaryAndInsertIntoArray(memoryWord* instructionArray, int IC, char* operand, symbolList** head, error** errorInfo, int source, int offset, symbolList* prevLabelPtr);
 
-void convertValueToBinaryAndInsertToDataArray(binaryWord* dataArray, int DC, int value);
+void convertValueToBinaryAndInsertToDataArray(memoryWord* dataArray, int DC, int value);
 
 char* convertBinaryToBase4Symbols(int binary);
 

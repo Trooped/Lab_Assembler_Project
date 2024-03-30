@@ -141,7 +141,7 @@ int getOperandCode(char* operand, symbolList** head, operationInfo* operationsAr
  * @param isSecondPass - a flag to signal if it's the second pass, and use different actions accordingly
  * @return the length of the operation or INSTRUCTION_FAIL_CODE if the operation failed
  */
-int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo, int isSecondPass) {
+int handleOperation(symbolList** head, memoryWord* instructionArray, int opcode, char* line, int *IC, operationInfo *operationsArray, error** errorInfo, int isSecondPass) {
     int L = 0; /* The number of lines to add to the IC*/
     char* colon; /* Pointer to the colon in the line*/
     int firstOperand; /* The first operand code*/
@@ -169,17 +169,17 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     }
 
     /* Checking the number of operands and their validity*/
-    if (numOfOperands == 0) {
+    if (numOfOperands == ZERO_OPERANDS) {
         if (operands[0][0] != '\0') {
             printError(errorInfo, "Too many operands for a 0 operand operation");
             return INSTRUCTION_FAIL_CODE;
         }
         else{ /* No operands for a 0 operand operation*/
-            firstOperand = NO_OPERAND;
-            secondOperand = NO_OPERAND;
+            firstOperand = NULL_OPERAND;
+            secondOperand = NULL_OPERAND;
         }
     }
-    else if (numOfOperands == 1) {
+    else if (numOfOperands == ONE_OPERAND) {
         if (operands[1][0] != '\0') {
             printError(errorInfo, "Too many operands for a 1 operand operation");
             return INSTRUCTION_FAIL_CODE;
@@ -189,14 +189,14 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
             return INSTRUCTION_FAIL_CODE;
         }
         else{
-            firstOperand = NO_OPERAND; /* No first operand for a 1 operand operation*/
+            firstOperand = NULL_OPERAND; /* No first operand for a 1 operand operation*/
             secondOperand = getOperandCode(operands[0], head, operationsArray, errorInfo); /* Get the operand code*/
             if (secondOperand == INSTRUCTION_FAIL_CODE){
                 return INSTRUCTION_FAIL_CODE;
             }
         }
     }
-    else if (numOfOperands == 2) {
+    else if (numOfOperands == TWO_OPERANDS) {
         if (operands[2][0] != '\0') {
             printError(errorInfo, "Too many operands for a 2 operand operation");
             return INSTRUCTION_FAIL_CODE;
@@ -232,85 +232,85 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
 
     /*switch case for the different operations, with specific errors for each operation*/
     switch(opcode){
-        case MOV_OP: /*mov*/
+        case MOV_OPCODE: /*mov*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot move to an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case CMP_OP: /*cmp*/
+        case CMP_OPCODE: /*cmp*/
             break;
-        case ADD_OP: /*add*/
+        case ADD_OPCODE: /*add*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot add into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case SUB_OP: /*sub*/
+        case SUB_OPCODE: /*sub*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot subtract into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case NOT_OP: /*not*/ /*TODO change this and the 2 next ones according to the table*/
+        case NOT_OPCODE: /*not*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot negate an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case CLR_OP: /*clr*/
+        case CLR_OPCODE: /*clr*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot clear an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case LEA_OP: /*lea*/
+        case LEA_OPCODE: /*lea*/
             if (firstOperand == REGISTER_ADDRESSING || firstOperand == IMMEDIATE_ADDRESSING || secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Invalid operands for lea operation");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case INC_OP: /*inc*/
+        case INC_OPCODE: /*inc*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot increment an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case DEC_OP: /*dec*/
+        case DEC_OPCODE: /*dec*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot decrement an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case JMP_OP: /*jmp*/
+        case JMP_OPCODE: /*jmp*/
             if (secondOperand == IMMEDIATE_ADDRESSING || secondOperand == OFFSET_ADDRESSING){
                 printError(errorInfo, "Invalid operands for jmp");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case BNE_OP: /*bne*/
+        case BNE_OPCODE: /*bne*/
             if (secondOperand == IMMEDIATE_ADDRESSING || secondOperand == OFFSET_ADDRESSING){
                 printError(errorInfo, "Invalid operands for bne");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case RED_OP: /*red*/
+        case RED_OPCODE: /*red*/
             if (secondOperand == IMMEDIATE_ADDRESSING){
                 printError(errorInfo, "Cannot read into an immediate operand");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case PRN_OP: /*prn*/
+        case PRN_OPCODE: /*prn*/
             break;
-        case JSR_OP: /*jsr*/
+        case JSR_OPCODE: /*jsr*/
             if (secondOperand == IMMEDIATE_ADDRESSING || secondOperand == OFFSET_ADDRESSING){
                 printError(errorInfo, "Invalid operands for jsr");
                 return INSTRUCTION_FAIL_CODE;
             }
             break;
-        case RTS_OP: /*rts*/
+        case RTS_OPCODE: /*rts*/
             break;
-        case HLT_OP: /*hlt*/
+        case HLT_OPCODE: /*hlt*/
             break;
         default:
             printError(errorInfo, "Invalid operation");
@@ -327,7 +327,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
     if (!isSecondPass){ /*If it's the first pass, only add the first word and update the IC*/
         insertFirstInstructionIntoArray(instructionArray, *IC, opcode, firstOperand, secondOperand);
     }
-    else if (numOfOperands != 0){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
+    else if (numOfOperands != ZERO_OPERANDS){ /*If it's the 2nd pass and there are operands(it's not a 0 operand operation like hlt)*/
         analyzeOperandsAndInsertIntoArraySecondPass(instructionArray, L, IC, operands, head, errorInfo); /*Analyze the operands and insert them into the instruction array*/
     }
 
@@ -343,7 +343,7 @@ int handleOperation(symbolList** head, binaryWord* instructionArray, int opcode,
  * @param dataArray - the array of data
  * @param errorInfo - the error struct
  */
-void handleData(char* type, char* labelName, char* line, symbolList** head, int *DC, binaryWord* dataArray, error** errorInfo) {
+void handleData(char* type, char* labelName, char* line, symbolList** head, int *DC, memoryWord* dataArray, error** errorInfo) {
     symbolList *tempPtr = NULL; /* Temporary pointer for the symbol list*/
     char* numbers; /* Pointer to the numbers in the line*/
     char* ptr; /* Pointer for iterating through the line*/
@@ -532,7 +532,7 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
     startName = ptr;
     equalPos = strchr(ptr, '='); /* Find the position of '=' */
     if (!equalPos) { /* If there's no '=' */
-        printError(errorInfo, "Missing '=' in .define statement");
+        printError(errorInfo, "Missing '=' in .define command");
         return;
     }
 
@@ -545,7 +545,7 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
         tempPtr++;
     }
     if (equalCounter > 0) { /*Meaning we've found another '=' after the first one*/
-        printError(errorInfo, "Multiple '=' found in .define statement");
+        printError(errorInfo, "Multiple '=' found in .define command");
         return;
     }
 
@@ -589,7 +589,7 @@ void handleDefine(symbolList** head, operationInfo* operationsArray, char* line,
     else { /* If the define label wasn't found in the symbol table*/
         /* Check validity of the name */
         if (!isValidLabelName(name, operationsArray, head, 0)) {
-            printError(errorInfo, "Not a valid .define symbol name");
+            printError(errorInfo, "Invalid .define symbol name");
             return;
         }
 

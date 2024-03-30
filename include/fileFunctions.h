@@ -20,7 +20,7 @@ void createEntFile(symbolList** head, char* fileName, error** errorInfo);
 
 void createExtFile(symbolList** head, char* fileName, error** errorInfo);
 
-void createObjectFile(binaryWord* dataArray, binaryWord* instructionArray, int IC, int DC, char* fileName, error** errorInfo, symbolList** symbolTable);
+void createObjectFile(memoryWord* dataArray, memoryWord* instructionArray, int IC, int DC, char* fileName, error** errorInfo, symbolList** symbolTable);
 
 
 

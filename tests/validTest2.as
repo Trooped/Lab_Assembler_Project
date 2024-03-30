@@ -1,6 +1,6 @@
 .entry START
     .extern Z
-    .define size = 5
+    .define size = 2
     .define maximum = 20
 MAIN: mov r2,START
 LOOP1: jmp L2
