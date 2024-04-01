@@ -1,6 +1,13 @@
-
+/**
+ * @file testFunctions.c
+ * This file contains the functions that are used to test the program.
+ */
 #include "testFunctions.h"
 
+/**
+ * This function will print the content of the files and then delete them.
+ * @param baseFileName the base file name
+ */
 void testPrintAndDeleteFile(char* baseFileName){
     printf("MACROS FILE AFTER SPREADING\n");
     printFileContent(baseFileName, "am");
@@ -30,19 +37,11 @@ void testPrintAndDeleteFile(char* baseFileName){
 }
 
 
-void printFileContentFromPointer(FILE* file) {
-    int c;
-    if (file == NULL) {
-        perror("Error opening file");
-        return;
-    }
-
-    while ((c = fgetc(file)) != EOF
-            ) { /* Read and print each character.*/
-        putchar(c);
-    }
-}
-
+/**
+ * This function will print the content of a file.
+ * @param filePath the file path
+ * @param suffix the suffix of the file
+ */
 void printFileContent(const char* filePath, char* suffix) {
     int c;
     char fileName[MAX_FILE_NAME];
@@ -62,6 +61,11 @@ void printFileContent(const char* filePath, char* suffix) {
     fclose(file); /* Close the file.*/
 }
 
+/**
+ * This function will delete a file.
+ * @param filePath the file path
+ * @param suffix the suffix of the file
+ */
 void deleteFile(const char* filePath, char* suffix) {
     char fileName[MAX_FILE_NAME];
     sprintf(fileName, "%s.%s", filePath, suffix);

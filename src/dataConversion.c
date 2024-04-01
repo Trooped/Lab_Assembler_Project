@@ -207,8 +207,8 @@ void convertValueToBinaryAndInsertToDataArray(memoryWord* dataArray, int DC, int
  */
 char* convertBinaryToBase4Symbols(int binary) {
     int i; /* Loop index. */
-    char symbols[4] = {'*', '#', '%', '!'}; /* The symbols to represent the base 4 digits. */
-    int mask = 0x3;  /* Binary 11, to extract two bits at a time. */
+    char symbols[NUM_OF_SYMBOLS] = {'*', '#', '%', '!'}; /* The symbols to represent the base 4 digits. */
+    int mask = NUM_OF_BITS_TO_EXTRACT;  /* Binary 11, to extract two bits at a time. */
     char* result = (char*)malloc(ENCRYPTED_WORD_SIZE+1);  /* Allocate on the heap. */
     if (result == NULL){ /* Check for malloc failure. */
         return NULL;  /* Return NULL to the main function (which will call the closeFileAndExit function) */

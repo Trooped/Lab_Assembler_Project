@@ -1,7 +1,9 @@
 /**
  * @file assembler.c
  * This file contains the main functions of the assembler.
- *
+ * --------------------------------------------------------------------------------------------------------------
+ * Created by: Omri Peretz, as the final project in the course "Laboratory in C", Open University of Israel 2024A.
+ *---------------------------------------------------------------------------------------------------------------
  * the functions in this file are:
  * 1. main - The main function of the assembler, which calls the pre-assembly and assembly functions.
  * 2. assembler - The second main function of the assembler. It reads the source file (with macros spread) and creates the memory image.
@@ -40,7 +42,7 @@ int main(int argc, char** argv) {
                 /*Call the assembler function*/
                 assembler(macrosSpreadFile, baseFileName);
 
-                testPrintAndDeleteFile(baseFileName);
+                testPrintAndDeleteFile(baseFileName); /*TODO delete this before submitting!!!*/
             }
             else { /*If the file couldn't be opened, print an error message*/
                 fprintf(stderr,"Failed to open file %s\n", argv[fileCount]);
@@ -55,7 +57,8 @@ int main(int argc, char** argv) {
 
 
 /**
- * This function is the main function of the assembler. It reads the sourceFile file and creates the memory image.
+ * The second main function of the assembler program, which is actually the assembly process itself.
+ * It reads the source file with macros and creates the memory image.
  * it also calls the firstPass and secondPass functions.
  * @param sourceFile The sourceFile file to be read.
  * @param fileName The name of the file.
@@ -86,15 +89,15 @@ void assembler(FILE* sourceFile, char* fileName){
     /*Initiating the second pass*/
     secondPass(sourceFile, dataArray, instructionArray, operationsArray, &symbolTable, &IC, &DC, &errorInfo);
 
-    /*Check if there are any errors, if there are- print the number of errors and exit the process*/
+    /*Check if there are any errors. If there are errors, then print the number of errors and exit the process*/
     if (errorInfo->errorFlag == TRUE) {
         fprintf(stderr,"%d Errors were found in your program, exiting the process\n", errorInfo->errorCounter);
         closeFileAndExit(&errorInfo, &symbolTable);
     }
 
-    /****************
+    /************************************************************************
     *If there are no errors, create the object file and the entry and external files
-    *****************/
+    *************************************************************************/
 
     /*If there are entry labels, create the entry file*/
     if (entryLabelCounter(&symbolTable) > 0) {
@@ -106,7 +109,6 @@ void assembler(FILE* sourceFile, char* fileName){
     }
     /*Create the object file*/
     createObjectFile(dataArray, instructionArray, IC, DC, baseFileName, &errorInfo, &symbolTable);
-
 
 
     /*Delete the symbol table and the error struct*/

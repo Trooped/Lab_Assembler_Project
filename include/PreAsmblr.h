@@ -1,6 +1,18 @@
 /**
  * This header file contains the functions and structs for the pre-assembly process.
- * The pre-assembly process will copy the macros from the old file into the new file.
+ * This module is responsible for copying the macros from the old file into the new file.
+ * The module works with a macros array, which is an array of macro pointers- which is dynamically allocated using a pointer to a pointer.
+ *
+ * The functions in this file are:
+ * 1. expandMacrosAndWriteToNewFile - This function will process the lines of the old file and write the macros into the new file.
+ * 2. allocateMemoryToMacros - This function will allocate memory for the macros array.
+ * 3. addNewMacroToMacrosArray - This function will add a new macro to the macros array.
+ * 4. freeMacrosArrayMemory - This function will free the memory allocated for the macros array.
+ * 5. checkIfMacroExists - This function will check if the given word is an existing macro.
+ * 6. writeCurrentMacroIntoFile - This function will write the macro with the given name to the new file.
+ * 7. checkIfMacroNameIsValid - This function will check if the given word is a valid macro name.
+ * 8. freeMemoryAndCloseFile - This function will free the memory allocated for the macros array and close the file.
+ * 9. freeMacroMemory - This function will free the memory allocated for an individual macro.
  */
 
 

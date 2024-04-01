@@ -15,8 +15,6 @@ add_executable(assembler
         include/PreAsmblr.h
         src/firstPass.c
         include/firstPass.h
-        src/utilities.c
-        include/utilities.h
         src/syntaxAnalyzer.c
         include/syntaxAnalyzer.h
         include/dataStructuresAndConstants.h

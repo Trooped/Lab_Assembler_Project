@@ -1,4 +1,8 @@
-
+/**
+ * @file testFunctions.h
+ * @brief Header file for testFunctions.c
+ * @details This file contains the prototypes of the functions used for testing the assembler.
+ */
 #ifndef _TESTFUNCTIONS_H
 #define _TESTFUNCTIONS_H
 
@@ -10,8 +14,6 @@
 #include "../include/assembler.h"
 
 void testPrintAndDeleteFile(char* baseFileName);
-
-void printFileContentFromPointer(FILE* file);
 
 void deleteFile(const char* filePath, char* suffix);
 
