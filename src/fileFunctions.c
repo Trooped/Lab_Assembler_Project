@@ -76,7 +76,7 @@ void createObjectFile(memoryWord* dataArray, memoryWord* instructionArray, int I
     for (i = 0; i < IC; i++) { /*print the instructions memory image to the file*/
         char* base4String = convertBinaryToBase4Symbols(instructionArray[i].wordBits); /*convert the binary to base 4*/
         if (base4String != NULL) {
-            fprintf(objectFile, "0%d %s\n", i+INITIAL_IC_VALUE, base4String); /*print the instruction to the file*/
+            fprintf(objectFile, "0%d\t%s\n", i+INITIAL_IC_VALUE, base4String); /*print the instruction to the file*/
             free(base4String); /*free the base 4 string*/
         } else { /*if the memory allocation failed, print an error message and exit*/
             printf("Memory allocation failed for value at index %d.\n", i);
@@ -86,7 +86,7 @@ void createObjectFile(memoryWord* dataArray, memoryWord* instructionArray, int I
     for (i = 0; i < DC; i++) { /*print the data memory image to the file*/
         char* base4String = convertBinaryToBase4Symbols(dataArray[i].wordBits); /*convert the binary to base 4*/
         if (base4String != NULL) {
-            fprintf(objectFile, "0%d %s\n", i+IC+INITIAL_IC_VALUE, base4String); /*print the data to the file*/
+            fprintf(objectFile, "0%d\t%s\n", i+IC+INITIAL_IC_VALUE, base4String); /*print the data to the file*/
             free(base4String); /*free the base 4 string*/
         } else { /*if the memory allocation failed, print an error message and exit*/
             printf("Memory allocation failed for value at index %d.\n", i);
@@ -115,7 +115,7 @@ void createEntFile(symbolList** head, char* fileName, error** errorInfo) {
     current = *head; /*set the current symbol to the head of the symbol table*/
     while (current != NULL) { /*loop through the symbol table*/
         if (current->isEntry == TRUE) { /*if the symbol is an entry symbol, print it to the file*/
-            fprintf(entFile, "%s 0%d\n", current->name, current->value);
+            fprintf(entFile, "%s\t0%d\n", current->name, current->value);
         }
         current = current->next; /*move to the next symbol*/
     }

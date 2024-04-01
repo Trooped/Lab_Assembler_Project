@@ -857,12 +857,12 @@ int isValidLabelName(char* name, operationInfo* operationsArray, symbolList** he
         name[strlen(name) - 1] = '\0';
     }
 
-    /* Check if the name is bigger than the maximum possible number (31), or if it's one of the operations, or if it already exists in the symbol table.*/
+    /* Check if the name is bigger than the maximum possible number (31), or if it's one of the operations*/
     if (strlen(name) > MAX_LABEL_NAME || isValidOperation(name, operationsArray) != INVALID_OPERATION_CODE){
         return FALSE;
     }
-    /*check if the name is one of the registers*/
-    if (strcmp(name, "r0") == 0 || strcmp(name, "r1") == 0 || strcmp(name, "r2") == 0 || strcmp(name, "r3") == 0 || strcmp(name, "r4") == 0 || strcmp(name, "r5") == 0 || strcmp(name, "r6") == 0 || strcmp(name, "r7") == 0 ){
+    /*check if the name is one of the registers or if it's "mcr/endmcr" keywords*/
+    if (strcmp(name, "r0") == 0 || strcmp(name, "r1") == 0 || strcmp(name, "r2") == 0 || strcmp(name, "r3") == 0 || strcmp(name, "r4") == 0 || strcmp(name, "r5") == 0 || strcmp(name, "r6") == 0 || strcmp(name, "r7") == 0 || strcmp(name, "mcr")==0 || strcmp(name, "endmcr")==0){
         return FALSE;
     }
     /* Check if the first character is an alphabetical character */
