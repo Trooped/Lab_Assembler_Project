@@ -3,7 +3,7 @@
  * This file contains the implementation of the first pass of the assembler.
  */
 
-#include "include/firstPass.h"
+#include "firstPass.h"
 
 /**
  * This function is the first pass of the assembler. It goes through the source file and creates the symbol table, and the data and initial instruction arrays.

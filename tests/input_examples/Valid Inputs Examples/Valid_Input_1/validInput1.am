@@ -1,0 +1,22 @@
+.entry Main
+    .extern ExternalFunc
+    .define addValue = 5
+    .define subValue = 3
+    .define maxNumber = 2047
+Main:   mov #100, r1
+clr r2
+add #addValue, r1
+sub #subValue, r1
+cmp #150, r1
+bne NotEqual
+jmp Equal
+Equal:   prn r1
+jmp EndProgram
+NotEqual: prn #999
+sub #maxNumber, r1
+jmp L3
+EndProgram: hlt
+    Numbers:  .data 10, 20, 30
+Message:  .string "Testing Macros"
+                                          .extern L3
+    .entry Numbers

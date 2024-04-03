@@ -11,8 +11,8 @@ include_directories(.)
 add_executable(assembler
         src/assembler.c
         include/assembler.h
-        src/PreAsmblr.c
-        include/PreAsmblr.h
+        src/preAsmblr.c
+        include/preAsmblr.h
         src/firstPass.c
         include/firstPass.h
         src/syntaxAnalyzer.c

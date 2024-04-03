@@ -14,7 +14,7 @@
  * 4. createExtFile - This function creates the external file.
  */
 
-#include "include/fileFunctions.h"
+#include "fileFunctions.h"
 
 
 /**

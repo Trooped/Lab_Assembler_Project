@@ -5,7 +5,7 @@
  * The second pass goes through the source file and creates the binary words for the instructions.
  */
 
-#include "include/secondPass.h"
+#include "secondPass.h"
 
 
 /**

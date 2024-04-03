@@ -1,5 +1,3 @@
-ThisLabelIsTooLongToBe_A_ValidLabelNameAndWillCauseAnError: mov r5, r7
-
 ;This will cause an error because of the '.' between 4 and 5
 L1: .data 1,2,3,4,5.6,7,8,9,10
 ;This will cause an error because of a missing " after the string

@@ -11,7 +11,7 @@
  * 5. convertBinaryToBase4Symbols - This function converts a binary number to base 4 symbols.
  */
 
-#include "include/dataConversion.h"
+#include "dataConversion.h"
 
 /**
  * This function inserts the first instruction into the instruction array.

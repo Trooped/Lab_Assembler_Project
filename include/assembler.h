@@ -17,7 +17,7 @@
 #include "fileFunctions.h"
 #include "listFunctions.h"
 #include "preAsmblr.h"
-#include "../tests/testFunctions.h"
+/*#include "../tests/testFunctions.h"*/
 #include "error.h"
 #include "firstPass.h"
 #include "secondPass.h"

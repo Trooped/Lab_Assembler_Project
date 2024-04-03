@@ -16,7 +16,7 @@
  * 8. isSymbolExtern - This function checks if a symbol is external.
  */
 
-#include "include/listFunctions.h"
+#include "listFunctions.h"
 
 /**
  * This function searches the symbol table for a specific label.

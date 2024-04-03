@@ -10,8 +10,8 @@
  * 4. initializeInstructionArray - This function initializes the instruction array with a given value.
  */
 
-#include "include/initializationFunctions.h"
-#include "include/syntaxAnalyzer.h"
+#include "initializationFunctions.h"
+#include "syntaxAnalyzer.h"
 
 
 /**

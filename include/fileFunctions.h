@@ -12,11 +12,11 @@
 #ifndef FILEFUNCTIONS_H
 #define FILEFUNCTIONS_H
 
+#include "preAsmblr.h"
 #include "dataStructuresAndConstants.h"
 #include <stdio.h>
 #include "dataConversion.h"
 #include "error.h"
-#include "preAsmblr.h"
 
 /**
  * This function will create a new file to copy macros from the old file into the new file.

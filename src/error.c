@@ -8,7 +8,7 @@
  * 3. closeFileAndExit - This function closes the file and frees the memory before exiting the program.
  */
 
-#include "include/error.h"
+#include "error.h"
 
 
 /**

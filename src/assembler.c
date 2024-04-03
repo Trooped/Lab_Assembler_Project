@@ -9,7 +9,7 @@
  * 2. assembler - The second main function of the assembler. It reads the source file (with macros spread) and creates the memory image.
  */
 
-#include "include/assembler.h"
+#include "assembler.h"
 
 /**
  * @file main.c
@@ -29,20 +29,20 @@ int main(int argc, char** argv) {
             sprintf(baseFileName, "%s", argv[fileCount]); /*Keep a copy of the original file name, without a suffix*/
             sprintf(fileName, "%s.as", argv[fileCount]); /*Add the suffix to the file name, so we can access it.*/
 
-            /*TODO maybe change the opening of this file to inside of the createFileWithMacros?*/
             initialFile = fopen(fileName, "r");
             if (initialFile != NULL) {
+                printf("Starting the pre-assembly process for file %s\n", argv[fileCount]);
                 macrosSpreadFile = createFileWithMacros(initialFile, baseFileName); /*create a new file with the macros from the old file*/
                 fclose(initialFile);
 
                 if (macrosSpreadFile == NULL) { /*If there were errors in the pre-assembly process (they were printed already), the file pointer is NULL*/
                     continue; /*Continue to the next file*/
                 }
+                printf("Starting the assembly process for file %s\n", argv[fileCount]);
 
                 /*Call the assembler function*/
                 assembler(macrosSpreadFile, baseFileName);
-
-                testPrintAndDeleteFile(baseFileName); /*TODO delete this before submitting!!!*/
+                printf("The assembly process for file %s has finished successfully\n\n", argv[fileCount]);
             }
             else { /*If the file couldn't be opened, print an error message*/
                 fprintf(stderr,"Failed to open file %s\n", argv[fileCount]);
