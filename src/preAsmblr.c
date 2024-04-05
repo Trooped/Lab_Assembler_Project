@@ -163,8 +163,21 @@ int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char* lineBuffer, m
     /* Prepare to read the macro's content. */
     while (fgets(lineBuffer, MAX_CHARS_PER_LINE, source) != NULL) {
         char** expandedLines = NULL; /* Temporary pointer for reallocating the lines array */
-        if (strstr(lineBuffer, "endmcr") != NULL) {
-            break; /* Found the end of the macro definition. */
+        char* endmcrPos = strstr(lineBuffer, "endmcr");
+        if (endmcrPos != NULL) {
+            /* Found "endmcr", now check the rest of the line */
+            char* cursor = endmcrPos + strlen("endmcr"); /* Move the cursor to the character after "endmcr" */
+
+            while (*cursor != '\0') { /* Check each character until the end of the string */
+                if (!isspace((unsigned char)*cursor) && *cursor != '\n') {
+                    /* Found a non-whitespace character before the end of the line, which is invalid */
+                    fprintf(stderr, "Error: 'endmcr' must be followed by whitespace or a newline only.\n");
+                    return FALSE;
+                }
+                cursor++;
+            }
+            /* Valid "endmcr" line found, exit the loop */
+            break;
         }
 
         /* Check if we need to expand the lines array for the current macro */

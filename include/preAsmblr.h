@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include "dataStructuresAndConstants.h"
 #include "error.h"
+#include <ctype.h>
 
 /*Constants that are used solely in the pre-assembly process*/
 #define MAX_MACRO_NAME_LENGTH 31 /*Maximum number of characters in a macro name*/
@@ -35,9 +36,9 @@
  * This struct will define each macro, it's lines (the actual lines of a text, a 2d pointer array) and a lines errorCounter.
  */
 typedef struct macros{
-    char macroName[MAX_MACRO_NAME_LENGTH];
-    char **lines;
-    int linesCounter;
+    char macroName[MAX_MACRO_NAME_LENGTH]; /*The name of the macro*/
+    char **lines; /*2d array of lines in the macro*/
+    int linesCounter; /*Number of lines in the macro*/
 }macro;
 
 /**
