@@ -49,6 +49,11 @@ void firstPass(FILE *sourceFile, memoryWord *dataArray, memoryWord *instructionA
         labelFlag = FALSE; /* Reset the label flag*/
         currentWord = strtok(lineBuffer, " \n\r\t"); /* Tokenize the line into words*/
         while (currentWord != NULL) {
+            if (isMemoryImageFull(*IC, *DC)) { /* Check if the memory image is full*/
+                printError(errorInfo, "The memory image is full, can't add more instructions or data");
+                closeFileAndExit(errorInfo, symbolTable);
+            }
+
             if (isDefine(currentWord)){ /*checks if the first word is a define directive*/
                 handleDefine(symbolTable, operationsArray, fullLine, errorInfo);
                 break;
@@ -117,6 +122,10 @@ void firstPass(FILE *sourceFile, memoryWord *dataArray, memoryWord *instructionA
             }
         }/* End of the inner while loop (to parse words in line)*/
     } /* End of the main while loop (to parse the source code line by line)*/
+    if (isMemoryImageFull(*IC, *DC)) { /* Check if the memory image is full*/
+        printError(errorInfo, "The memory image is full, can't add more instructions or data");
+        closeFileAndExit(errorInfo, symbolTable);
+    }
 
     /*increment the data symbols by the initial IC value- 100*/
     incrementDataSymbolValues(symbolTable, (*IC) + INITIAL_IC_VALUE);

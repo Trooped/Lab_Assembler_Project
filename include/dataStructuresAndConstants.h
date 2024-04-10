@@ -20,9 +20,9 @@
 /*Memory image constants*/
 #define WORD_SIZE 14 /*Word size*/
 #define ENCRYPTED_WORD_SIZE 7 /*Encrypted word size*/
-#define DATA_ARRAY_SIZE 3996 /*Maximum number of data in the array*/
-#define INSTRUCTION_ARRAY_SIZE 3996 /*Maximum number of instructions in the array*/
-#define MEMORY_IMAGE_SIZE (DATA_ARRAY_SIZE + INSTRUCTION_ARRAY_SIZE) /*Maximum number of words in the array*/
+#define DATA_ARRAY_SIZE (3996) /*Maximum number of data in the array*/
+#define INSTRUCTION_ARRAY_SIZE (3996) /*Maximum number of instructions in the array*/
+#define MEMORY_IMAGE_SIZE (3996) /*Maximum number of words in the array*/
 #define INITIAL_IC_VALUE 100 /*Initial value for the instruction counter, 0-99 are reserved*/
 
 /*General constants*/

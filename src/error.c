@@ -5,7 +5,8 @@
  * The functions in this file are:
  * 1. printError - This function prints an error message and updates the errorInfo struct accordingly.
  * 2. initializeErrorInfo - This function initializes the errorInfo struct to NULL, with the file name and file pointer.
- * 3. closeFileAndExit - This function closes the file and frees the memory before exiting the program.
+ * 3. isMemoryImageFull - This function checks if the memory image is full.
+ * 4. closeFileAndExit - This function closes the file and frees the memory before exiting the program.
  */
 
 #include "error.h"
@@ -49,6 +50,20 @@ void initializeErrorInfo(error** errorInfo,symbolList** symbolTable, char* fileN
     (*errorInfo)->file = NULL; /*set the file pointer to NULL*/
     (*errorInfo)->currentLineContent[0] = '\0'; /* Set the line text to an empty string*/
     (*errorInfo)->currentLineNumber = 0; /* Set the line counter to 0*/
+}
+
+/**
+ * This function checks if the memory image is full.
+ *
+ * @param IC The instruction counter.
+ * @param DC The data counter.
+ * @return TRUE if the memory image is full, FALSE otherwise.
+ */
+int isMemoryImageFull(int IC, int DC) {
+    if ((IC + DC) >= MEMORY_IMAGE_SIZE) { /* Check if the memory image is full*/
+        return TRUE; /* Return true if the memory image is full*/
+    }
+    return FALSE; /* Return false if the memory image is not full*/
 }
 
 /**

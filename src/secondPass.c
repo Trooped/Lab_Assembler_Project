@@ -76,9 +76,8 @@ void secondPass(FILE *sourceFile, memoryWord *dataArray, memoryWord *instruction
 
     /*Checking if the program is too large for the memory we have, which is 4096-100 words of memory
      * if it is- end the program prematurely.*/
-    if ((*IC)+(*DC) > MEMORY_IMAGE_SIZE) {
-        printError(errorInfo, "The program is too large for the available memory, exiting the process");
+    if (isMemoryImageFull(*IC, *DC)) { /* Check if the memory image is full*/
+        printError(errorInfo, "The memory image is full, can't add more instructions or data");
         closeFileAndExit(errorInfo, symbolTable);
     }
-
 }
