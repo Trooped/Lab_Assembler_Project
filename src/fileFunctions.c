@@ -38,11 +38,11 @@ FILE* createFileWithMacros(FILE* sourceFile, const char* oldFileName) {
         return NULL;
     }
     /*process the lines of the file*/
-    expandMacrosAndWriteToNewFile(sourceFile, resultFile);
+    expandMacrosAndWriteToNewFile(sourceFile, resultFile, error);
 
     /*If there are errors in pre-assembly, stop the run*/
     if (error->errorFlag == TRUE) {
-        fprintf(stderr, "Errors were found in the pre-assembly process, exiting the process\n");
+        fprintf(stderr, "Errors were found in the pre-assembly process, exiting the process\n\n");
         free(error); /*free the error struct*/
         fclose(resultFile); /*close the file*/
         return NULL;

@@ -59,7 +59,7 @@ macro** allocateMemoryToMacros(int macroArrSize);
  * @param macroArrSizePtr the size of the macros array
  * @param tmpSizePtr the temporary size of the macros array
  */
-void expandMacrosAndWriteToNewFile(FILE* source, FILE* resultFile);
+void expandMacrosAndWriteToNewFile(FILE* source, FILE* resultFile, error* error);
 
 /**
  * This function will add a new macro to the macros array.
@@ -73,7 +73,7 @@ void expandMacrosAndWriteToNewFile(FILE* source, FILE* resultFile);
  * @param macroArrSize the size of the macros array
  * @param tmpSize the temporary size of the macros array
  */
-int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char* lineBuffer, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize);
+int addNewMacroToMacrosArray(FILE* source, FILE* resultFile, char* lineBuffer, macro ***macros, int *macroCount, char *currentLine, int *macroArrSize, int *tmpSize, error* error);
 
 /**
  * This function will free the memory allocated for the macros array.
