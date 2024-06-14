@@ -1,11 +1,15 @@
 # Lab Assembler Project In C
 ## 📃Table of Contents📃
+- [Grade](#Grade)
 - [Introduction](#Introduction)
 - [Usage](#Usage)
 - [Code](#Code)
 - [Limitations And Specifics](#Limitations-And-Specifics)
 - [Documentation](#Documentation)
 - [Author](#Author)
+
+## 🏆Grade🏆
+**Grade Received For The Project: 98**
 ## 🏢Introduction🏢
 ### This project, developed in C, as a final project for the "Lab in Systems Programming - 20465" 2024A course, part of the Computer Science degree at the Open University of Israel.
  It encompasses a comprehensive assembler system for a specific assembly language, with 4096 words in it's memory image. The assembler functions in several stages:
